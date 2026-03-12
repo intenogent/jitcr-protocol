@@ -1,0 +1,148 @@
+{
+  "metadata": {
+    "date": "2026-03-07T13:41:20.386142",
+    "method": "Offline estimation (3.8 chars/token, \u00b115-20%)",
+    "model": "claude-sonnet-4-5-20250929",
+    "messages_per_session": 20,
+    "framework_version": "1.3"
+  },
+  "benchmark_1_token_counts": {
+    "before_jitcr": {
+      "bytes": 6068,
+      "tokens": 1596
+    },
+    "after_tier1": {
+      "bytes": 1595,
+      "tokens": 419
+    },
+    "after_tier2": {
+      "bytes": 7045,
+      "tokens": 1853
+    },
+    "after_tier3_handoff": {
+      "bytes": 3818,
+      "tokens": 1004,
+      "file": "HANDOFF_2026-02-24_1737.md"
+    },
+    "after_tier3_journals": [
+      {
+        "name": "journal_2026-02-23_1530.md",
+        "bytes": 2313,
+        "tokens": 605
+      },
+      {
+        "name": "journal_2026-02-23_1749.md",
+        "bytes": 14945,
+        "tokens": 3912
+      },
+      {
+        "name": "journal_2026-02-24_1737.md",
+        "bytes": 3981,
+        "tokens": 1041
+      }
+    ],
+    "after_tier3_git": {
+      "tokens": 150,
+      "note": "estimated"
+    },
+    "after_tier3_total": 6712,
+    "session_before_total": 31920,
+    "session_after_total": 16945,
+    "savings_tokens": 14975,
+    "savings_percent": 46.9,
+    "scaling": [
+      {
+        "messages": 5,
+        "before": 7980,
+        "after": 10660,
+        "saved": -2680,
+        "percent": -33.6
+      },
+      {
+        "messages": 10,
+        "before": 15960,
+        "after": 12755,
+        "saved": 3205,
+        "percent": 20.1
+      },
+      {
+        "messages": 15,
+        "before": 23940,
+        "after": 14850,
+        "saved": 9090,
+        "percent": 38.0
+      },
+      {
+        "messages": 20,
+        "before": 31920,
+        "after": 16945,
+        "saved": 14975,
+        "percent": 46.9
+      },
+      {
+        "messages": 25,
+        "before": 39900,
+        "after": 19040,
+        "saved": 20860,
+        "percent": 52.3
+      },
+      {
+        "messages": 30,
+        "before": 47880,
+        "after": 21135,
+        "saved": 26745,
+        "percent": 55.9
+      },
+      {
+        "messages": 50,
+        "before": 79800,
+        "after": 29515,
+        "saved": 50285,
+        "percent": 63.0
+      }
+    ]
+  },
+  "benchmark_2_cost": {
+    "sessions_per_day": 5,
+    "working_days_per_month": 22,
+    "models": {
+      "sonnet_4.5": {
+        "price_per_m_input": 3.0,
+        "before_per_session": 0.09576,
+        "after_per_session": 0.050835,
+        "saved_per_session": 0.044925,
+        "before_monthly": 10.5336,
+        "after_monthly": 5.5918,
+        "saved_monthly": 4.9417
+      },
+      "opus_4.5": {
+        "price_per_m_input": 15.0,
+        "before_per_session": 0.4788,
+        "after_per_session": 0.254175,
+        "saved_per_session": 0.224625,
+        "before_monthly": 52.668,
+        "after_monthly": 27.9593,
+        "saved_monthly": 24.7088
+      }
+    }
+  },
+  "benchmark_3_longevity": {
+    "context_window": 200000,
+    "avg_user_msg_tokens": 150,
+    "avg_response_tokens": 1500,
+    "avg_tool_overhead_tokens": 300,
+    "per_exchange_tokens": 1950,
+    "exchanges_without_jitcr": 101,
+    "exchanges_with_jitcr": 97,
+    "extra_exchanges": -4,
+    "extra_exchanges_percent": -4.0
+  },
+  "benchmark_4_session_restore": {
+    "jitcr_start_load_tokens": 8565,
+    "manual_estimate_tokens": 11249
+  },
+  "mathematical_proof": {
+    "breakeven_messages": 4.6,
+    "formula": "Savings = T2 \u00d7 (N - 1) - T3"
+  }
+}
