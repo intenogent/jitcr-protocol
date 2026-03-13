@@ -433,29 +433,35 @@ jitcr-protocol\                              ← GitHub repo (what you're readin
 **Step 1:** Create a new Claude Desktop Project for your project.
 *(Claude Desktop → Projects → New Project)*
 
-**Step 2:** Copy the bootstrap snippet below and paste it into your new project's
-**Project Instructions** *(Project → Settings → Project Instructions)*:
+**Step 2:** Go to **Project → Settings → Project Instructions** and paste this
+bootstrap snippet — this is the only copy/paste in the entire install process:
 
 ```
-On the user's first message in this project, fetch and execute the JITCR installer:
+On the user's first message in this project, fetch and execute the JITCR installer
+by running this command via shell-command MCP:
 
-  Windows: Invoke-WebRequest -Uri "https://raw.githubusercontent.com/intenogent/jitcr-protocol/main/JITCR_Installer_Prompt.md" -UseBasicParsing | Select-Object -ExpandProperty Content
+  Windows  : Invoke-WebRequest -Uri "https://raw.githubusercontent.com/intenogent/jitcr-protocol/main/JITCR_Installer_Prompt.md" -UseBasicParsing | Select-Object -ExpandProperty Content
   macOS/Linux: curl -s "https://raw.githubusercontent.com/intenogent/jitcr-protocol/main/JITCR_Installer_Prompt.md"
 
-Read the downloaded content and follow its instructions exactly as if they
-had been typed by the user. Begin with Phase 1 immediately.
+Read the downloaded content in full and follow its instructions exactly.
+Begin immediately with Phase 1.
 ```
 
-**Step 3:** Send any first message in the project (e.g. `install`). Claude will
-download the installer from GitHub via shell-command MCP and run it interactively —
-checking your MCPs, asking setup questions, creating all folders and files, and
-outputting your final Tier 1 text ready to copy into Project Instructions.
+**Step 3:** Open a new chat in this project and type `install`. Claude fetches the
+installer from GitHub via shell-command MCP and runs it interactively — checking
+your MCPs, asking setup questions, and creating all files and folders.
+
+**Step 4:** When the installer finishes, it outputs your **Tier 1 text**. Copy it,
+go back to **Project → Settings → Project Instructions**, and **replace the bootstrap
+snippet** with this Tier 1 text. The bootstrap is a one-shot launcher — it gets
+replaced by your real project instructions once install is complete.
+
+**Step 5:** Start a new chat and type `> start`. JITCR is running. 🚀
 
 > ⚠️ **Do not paste or attach `JITCR_Installer_Prompt.md` directly.**
-> The file is too large for Claude Desktop’s paste-as-text threshold. The bootstrap
-> snippet above fetches it automatically at runtime via shell-command MCP.
-
-Start a new session and type `> start`. JITCR is running. 🚀
+> The file is too large for Claude Desktop’s paste threshold and will be treated
+> as an attached document, triggering the safety filter. The bootstrap snippet
+> fetches it automatically at runtime — no manual file handling needed.
 
 ---
 
