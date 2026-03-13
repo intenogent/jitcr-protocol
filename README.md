@@ -437,6 +437,11 @@ jitcr-protocol\                              ← GitHub repo (what you're readin
 repo. Click the **Copy raw file** button (clipboard icon, top right of the file view).
 Paste the copied text as your **first message** in the new project chat.
 
+> ⚠️ **Paste as text — do not attach as a file.**
+> Attaching the file causes Claude to treat the contents as an untrusted external
+> document and it will refuse to run the installer. The text must arrive as your
+> own chat message, not as an attachment.
+
 **Step 3:** The JITCR Setup Agent runs the interactive setup — silently checks your
 MCPs, asks where you want your `JITCR_Protocol\` folder, asks a few questions about
 your project, creates all folders and files on your machine, then outputs your Tier 1
