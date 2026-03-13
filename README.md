@@ -99,7 +99,7 @@ Claude to load the rest of the context. When you type `> start` in a new session
 Claude automatically:
 
 1. Detects your OS (Windows, macOS, or Linux)
-2. Checks that your session folder exists — creates it if not
+2. Checks that your project logs folder exists — creates it if not
 3. Checks git status in your project root
 4. Loads Tier 2 — reads `JITCR_{ProjectName}.md` from your machine via filesystem MCP
 5. Loads Tier 3 — reads the latest handoff file from JITCR_Protocol\{ProjectName}\logs\;
@@ -315,7 +315,7 @@ Once JITCR is running, every project session has these commands available:
 | Command | What It Does |
 |---|---|
 | `> start` | Loads Tier 2 + Tier 3, checks git, displays session header |
-| `> journal` | Writes timestamped activity log entry to your Sessions folder |
+| `> journal` | Writes timestamped activity log entry to `{ProjectName}\logs\` |
 | `> handoff` | Creates a structured snapshot of the current session state |
 | `> save` | Runs journal + handoff together in one step |
 | `> status` | Shows last handoff, last journal entry, and git status |
