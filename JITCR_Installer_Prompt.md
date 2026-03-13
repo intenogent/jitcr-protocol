@@ -340,14 +340,14 @@ All subsequent path and shell operations use the detected OS context.
 ## Session Logs Location
 
 Session logs (journals + handoffs) for every project are stored under:
-`{HubRoot}\{ProjectName}\logs\`
+`JITCR_Protocol\{ProjectName}\logs\`
 
-The `{HubRoot}` path is defined by the user during install and stored in the
-project's Tier 2 file (`JITCR_{ProjectName}.md`) under the Session Logs field.
+`JITCR_Protocol\` is the fixed root folder created during install. Every project
+gets its own subfolder inside it, with `logs\` for journals and handoffs.
 
 Every project has its own `logs\` subfolder directly inside its project folder:
 ```
-{HubRoot}\
+JITCR_Protocol\
 ├── JITCR_Universal_Commands.md        ← this file
 ├── {ProjectName-A}\
 │   ├── JITCR_{ProjectName-A}.md          ← Tier 2 guide
@@ -369,13 +369,13 @@ STEP 1: OS Detection (silent)
         macOS   → uname = "Darwin"       → bash syntax
         Linux   → uname = "Linux"        → bash syntax
 
-STEP 2: Read project name and {HubRoot} from Tier 1 Project Instructions
-        Logs path: {HubRoot}\{ProjectName}\logs\
+STEP 2: Read project name from Tier 1 Project Instructions
+        Logs path: JITCR_Protocol\{ProjectName}\logs\
 
 STEP 3: Check and create logs folder if missing
-        IF {HubRoot}\{ProjectName}\logs\ does not exist
-          → create {HubRoot}\{ProjectName}\
-          → create {HubRoot}\{ProjectName}\logs\
+        IF JITCR_Protocol\{ProjectName}\logs\ does not exist
+          → create JITCR_Protocol\{ProjectName}\
+          → create JITCR_Protocol\{ProjectName}\logs\
           → confirm: "Created logs folder for {ProjectName}"
 
 STEP 4: Git status check
@@ -393,7 +393,7 @@ STEP 5: Load Tier 2
         Confirm loaded. Display approximate token count.
 
 STEP 6: Load Tier 3 — Conditional
-        ALWAYS   → read latest handoff_*.md from {HubRoot}\{ProjectName}\logs\
+        ALWAYS   → read latest handoff_*.md from JITCR_Protocol\{ProjectName}\logs\
                    (if no handoff exists → note "First session for this project")
         ONLY IF  → handoff status = BLOCKED
                    OR handoff contains open/unresolved issues
@@ -419,7 +419,7 @@ STEP 7: Display session header
 ```
 1. Get current timestamp (YYYY-MM-DD HH:MM)
 2. Determine journal file path:
-   {HubRoot}\{ProjectName}\logs\journal_YYYY-MM-DD_HHMM.md
+   JITCR_Protocol\{ProjectName}\logs\journal_YYYY-MM-DD_HHMM.md
 3. If file does not exist → create it with header
 4. Append entry using template below
 5. Confirm: "Journal updated → journal_YYYY-MM-DD_HHMM.md"
@@ -452,7 +452,7 @@ STEP 7: Display session header
 ```
 1. Get current timestamp (YYYY-MM-DD HH:MM)
 2. Create file:
-   {HubRoot}\{ProjectName}\logs\handoff_YYYY-MM-DD_HHMM.md
+   JITCR_Protocol\{ProjectName}\logs\handoff_YYYY-MM-DD_HHMM.md
 3. Write handoff using template below
 4. Confirm: "Handoff saved → handoff_YYYY-MM-DD_HHMM.md"
 ```
@@ -564,9 +564,9 @@ Confirm: "Backup created → {project_root}_backup_YYYY-MM-DD_HHMM.zip"
 
 | File Type | Format | Location |
 |---|---|---|
-| Tier 2 guide | `JITCR_[ProjectName].md` | `{HubRoot}\{ProjectName}\` |
-| Journal | `journal_YYYY-MM-DD_HHMM.md` | `{HubRoot}\{ProjectName}\logs\` |
-| Handoff | `handoff_YYYY-MM-DD_HHMM.md` | `{HubRoot}\{ProjectName}\logs\` |
+| Tier 2 guide | `JITCR_[ProjectName].md` | `JITCR_Protocol\{ProjectName}\` |
+| Journal | `journal_YYYY-MM-DD_HHMM.md` | `JITCR_Protocol\{ProjectName}\logs\` |
+| Handoff | `handoff_YYYY-MM-DD_HHMM.md` | `JITCR_Protocol\{ProjectName}\logs\` |
 | Backup | `{ProjectName}_backup_YYYY-MM-DD_HHMM.zip` | Project root or backup path |
 
 > All type prefixes are always **lowercase**: `journal_`, `handoff_`
@@ -639,7 +639,7 @@ Tip: Commands accept natural extensions — e.g. > commit "my message"
 2. Execute each test in sequence
 3. Report PASS/FAIL per test inline as tests run
 4. On completion, write results to:
-   {HubRoot}\{ProjectName}\logs\qa_YYYY-MM-DD_HHMM.md
+   JITCR_Protocol\{ProjectName}\logs\qa_YYYY-MM-DD_HHMM.md
    using the QA Results Template in JITCR_QA.md
 5. Display summary: X passed, Y failed, Z skipped
 
@@ -656,6 +656,6 @@ To run a single test:
 | 2.0 | 2026-03-06 | Initial universal commands file — JITCR Protocol v2.0 |
 | 2.1 | 2026-03-07 | Added > qa command — QA test suite runner |
 | 2.2 | 2026-03-07 | Fixed OS detection: use OSVersion.Platform not $env:OS |
-| 2.3 | 2026-03-13 | Removed Sessions\ folder — logs now live inside each project subfolder; replaced hardcoded OS paths with {HubRoot} |
+| 2.3 | 2026-03-13 | Removed Sessions\ folder — logs now live in JITCR_Protocol\{ProjectName}\logs\; {HubRoot} replaced with literal JITCR_Protocol\ |
 
 ▓▓ EMBEDDED UNIVERSAL COMMANDS CONTENT — END ▓▓
