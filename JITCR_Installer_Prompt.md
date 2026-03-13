@@ -78,6 +78,20 @@ Q0: Tell the user:
 
      Press Enter to accept the default, or type a custom path:"
 
+     Here is what will be created inside it:
+
+     {HubRoot}\
+     ├── JITCR_Universal_Commands.md       ← shared command engine (all projects)
+     ├── {ProjectName-A}\                   ← one subfolder per project
+     │   ├── JITCR_{ProjectName-A}.md       ← Tier 2 guide
+     │   └── logs\                          ← journals and handoffs
+     ├── {ProjectName-B}\                   ← next project — same structure
+     │   ├── JITCR_{ProjectName-B}.md
+     │   └── logs\
+     └── {ProjectName-Z}\                   ← every project follows this pattern
+         ├── JITCR_{ProjectName-Z}.md
+         └── logs\
+
     IF user presses Enter or types nothing → use OS default as {HubRoot}
     IF user types a path → use that as {HubRoot}
     Store as: {HubRoot}
@@ -113,8 +127,8 @@ After all answers, show the user what will be created:
 
   📁 Folders to create:
      {HubRoot}                              (if missing)
-     {HubRoot}\{ProjectName}\              (Tier 2 guide lives here)
-     {HubRoot}\Sessions\{ProjectName}\logs\ (session logs live here)
+     {HubRoot}\{ProjectName}\              (Tier 2 guide and session logs live here)
+     {HubRoot}\{ProjectName}\logs\         (journals and handoffs live here)
 
   📄 Files to create:
      JITCR_{ProjectName}.md       → {HubRoot}\{ProjectName}\ folder
@@ -134,7 +148,7 @@ Execute only after user confirms.
 STEP 1 — Create folder structure using filesystem MCP:
   Create: {HubRoot}
   Create: {HubRoot}\{ProjectName}\
-  Create: {HubRoot}\Sessions\{ProjectName}\logs\
+  Create: {HubRoot}\{ProjectName}\logs\
   Confirm each folder created.
 
 STEP 2 — Write JITCR_Universal_Commands.md (only if not already present):
@@ -168,7 +182,7 @@ STEP 3 — Write JITCR_{ProjectName}.md:
 | Project Name | {ProjectName} |
 | OS | {OS detected in Phase 1} |
 | Project Root | {ProjectRoot} |
-| Sessions Hub | {HubRoot}\Sessions\{ProjectName}\logs\ |
+| Session Logs | {HubRoot}\{ProjectName}\logs\ |
 | Universal Commands | {HubRoot}\JITCR_Universal_Commands.md |
 | Git | {active — initialized during install / not initialized} |
 
@@ -186,7 +200,7 @@ STEP 3 — Write JITCR_{ProjectName}.md:
 |---|---|
 | This file (Tier 2) | {HubRoot}\{ProjectName}\JITCR_{ProjectName}.md |
 | Universal Commands | {HubRoot}\JITCR_Universal_Commands.md |
-| Session logs | {HubRoot}\Sessions\{ProjectName}\logs\ |
+| Session logs | {HubRoot}\{ProjectName}\logs\ |
 | Project root | {ProjectRoot} |
 
 ---
@@ -323,16 +337,27 @@ All subsequent path and shell operations use the detected OS context.
 
 ---
 
-## Sessions Hub Path (Per OS)
-
-The hub root is defined by the user during install and stored in the project's
-Tier 2 file (JITCR_{ProjectName}.md) under the Sessions Hub field.
+## Session Logs Location
 
 Session logs (journals + handoffs) for every project are stored under:
-`{HubRoot}\Sessions\{ProjectName}\logs\`
+`{HubRoot}\{ProjectName}\logs\`
 
-If no project name is defined in Tier 1:
-`{HubRoot}\Sessions\GeneralChats\logs\`
+The `{HubRoot}` path is defined by the user during install and stored in the
+project's Tier 2 file (`JITCR_{ProjectName}.md`) under the Session Logs field.
+
+Every project has its own `logs\` subfolder directly inside its project folder:
+```
+{HubRoot}\
+├── JITCR_Universal_Commands.md        ← this file
+├── {ProjectName-A}\
+│   ├── JITCR_{ProjectName-A}.md          ← Tier 2 guide
+│   └── logs\                             ← journals and handoffs
+├── {ProjectName-B}\
+│   ├── JITCR_{ProjectName-B}.md
+│   └── logs\
+└── {ProjectName-Z}\
+    ├── JITCR_{ProjectName-Z}.md
+    └── logs\
 
 ---
 
@@ -344,15 +369,14 @@ STEP 1: OS Detection (silent)
         macOS   → uname = "Darwin"       → bash syntax
         Linux   → uname = "Linux"        → bash syntax
 
-STEP 2: Read project name from Tier 1 Project Instructions
-        IF project name defined  → use {HubRoot}\Sessions\{ProjectName}\logs\
-        IF no project name       → use {HubRoot}\Sessions\GeneralChats\logs\
+STEP 2: Read project name and {HubRoot} from Tier 1 Project Instructions
+        Logs path: {HubRoot}\{ProjectName}\logs\
 
-STEP 3: Check and create session folder if missing
-        IF Sessions\{ProjectName}\ does not exist
-          → create Sessions\{ProjectName}\
-          → create Sessions\{ProjectName}\logs\
-          → confirm: "Created session folder for {ProjectName}"
+STEP 3: Check and create logs folder if missing
+        IF {HubRoot}\{ProjectName}\logs\ does not exist
+          → create {HubRoot}\{ProjectName}\
+          → create {HubRoot}\{ProjectName}\logs\
+          → confirm: "Created logs folder for {ProjectName}"
 
 STEP 4: Git status check
         Run: git -C "{project_root}" status
@@ -369,7 +393,7 @@ STEP 5: Load Tier 2
         Confirm loaded. Display approximate token count.
 
 STEP 6: Load Tier 3 — Conditional
-        ALWAYS   → read latest handoff_*.md from {HubRoot}\Sessions\{ProjectName}\logs\
+        ALWAYS   → read latest handoff_*.md from {HubRoot}\{ProjectName}\logs\
                    (if no handoff exists → note "First session for this project")
         ONLY IF  → handoff status = BLOCKED
                    OR handoff contains open/unresolved issues
@@ -395,7 +419,7 @@ STEP 7: Display session header
 ```
 1. Get current timestamp (YYYY-MM-DD HH:MM)
 2. Determine journal file path:
-   {HubRoot}\Sessions\{ProjectName}\logs\journal_YYYY-MM-DD_HHMM.md
+   {HubRoot}\{ProjectName}\logs\journal_YYYY-MM-DD_HHMM.md
 3. If file does not exist → create it with header
 4. Append entry using template below
 5. Confirm: "Journal updated → journal_YYYY-MM-DD_HHMM.md"
@@ -428,7 +452,7 @@ STEP 7: Display session header
 ```
 1. Get current timestamp (YYYY-MM-DD HH:MM)
 2. Create file:
-   {HubRoot}\Sessions\{ProjectName}\logs\handoff_YYYY-MM-DD_HHMM.md
+   {HubRoot}\{ProjectName}\logs\handoff_YYYY-MM-DD_HHMM.md
 3. Write handoff using template below
 4. Confirm: "Handoff saved → handoff_YYYY-MM-DD_HHMM.md"
 ```
@@ -540,9 +564,9 @@ Confirm: "Backup created → {project_root}_backup_YYYY-MM-DD_HHMM.zip"
 
 | File Type | Format | Location |
 |---|---|---|
-| Tier 2 guide | `JITCR_[ProjectName].md` | {HubRoot}\{ProjectName}\ |
-| Journal | `journal_YYYY-MM-DD_HHMM.md` | `{HubRoot}\Sessions\{ProjectName}\logs\` |
-| Handoff | `handoff_YYYY-MM-DD_HHMM.md` | `{HubRoot}\Sessions\{ProjectName}\logs\` |
+| Tier 2 guide | `JITCR_[ProjectName].md` | `{HubRoot}\{ProjectName}\` |
+| Journal | `journal_YYYY-MM-DD_HHMM.md` | `{HubRoot}\{ProjectName}\logs\` |
+| Handoff | `handoff_YYYY-MM-DD_HHMM.md` | `{HubRoot}\{ProjectName}\logs\` |
 | Backup | `{ProjectName}_backup_YYYY-MM-DD_HHMM.zip` | Project root or backup path |
 
 > All type prefixes are always **lowercase**: `journal_`, `handoff_`
@@ -615,7 +639,7 @@ Tip: Commands accept natural extensions — e.g. > commit "my message"
 2. Execute each test in sequence
 3. Report PASS/FAIL per test inline as tests run
 4. On completion, write results to:
-   {HubRoot}\Sessions\{ProjectName}\logs\qa_YYYY-MM-DD_HHMM.md
+   {HubRoot}\{ProjectName}\logs\qa_YYYY-MM-DD_HHMM.md
    using the QA Results Template in JITCR_QA.md
 5. Display summary: X passed, Y failed, Z skipped
 
@@ -632,5 +656,6 @@ To run a single test:
 | 2.0 | 2026-03-06 | Initial universal commands file — JITCR Protocol v2.0 |
 | 2.1 | 2026-03-07 | Added > qa command — QA test suite runner |
 | 2.2 | 2026-03-07 | Fixed OS detection: use OSVersion.Platform not $env:OS |
+| 2.3 | 2026-03-13 | Removed Sessions\ folder — logs now live inside each project subfolder; replaced hardcoded OS paths with {HubRoot} |
 
 ▓▓ EMBEDDED UNIVERSAL COMMANDS CONTENT — END ▓▓

@@ -83,7 +83,7 @@ TIER 2 — JITCR_{ProjectName}.md (loaded once per session)
   Contains : Project purpose, architecture, key paths, commands, notes
 
 TIER 3 — Session logs (loaded conditionally)
-  Lives in : JITCR_Protocol\Sessions\{ProjectName}\logs\
+  Lives in : JITCR_Protocol\{ProjectName}\logs\
   Loads    : Latest handoff always + recent journals only if status = BLOCKED
   Contains : What was done, decisions made, open issues, what comes next
 ```
@@ -102,8 +102,8 @@ Claude automatically:
 2. Checks that your session folder exists — creates it if not
 3. Checks git status in your project root
 4. Loads Tier 2 — reads `JITCR_{ProjectName}.md` from your machine via filesystem MCP
-5. Loads Tier 3 — reads the latest handoff file; reads recent journals only if
-   the last session was marked BLOCKED or had unresolved issues
+5. Loads Tier 3 — reads the latest handoff file from JITCR_Protocol\{ProjectName}\logs\;
+   reads recent journals only if the last session was marked BLOCKED or had unresolved issues
 6. Displays a session header confirming everything is loaded and ready
 
 This means Claude enters every session already knowing your project, your last
@@ -138,7 +138,7 @@ Claude is the development assistant for {ProjectName}.
 - Name: {ProjectName}
 - OS: {OS}
 - Root: {ProjectRoot}
-- Sessions Hub: JITCR_Protocol\Sessions\{ProjectName}\logs\
+- Session logs : JITCR_Protocol\{ProjectName}\logs\
 - Universal Commands: JITCR_Protocol\JITCR_Universal_Commands.md
 - Git: active
 
@@ -147,7 +147,7 @@ Claude is the development assistant for {ProjectName}.
 
 ## Key File Paths
 - Tier 2 guide : JITCR_Protocol\{ProjectName}\JITCR_{ProjectName}.md
-- Session logs : JITCR_Protocol\Sessions\{ProjectName}\logs\
+- Session logs : JITCR_Protocol\{ProjectName}\logs\
 - Project root : {ProjectRoot}
 
 ## File Access Rules
@@ -223,7 +223,7 @@ Claude is the development assistant for {ProjectName}.
 | Project Name   | {ProjectName}                                           |
 | OS             | {OS}                                                    |
 | Project Root   | {ProjectRoot}                                           |
-| Sessions Hub   | JITCR_Protocol\Sessions\{ProjectName}\logs\             |
+| Session Logs   | JITCR_Protocol\{ProjectName}\logs\                     |
 | Universal Cmds | JITCR_Protocol\JITCR_Universal_Commands.md              |
 | Git            | active                                                  |
 
@@ -234,7 +234,7 @@ Claude is the development assistant for {ProjectName}.
 | File           | Path                                                    |
 |----------------|---------------------------------------------------------|
 | This file (T2) | JITCR_Protocol\{ProjectName}\JITCR_{ProjectName}.md     |
-| Session logs   | JITCR_Protocol\Sessions\{ProjectName}\logs\             |
+| Session logs   | JITCR_Protocol\{ProjectName}\logs\                     |
 | Project root   | {ProjectRoot}                                           |
 
 ## Quick Command Reference
@@ -369,36 +369,52 @@ Download from [git-scm.com](https://git-scm.com) if needed.
 
 JITCR creates a single folder on your machine — `JITCR_Protocol\` — that acts
 as the central location for all your JITCR-managed projects. Every project gets
-its own subfolder inside it. Session logs for all projects are stored under a
-shared `Sessions\` folder, organized by project name.
+its own subfolder inside it, containing both its Tier 2 guide and its session logs.
+There is no separate Sessions folder — everything for a project lives together.
 
 **The `JITCR_Protocol\` folder on your machine (created by the installer):**
 
 ```
-JITCR_Protocol\                              ← your local JITCR root (all projects)
+JITCR_Protocol\                               ← your local JITCR root (all projects)
 │
-├── JITCR_Universal_Commands.md              ← shared command engine (all projects)
+├── JITCR_Universal_Commands.md               ← shared command engine (all projects)
 │
-├── ProjectA\                                ← one subfolder per project
-│   └── JITCR_ProjectA.md                   ← Tier 2 guide for ProjectA
+├── {ProjectName-A}\                          ← one subfolder per project
+│   ├── JITCR_{ProjectName-A}.md              ← Tier 2 guide for this project
+│   └── logs\                                 ← all session logs for this project
+│       ├── journal_YYYY-MM-DD_HHMM.md        ← activity log
+│       └── handoff_YYYY-MM-DD_HHMM.md        ← session handoff
 │
-├── ProjectB\
-│   └── JITCR_ProjectB.md                   ← Tier 2 guide for ProjectB
+├── {ProjectName-B}\                          ← second project — same structure
+│   ├── JITCR_{ProjectName-B}.md
+│   └── logs\
+│       ├── journal_YYYY-MM-DD_HHMM.md
+│       └── handoff_YYYY-MM-DD_HHMM.md
 │
-└── Sessions\                                ← all session logs live here
-    ├── ProjectA\
-    │   └── logs\
-    │       ├── journal_2026-03-12_0900.md   ← activity log
-    │       └── handoff_2026-03-12_0900.md   ← session handoff
-    └── ProjectB\
-        └── logs\
-            ├── journal_2026-03-12_1400.md
-            └── handoff_2026-03-12_1400.md
+└── {ProjectName-Z}\                          ← every additional project follows the same pattern
+    ├── JITCR_{ProjectName-Z}.md
+    └── logs\
+        ├── journal_YYYY-MM-DD_HHMM.md
+        └── handoff_YYYY-MM-DD_HHMM.md
 ```
 
-> Each project in Claude Desktop gets its own subfolder and its own session logs.
-> The `JITCR_Universal_Commands.md` file is shared — one copy, used by all projects.
-> The installer creates this entire structure automatically when you run it.
+> Each project gets its own subfolder directly under `JITCR_Protocol\`.
+> Tier 2 guide and session logs live together inside that subfolder — nothing is split across separate folders.
+> The `JITCR_Universal_Commands.md` file is shared — one copy at the root, used by all projects.
+> The installer creates the full structure for each project automatically when you run it.
+
+**What the `logs\` folder contains:**
+Every time you run `> save`, JITCR writes two files into `{ProjectName}\logs\`:
+
+| File | Purpose |
+|---|---|
+| `journal_YYYY-MM-DD_HHMM.md` | Timestamped activity log — what was done, decisions made, files changed |
+| `handoff_YYYY-MM-DD_HHMM.md` | Current state snapshot — project status, open issues, what to do next session |
+
+These files power **Feature 2 — Session Continuity**. When you type `> start` in a
+new session, JITCR reads the latest handoff automatically — restoring full context
+instantly without re-explaining anything. All files are plain markdown, readable by
+any text editor, transferable to any LLM, and fully under your control.
 
 **This is separate from the GitHub repo**, which contains only the published
 protocol files (README, installer prompt, and command engine):
