@@ -15,7 +15,7 @@
 - [Session Continuity & Commands](#feature-2--session-continuity)
 - [How to Install](#how-to-install)
   - [Pre-requisites](#pre-requisites)
-  - [Where JITCR Stores Its Files](#where-jitcr-stores-its-files)
+  - [How JITCR Organizes Your Files](#how-jitcr-organizes-your-files)
   - [Installation — 3 Steps](#installation--3-steps)
 - [Repo Contents](#repo-contents)
 - [Requirements](#requirements)
@@ -78,12 +78,12 @@ TIER 1 — Project Instructions (always-on, ~200–300 tokens)
   Contains : Role, project name, root path, 5 guardrail rules, > start trigger
 
 TIER 2 — JITCR_{ProjectName}.md (loaded once per session)
-  Lives in : {HubRoot}\{ProjectName}\ on your machine
+  Lives in : JITCR_Protocol\{ProjectName}\ on your machine
   Loads    : Once at > start via filesystem MCP
   Contains : Project purpose, architecture, key paths, commands, notes
 
 TIER 3 — Session logs (loaded conditionally)
-  Lives in : {HubRoot}\Sessions\{ProjectName}\logs\
+  Lives in : JITCR_Protocol\Sessions\{ProjectName}\logs\
   Loads    : Latest handoff always + recent journals only if status = BLOCKED
   Contains : What was done, decisions made, open issues, what comes next
 ```
@@ -113,8 +113,15 @@ session's state, and any open issues — without you typing a word of explanatio
 
 ## Before JITCR vs. After JITCR
 
-The same project context, shown two ways. The content is identical — only
-where it lives and when it loads is different.
+The following side-by-side shows the exact same project context organized two ways.
+
+**Before JITCR:** everything lives in one block inside Claude Desktop's Project
+Instructions — loaded on every single message, whether Claude needs it or not.
+
+**After JITCR:** the same content is split across three tiers. Only Tier 1
+(~225 tokens) loads every message. Tiers 2 and 3 load once at `> start` via
+your filesystem MCP — then they're done. The content is identical. The token
+cost across a session is not.
 
 ---
 
@@ -131,16 +138,16 @@ Claude is the development assistant for {ProjectName}.
 - Name: {ProjectName}
 - OS: {OS}
 - Root: {ProjectRoot}
-- Sessions Hub: {HubRoot}\Sessions\{ProjectName}\logs\
-- Universal Commands: {HubRoot}\JITCR_Universal_Commands.md
+- Sessions Hub: JITCR_Protocol\Sessions\{ProjectName}\logs\
+- Universal Commands: JITCR_Protocol\JITCR_Universal_Commands.md
 - Git: active
 
 ## Project Purpose
 {RoleDescription}
 
 ## Key File Paths
-- Tier 2 guide : {HubRoot}\{ProjectName}\JITCR_{ProjectName}.md
-- Session logs : {HubRoot}\Sessions\{ProjectName}\logs\
+- Tier 2 guide : JITCR_Protocol\{ProjectName}\JITCR_{ProjectName}.md
+- Session logs : JITCR_Protocol\Sessions\{ProjectName}\logs\
 - Project root : {ProjectRoot}
 
 ## File Access Rules
@@ -165,7 +172,6 @@ Claude is the development assistant for {ProjectName}.
 > status  Show last handoff, last journal, git status
 > commit  Git commit all project files
 > end     save + optional commit + session summary
-> backup  Zip project root to local backup
 
 ## Latest Session State
 Status: IN PROGRESS
@@ -199,7 +205,7 @@ Claude is the development assistant for {ProjectName}.
 - Read files before overwriting — preserve content
 - Shell commands: always use forward slashes in paths
 - On > start: read JITCR_{ProjectName}.md from:
-  {HubRoot}\{ProjectName}\
+  JITCR_Protocol\{ProjectName}\
 
 ## Environment
 {Environment}
@@ -212,24 +218,24 @@ Claude is the development assistant for {ProjectName}.
 
 ```markdown
 ## Project Identity
-| Field          | Value                                              |
-|----------------|----------------------------------------------------|
-| Project Name   | {ProjectName}                                      |
-| OS             | {OS}                                               |
-| Project Root   | {ProjectRoot}                                      |
-| Sessions Hub   | {HubRoot}\Sessions\{ProjectName}\logs\             |
-| Universal Cmds | {HubRoot}\JITCR_Universal_Commands.md              |
-| Git            | active                                             |
+| Field          | Value                                                   |
+|----------------|---------------------------------------------------------|
+| Project Name   | {ProjectName}                                           |
+| OS             | {OS}                                                    |
+| Project Root   | {ProjectRoot}                                           |
+| Sessions Hub   | JITCR_Protocol\Sessions\{ProjectName}\logs\             |
+| Universal Cmds | JITCR_Protocol\JITCR_Universal_Commands.md              |
+| Git            | active                                                  |
 
 ## Project Purpose
 {RoleDescription}
 
 ## Key File Paths
-| File           | Path                                               |
-|----------------|----------------------------------------------------|
-| This file (T2) | {HubRoot}\{ProjectName}\JITCR_{ProjectName}.md     |
-| Session logs   | {HubRoot}\Sessions\{ProjectName}\logs\             |
-| Project root   | {ProjectRoot}                                      |
+| File           | Path                                                    |
+|----------------|---------------------------------------------------------|
+| This file (T2) | JITCR_Protocol\{ProjectName}\JITCR_{ProjectName}.md     |
+| Session logs   | JITCR_Protocol\Sessions\{ProjectName}\logs\             |
+| Project root   | {ProjectRoot}                                           |
 
 ## Quick Command Reference
 | Command   | Action                                        |
@@ -241,7 +247,6 @@ Claude is the development assistant for {ProjectName}.
 | > status  | Show last handoff, journal, git status        |
 | > commit  | Git commit                                    |
 | > end     | save + optional commit + session summary      |
-| > backup  | Zip project root                              |
 
 Full command logic → JITCR_Universal_Commands.md
 ```
@@ -316,7 +321,6 @@ Once JITCR is running, every project session has these commands available:
 | `> status` | Shows last handoff, last journal entry, and git status |
 | `> commit` | Git commits all project files with a structured message |
 | `> end` | save + optional commit + displays session summary |
-| `> backup` | Zips your entire project root to a local backup file |
 | `> ?` | Display all available commands |
 
 > Commands accept natural extensions — e.g. `> commit "my message"` or
@@ -352,8 +356,8 @@ This allows Claude to read and write files on your machine. Add it to your
 `claude_desktop_config.json`. Without this, JITCR cannot function.
 
 **3. shell-command MCP — recommended**
-Allows Claude to run terminal commands. Needed for `> commit`, `> end`, and
-`> backup`. JITCR works without it but git commands will be unavailable.
+Allows Claude to run terminal commands. Needed for `> commit` and `> end`.
+JITCR works without it but git commands will be unavailable.
 
 **4. Git — optional**
 Only needed if you want version control via `> commit` and `> end`.
@@ -361,26 +365,50 @@ Download from [git-scm.com](https://git-scm.com) if needed.
 
 ---
 
-### Where JITCR Stores Its Files
+### How JITCR Organizes Your Files
 
-The **JITCR Setup Agent** will ask you to choose a **hub folder** — this is where JITCR stores its files for all your projects:
+JITCR creates a single folder on your machine — `JITCR_Protocol\` — that acts
+as the central location for all your JITCR-managed projects. Every project gets
+its own subfolder inside it. Session logs for all projects are stored under a
+shared `Sessions\` folder, organized by project name.
 
-- Your project's Tier 2 guide (`JITCR_{ProjectName}.md`)
-- Your session logs (journals and handoffs)
-- The shared command engine (`JITCR_Universal_Commands.md`)
-
-**You choose the location. JITCR works with any path on any OS.**
-
-The JITCR Setup Agent will suggest a default, but you can change it to any folder you prefer:
+**The `JITCR_Protocol\` folder on your machine (created by the installer):**
 
 ```
-Windows : C:\Users\{you}\Documents\JITCR_Protocol\
-macOS   : ~/Documents/JITCR_Protocol/
-Linux   : ~/Documents/JITCR_Protocol/
+JITCR_Protocol\                              ← your local JITCR root (all projects)
+│
+├── JITCR_Universal_Commands.md              ← shared command engine (all projects)
+│
+├── ProjectA\                                ← one subfolder per project
+│   └── JITCR_ProjectA.md                   ← Tier 2 guide for ProjectA
+│
+├── ProjectB\
+│   └── JITCR_ProjectB.md                   ← Tier 2 guide for ProjectB
+│
+└── Sessions\                                ← all session logs live here
+    ├── ProjectA\
+    │   └── logs\
+    │       ├── journal_2026-03-12_0900.md   ← activity log
+    │       └── handoff_2026-03-12_0900.md   ← session handoff
+    └── ProjectB\
+        └── logs\
+            ├── journal_2026-03-12_1400.md
+            └── handoff_2026-03-12_1400.md
 ```
 
-Once set, all JITCR projects on your machine share the same hub — no duplication,
-no per-project setup beyond answering a few questions.
+> Each project in Claude Desktop gets its own subfolder and its own session logs.
+> The `JITCR_Universal_Commands.md` file is shared — one copy, used by all projects.
+> The installer creates this entire structure automatically when you run it.
+
+**This is separate from the GitHub repo**, which contains only the published
+protocol files (README, installer prompt, and command engine):
+
+```
+jitcr-protocol\                              ← GitHub repo (what you're reading now)
+├── README.md                                ← full documentation
+├── JITCR_Installer_Prompt.md               ← one-click copy — paste as first message
+└── JITCR_Universal_Commands.md             ← full command engine
+```
 
 ---
 
@@ -394,9 +422,9 @@ repo. Click the **Copy raw file** button (clipboard icon, top right of the file 
 Paste the copied text as your **first message** in the new project chat.
 
 **Step 3:** The JITCR Setup Agent runs the interactive setup — silently checks your
-MCPs, asks where you want your hub folder, asks a few questions about your project,
-creates all folders and files on your machine, then outputs your Tier 1 text ready
-to copy. Paste that text into your Project Instructions
+MCPs, asks where you want your `JITCR_Protocol\` folder, asks a few questions about
+your project, creates all folders and files on your machine, then outputs your Tier 1
+text ready to copy. Paste that text into your Project Instructions
 *(Project → Settings → Project Instructions)*.
 
 Start a new session and type `> start`. JITCR is running. 🚀
