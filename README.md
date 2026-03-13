@@ -340,6 +340,28 @@ Download from [git-scm.com](https://git-scm.com) if needed.
 
 ---
 
+### Where JITCR Stores Its Files
+
+The **JITCR Setup Agent** will ask you to choose a **hub folder** — this is where JITCR stores its files for all your projects:
+
+- Your project's Tier 2 guide (`JITCR_{ProjectName}.md`)
+- Your session logs (journals and handoffs)
+- The shared command engine (`JITCR_Universal_Commands.md`)
+
+**You choose the location. JITCR works with any path on any OS.**
+
+The JITCR Setup Agent will suggest a default, but you can change it to any folder you prefer:
+
+```
+Windows : C:\Users\{you}\Documents\JITCR_Protocol\
+macOS   : ~/Documents/JITCR_Protocol/
+Linux   : ~/Documents/JITCR_Protocol/
+```
+
+Once set, all JITCR projects on your machine share the same hub — no duplication, no per-project setup beyond answering a few questions.
+
+---
+
 ### Installation — 3 Steps
 
 **Step 1:** Create a new Claude Desktop Project for your project.

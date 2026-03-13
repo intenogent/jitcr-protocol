@@ -1,8 +1,8 @@
 # JITCR Protocol — Installer Prompt
-**Version:** 1.1
-**Date:** 2026-03-07
-**Change:** Universal Commands content now embedded directly — fully self-contained,
-            no GitHub URL dependency, no training knowledge fallback needed.
+**Version:** 1.2
+**Date:** 2026-03-12
+**Change:** Hub folder is now user-defined — OS-independent. JITCR Setup Agent
+            suggests a default but user can choose any path on any OS.
 
 ---
 
@@ -97,6 +97,18 @@ PHASE 2 — GATHER PROJECT INFO
 Ask one question at a time. Wait for each answer before asking the next.
 ────────────────────────────────────────────────────────────────────────────
 
+Q0: "Where do you want the JITCR Setup Agent to store its hub files?"
+    (This is where your Tier 2 guides, session logs, and shared command engine live.)
+    Suggest a default based on detected OS:
+      Windows detected → suggest: C:\Users\{Username}\Documents\JITCR_Protocol\
+      macOS detected   → suggest: ~/Documents/JITCR_Protocol/
+      Linux detected   → suggest: ~/Documents/JITCR_Protocol/
+    Tell the user:
+    "You can accept this default or type any path you prefer.
+     This folder will be shared across all your JITCR projects."
+    Store as: {HubRoot}
+    Normalize {HubRoot}: ensure no trailing separator inconsistency.
+
 Q1: "What is the name of your project?"
     (No spaces — use hyphens or underscores. Example: MyPythonApp or My-App)
     Store as: {ProjectName}
@@ -126,13 +138,13 @@ After all answers, show the user what will be created:
   "Here is what I will set up for you:
 
   📁 Folders to create:
-     C:\Users\{Username}\Documents\Claude_Desktop\                (if missing)
-     C:\Users\{Username}\Documents\Claude_Desktop\{ProjectName}\
-     C:\Users\{Username}\Documents\Claude_Desktop\Sessions\{ProjectName}\logs\
+     {HubRoot}                             (if missing)
+     {HubRoot}\{ProjectName}\              (Tier 2 guide lives here)
+     {HubRoot}\Sessions\{ProjectName}\logs\ (session logs live here)
 
   📄 Files to create:
-     JITCR_{ProjectName}.md       → Claude_Desktop\{ProjectName}\ folder
-     JITCR_Universal_Commands.md  → Claude_Desktop\ folder (only if missing)
+     JITCR_{ProjectName}.md       → {HubRoot}\{ProjectName}\ folder
+     JITCR_Universal_Commands.md  → {HubRoot}\ folder (only if missing)
 
   {If GitChoice = yes: "🔧 Git will be initialized in {ProjectRoot}"}
 
@@ -146,20 +158,20 @@ Execute only after user confirms.
 ────────────────────────────────────────────────────────────────────────────
 
 STEP 1 — Create folder structure using filesystem MCP:
-  Create: C:\Users\{Username}\Documents\Claude_Desktop\
-  Create: C:\Users\{Username}\Documents\Claude_Desktop\{ProjectName}\
-  Create: C:\Users\{Username}\Documents\Claude_Desktop\Sessions\{ProjectName}\logs\
+  Create: {HubRoot}
+  Create: {HubRoot}\{ProjectName}\
+  Create: {HubRoot}\Sessions\{ProjectName}\logs\
   Confirm each folder created.
 
 STEP 2 — Write JITCR_Universal_Commands.md (only if not already present):
-  Check if C:\Users\{Username}\Documents\Claude_Desktop\JITCR_Universal_Commands.md exists.
+  Check if {HubRoot}\JITCR_Universal_Commands.md exists.
   IF missing  → write it using the EMBEDDED UNIVERSAL COMMANDS CONTENT
                 at the bottom of this prompt (between the ▓▓ markers).
   IF exists   → skip (do not overwrite).
   Confirm result either way.
 
 STEP 3 — Write JITCR_{ProjectName}.md:
-  File path: C:\Users\{Username}\Documents\Claude_Desktop\{ProjectName}\JITCR_{ProjectName}.md
+  File path: {HubRoot}\{ProjectName}\JITCR_{ProjectName}.md
   Use the template below, filled with the user's answers:
 
 ---
@@ -182,8 +194,8 @@ STEP 3 — Write JITCR_{ProjectName}.md:
 | Project Name | {ProjectName} |
 | OS | {OS detected in Phase 1} |
 | Project Root | {ProjectRoot} |
-| Sessions Hub | C:\Users\{Username}\Documents\Claude_Desktop\Sessions\{ProjectName}\logs\ |
-| Universal Commands | C:\Users\{Username}\Documents\Claude_Desktop\JITCR_Universal_Commands.md |
+| Sessions Hub | {HubRoot}\Sessions\{ProjectName}\logs\ |
+| Universal Commands | {HubRoot}\JITCR_Universal_Commands.md |
 | Git | {active — initialized during install / not initialized} |
 
 ---
@@ -198,9 +210,9 @@ STEP 3 — Write JITCR_{ProjectName}.md:
 
 | File | Path |
 |---|---|
-| This file (Tier 2) | C:\Users\{Username}\Documents\Claude_Desktop\{ProjectName}\JITCR_{ProjectName}.md |
-| Universal Commands | C:\Users\{Username}\Documents\Claude_Desktop\JITCR_Universal_Commands.md |
-| Session logs | C:\Users\{Username}\Documents\Claude_Desktop\Sessions\{ProjectName}\logs\ |
+| This file (Tier 2) | {HubRoot}\{ProjectName}\JITCR_{ProjectName}.md |
+| Universal Commands | {HubRoot}\JITCR_Universal_Commands.md |
+| Session logs | {HubRoot}\Sessions\{ProjectName}\logs\ |
 | Project root | {ProjectRoot} |
 
 ---
@@ -273,7 +285,7 @@ Project Instructions for this project:
 - Read files before overwriting — preserve content
 - Shell commands: always use forward slashes in paths
 - On > start: read JITCR_{ProjectName}.md from:
-  C:\Users\{Username}\Documents\Claude_Desktop\{ProjectName}\
+  {HubRoot}\{ProjectName}\
 
 ## Environment
 {Environment}
