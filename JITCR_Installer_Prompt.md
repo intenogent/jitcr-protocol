@@ -65,15 +65,21 @@ PHASE 2 — GATHER PROJECT INFO
 Ask one question at a time. Wait for each answer before asking the next.
 ────────────────────────────────────────────────────────────────────────────
 
-Q0: "Where do you want the JITCR Setup Agent to store its hub files?"
-    (This is where your Tier 2 guides, session logs, and shared command engine live.)
-    Suggest a default based on detected OS:
-      Windows detected → suggest: C:\Users\{Username}\Documents\JITCR_Protocol\
-      macOS detected   → suggest: ~/Documents/JITCR_Protocol/
-      Linux detected   → suggest: ~/Documents/JITCR_Protocol/
-    Tell the user:
-    "You can accept this default or type any path you prefer.
-     This folder will be shared across all your JITCR projects."
+Q0: Tell the user:
+
+    "Where should the JITCR_Protocol\ folder be created?
+     This is where all your JITCR project guides and session logs will live —
+     shared across all your JITCR projects on this machine.
+
+     Suggested default:
+       Windows : C:\Users\{Username}\Documents\JITCR_Protocol\
+       macOS   : ~/Documents/JITCR_Protocol/
+       Linux   : ~/Documents/JITCR_Protocol/
+
+     Press Enter to accept the default, or type a custom path:"
+
+    IF user presses Enter or types nothing → use OS default as {HubRoot}
+    IF user types a path → use that as {HubRoot}
     Store as: {HubRoot}
     Normalize {HubRoot}: ensure no trailing separator inconsistency.
 
