@@ -3,6 +3,27 @@
 
 ---
 
+## Table of Contents
+
+- [The Problem](#the-problem)
+- [What JITCR Does](#what-jitcr-does)
+- [What Are MCPs?](#what-are-mcps)
+- [The Three Tiers](#the-three-tiers)
+- [How > start Works](#how--start-works)
+- [Before & After JITCR](#before-jitcr-vs-after-jitcr)
+- [Token Savings](#token-savings--the-formula)
+- [Session Continuity & Commands](#feature-2--session-continuity)
+- [How to Install](#how-to-install)
+  - [Pre-requisites](#pre-requisites)
+  - [Where JITCR Stores Its Files](#where-jitcr-stores-its-files)
+  - [Installation — 3 Steps](#installation--3-steps)
+- [Repo Contents](#repo-contents)
+- [Requirements](#requirements)
+- [License](#license)
+- [Author](#author)
+
+---
+
 ## The Problem
 
 If you use Claude Desktop for real projects, you have likely hit two walls:
@@ -57,12 +78,12 @@ TIER 1 — Project Instructions (always-on, ~200–300 tokens)
   Contains : Role, project name, root path, 5 guardrail rules, > start trigger
 
 TIER 2 — JITCR_{ProjectName}.md (loaded once per session)
-  Lives in : Documents\Claude_Desktop\{ProjectName}\ on your machine
+  Lives in : {HubRoot}\{ProjectName}\ on your machine
   Loads    : Once at > start via filesystem MCP
   Contains : Project purpose, architecture, key paths, commands, notes
 
 TIER 3 — Session logs (loaded conditionally)
-  Lives in : Documents\Claude_Desktop\Sessions\{ProjectName}\logs\
+  Lives in : {HubRoot}\Sessions\{ProjectName}\logs\
   Loads    : Latest handoff always + recent journals only if status = BLOCKED
   Contains : What was done, decisions made, open issues, what comes next
 ```
@@ -110,16 +131,16 @@ Claude is the development assistant for {ProjectName}.
 - Name: {ProjectName}
 - OS: {OS}
 - Root: {ProjectRoot}
-- Sessions Hub: Documents\Claude_Desktop\Sessions\{ProjectName}\logs\
-- Universal Commands: Documents\Claude_Desktop\JITCR_Universal_Commands.md
+- Sessions Hub: {HubRoot}\Sessions\{ProjectName}\logs\
+- Universal Commands: {HubRoot}\JITCR_Universal_Commands.md
 - Git: active
 
 ## Project Purpose
 {RoleDescription}
 
 ## Key File Paths
-- Tier 2 guide : Documents\Claude_Desktop\{ProjectName}\JITCR_{ProjectName}.md
-- Session logs : Documents\Claude_Desktop\Sessions\{ProjectName}\logs\
+- Tier 2 guide : {HubRoot}\{ProjectName}\JITCR_{ProjectName}.md
+- Session logs : {HubRoot}\Sessions\{ProjectName}\logs\
 - Project root : {ProjectRoot}
 
 ## File Access Rules
@@ -178,7 +199,7 @@ Claude is the development assistant for {ProjectName}.
 - Read files before overwriting — preserve content
 - Shell commands: always use forward slashes in paths
 - On > start: read JITCR_{ProjectName}.md from:
-  Documents\Claude_Desktop\{ProjectName}\
+  {HubRoot}\{ProjectName}\
 
 ## Environment
 {Environment}
@@ -191,24 +212,24 @@ Claude is the development assistant for {ProjectName}.
 
 ```markdown
 ## Project Identity
-| Field          | Value                                                        |
-|----------------|--------------------------------------------------------------|
-| Project Name   | {ProjectName}                                                |
-| OS             | {OS}                                                         |
-| Project Root   | {ProjectRoot}                                                |
-| Sessions Hub   | Documents\Claude_Desktop\Sessions\{ProjectName}\logs\        |
-| Universal Cmds | Documents\Claude_Desktop\JITCR_Universal_Commands.md         |
-| Git            | active                                                       |
+| Field          | Value                                              |
+|----------------|----------------------------------------------------|
+| Project Name   | {ProjectName}                                      |
+| OS             | {OS}                                               |
+| Project Root   | {ProjectRoot}                                      |
+| Sessions Hub   | {HubRoot}\Sessions\{ProjectName}\logs\             |
+| Universal Cmds | {HubRoot}\JITCR_Universal_Commands.md              |
+| Git            | active                                             |
 
 ## Project Purpose
 {RoleDescription}
 
 ## Key File Paths
-| File             | Path                                                         |
-|------------------|--------------------------------------------------------------|
-| This file (T2)   | Documents\Claude_Desktop\{ProjectName}\JITCR_{ProjectName}.md|
-| Session logs     | Documents\Claude_Desktop\Sessions\{ProjectName}\logs\        |
-| Project root     | {ProjectRoot}                                                |
+| File           | Path                                               |
+|----------------|----------------------------------------------------|
+| This file (T2) | {HubRoot}\{ProjectName}\JITCR_{ProjectName}.md     |
+| Session logs   | {HubRoot}\Sessions\{ProjectName}\logs\             |
+| Project root   | {ProjectRoot}                                      |
 
 ## Quick Command Reference
 | Command   | Action                                        |
@@ -358,7 +379,8 @@ macOS   : ~/Documents/JITCR_Protocol/
 Linux   : ~/Documents/JITCR_Protocol/
 ```
 
-Once set, all JITCR projects on your machine share the same hub — no duplication, no per-project setup beyond answering a few questions.
+Once set, all JITCR projects on your machine share the same hub — no duplication,
+no per-project setup beyond answering a few questions.
 
 ---
 
@@ -367,15 +389,17 @@ Once set, all JITCR projects on your machine share the same hub — no duplicati
 **Step 1:** Create a new Claude Desktop Project for your project.
 *(Claude Desktop → Projects → New Project)*
 
-**Step 2:** Start a new chat inside that project. Copy the entire prompt
-from [INSTALL_PROMPT.md](./INSTALL_PROMPT.md) and paste it as your first message.
+**Step 2:** Open [`JITCR_Installer_Prompt.md`](./JITCR_Installer_Prompt.md) in this
+repo. Click the **Copy raw file** button (clipboard icon, top right of the file view).
+Paste the copied text as your **first message** in the new project chat.
 
-**Step 3:** Claude runs the interactive setup — silently checks your MCPs,
-asks a few questions about your project, creates all folders and files on your
-machine, then outputs your Tier 1 text. Copy that text into your Project
-Instructions *(Project → Settings → Project Instructions)*.
+**Step 3:** The JITCR Setup Agent runs the interactive setup — silently checks your
+MCPs, asks where you want your hub folder, asks a few questions about your project,
+creates all folders and files on your machine, then outputs your Tier 1 text ready
+to copy. Paste that text into your Project Instructions
+*(Project → Settings → Project Instructions)*.
 
-Start a new session and type `> start`. JITCR is running.
+Start a new session and type `> start`. JITCR is running. 🚀
 
 ---
 
@@ -383,9 +407,9 @@ Start a new session and type `> start`. JITCR is running.
 
 ```
 jitcr-protocol/
-├── README.md                    ← You are here
-├── INSTALL_PROMPT.md            ← Paste as your first chat message to install
-└── JITCR_Universal_Commands.md  ← Full command logic for all > commands
+├── README.md                      ← You are here — full documentation
+├── JITCR_Installer_Prompt.md      ← One-click copy — paste as first chat message
+└── JITCR_Universal_Commands.md    ← Full command engine for all > commands
 ```
 
 ---
@@ -395,7 +419,7 @@ jitcr-protocol/
 - Claude Desktop with Project Instructions support
 - filesystem MCP — required
 - shell-command MCP — recommended
-- Windows 11, macOS, or Linux
+- Windows, macOS, or Linux
 - Git — optional
 
 ---

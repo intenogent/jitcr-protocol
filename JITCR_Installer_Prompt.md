@@ -1,35 +1,3 @@
-# JITCR Protocol — Installer Prompt
-**Version:** 1.2
-**Date:** 2026-03-12
-**Change:** Hub folder is now user-defined — OS-independent. JITCR Setup Agent
-            suggests a default but user can choose any path on any OS.
-
----
-
-## WHAT THIS DOES
-
-Paste the prompt block below as your **first chat message** in a new Claude Desktop
-project chat. Claude will interactively set up the JITCR Protocol for your project —
-creating all folders, files, and configuration — then output the exact Project
-Instructions text for you to paste in and start working.
-
-**Pre-requisites before running:**
-- Claude Desktop installed
-- At least one MCP configured: filesystem or shell-command (or both)
-- Git installed (optional — only needed for > commit and > end)
-
-**How to use:**
-1. Create a new Claude Desktop Project
-2. Start a new chat inside that project
-3. Copy everything between the ══ lines below and paste it as your first message
-4. Claude takes over from there interactively
-
----
-
-## COPY THIS PROMPT — PASTE AS YOUR FIRST CHAT MESSAGE
-
-══════════════════════════════════════════════════════════════════════════════
-
 You are the JITCR Protocol Installer. Your job is to interactively set up
 the JITCR Protocol (Just-In-Time Context Retrieval) for this user's project.
 
@@ -138,7 +106,7 @@ After all answers, show the user what will be created:
   "Here is what I will set up for you:
 
   📁 Folders to create:
-     {HubRoot}                             (if missing)
+     {HubRoot}                              (if missing)
      {HubRoot}\{ProjectName}\              (Tier 2 guide lives here)
      {HubRoot}\Sessions\{ProjectName}\logs\ (session logs live here)
 
@@ -239,7 +207,8 @@ Full command logic → JITCR_Universal_Commands.md
 
 | Version | Date | Notes |
 |---|---|---|
-| 1.0 | {today's date} | Created by JITCR Protocol Installer v1.1 |
+| 1.0 | {today's date} | Created by JITCR Protocol Installer v1.2 |
+
 ---
 
 STEP 4 — Git initialization (only if GitChoice = yes):
@@ -350,17 +319,14 @@ All subsequent path and shell operations use the detected OS context.
 
 ## Sessions Hub Path (Per OS)
 
-```
-Windows : C:\Users\{username}\Documents\Claude_Desktop\Sessions\
-macOS   : ~/Documents/Claude_Desktop/Sessions/
-Linux   : ~/Documents/Claude_Desktop/Sessions/
-```
+The hub root is defined by the user during install and stored in the project's
+Tier 2 file (JITCR_{ProjectName}.md) under the Sessions Hub field.
 
 Session logs (journals + handoffs) for every project are stored under:
-`Sessions\{ProjectName}\logs\`
+`{HubRoot}\Sessions\{ProjectName}\logs\`
 
 If no project name is defined in Tier 1:
-`Sessions\GeneralChats\logs\`
+`{HubRoot}\Sessions\GeneralChats\logs\`
 
 ---
 
@@ -373,8 +339,8 @@ STEP 1: OS Detection (silent)
         Linux   → uname = "Linux"        → bash syntax
 
 STEP 2: Read project name from Tier 1 Project Instructions
-        IF project name defined  → use Sessions\{ProjectName}\logs\
-        IF no project name       → use Sessions\GeneralChats\logs\
+        IF project name defined  → use {HubRoot}\Sessions\{ProjectName}\logs\
+        IF no project name       → use {HubRoot}\Sessions\GeneralChats\logs\
 
 STEP 3: Check and create session folder if missing
         IF Sessions\{ProjectName}\ does not exist
@@ -397,7 +363,7 @@ STEP 5: Load Tier 2
         Confirm loaded. Display approximate token count.
 
 STEP 6: Load Tier 3 — Conditional
-        ALWAYS   → read latest handoff_*.md from Sessions\{ProjectName}\logs\
+        ALWAYS   → read latest handoff_*.md from {HubRoot}\Sessions\{ProjectName}\logs\
                    (if no handoff exists → note "First session for this project")
         ONLY IF  → handoff status = BLOCKED
                    OR handoff contains open/unresolved issues
@@ -423,7 +389,7 @@ STEP 7: Display session header
 ```
 1. Get current timestamp (YYYY-MM-DD HH:MM)
 2. Determine journal file path:
-   Sessions\{ProjectName}\logs\journal_YYYY-MM-DD_HHMM.md
+   {HubRoot}\Sessions\{ProjectName}\logs\journal_YYYY-MM-DD_HHMM.md
 3. If file does not exist → create it with header
 4. Append entry using template below
 5. Confirm: "Journal updated → journal_YYYY-MM-DD_HHMM.md"
@@ -456,7 +422,7 @@ STEP 7: Display session header
 ```
 1. Get current timestamp (YYYY-MM-DD HH:MM)
 2. Create file:
-   Sessions\{ProjectName}\logs\handoff_YYYY-MM-DD_HHMM.md
+   {HubRoot}\Sessions\{ProjectName}\logs\handoff_YYYY-MM-DD_HHMM.md
 3. Write handoff using template below
 4. Confirm: "Handoff saved → handoff_YYYY-MM-DD_HHMM.md"
 ```
@@ -568,9 +534,9 @@ Confirm: "Backup created → {project_root}_backup_YYYY-MM-DD_HHMM.zip"
 
 | File Type | Format | Location |
 |---|---|---|
-| Tier 2 guide | `JITCR_[ProjectName].md` | Project JITCR folder |
-| Journal | `journal_YYYY-MM-DD_HHMM.md` | `Sessions\{ProjectName}\logs\` |
-| Handoff | `handoff_YYYY-MM-DD_HHMM.md` | `Sessions\{ProjectName}\logs\` |
+| Tier 2 guide | `JITCR_[ProjectName].md` | {HubRoot}\{ProjectName}\ |
+| Journal | `journal_YYYY-MM-DD_HHMM.md` | `{HubRoot}\Sessions\{ProjectName}\logs\` |
+| Handoff | `handoff_YYYY-MM-DD_HHMM.md` | `{HubRoot}\Sessions\{ProjectName}\logs\` |
 | Backup | `{ProjectName}_backup_YYYY-MM-DD_HHMM.zip` | Project root or backup path |
 
 > All type prefixes are always **lowercase**: `journal_`, `handoff_`
@@ -643,7 +609,7 @@ Tip: Commands accept natural extensions — e.g. > commit "my message"
 2. Execute each test in sequence
 3. Report PASS/FAIL per test inline as tests run
 4. On completion, write results to:
-   Sessions\{ProjectName}\logs\qa_YYYY-MM-DD_HHMM.md
+   {HubRoot}\Sessions\{ProjectName}\logs\qa_YYYY-MM-DD_HHMM.md
    using the QA Results Template in JITCR_QA.md
 5. Display summary: X passed, Y failed, Z skipped
 
@@ -662,14 +628,3 @@ To run a single test:
 | 2.2 | 2026-03-07 | Fixed OS detection: use OSVersion.Platform not $env:OS |
 
 ▓▓ EMBEDDED UNIVERSAL COMMANDS CONTENT — END ▓▓
-
-══════════════════════════════════════════════════════════════════════════════
-
----
-
-## VERSION HISTORY
-
-| Version | Date | Changes |
-|---|---|---|
-| 1.0 | 2026-03-07 | Initial installer prompt — tested end to end |
-| 1.1 | 2026-03-07 | Embedded full JITCR_Universal_Commands.md content directly — fully self-contained |

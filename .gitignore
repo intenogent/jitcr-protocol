@@ -1,12 +1,9 @@
-# JITCR Protocol — GitHub whitelist
-# Only the three published protocol files and this .gitignore are ever tracked.
-# Everything else in this folder (archive, logs, working files) stays local only.
+# JITCR Protocol — .gitignore
+# Whitelist approach: only explicitly listed files are tracked.
+# Everything else (working files, logs, archive) is excluded.
 
-# Exclude everything by default
 *
-
-# Re-include only the published files
 !.gitignore
 !README.md
-!INSTALL_PROMPT.md
+!JITCR_Installer_Prompt.md
 !JITCR_Universal_Commands.md
