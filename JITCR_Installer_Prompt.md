@@ -78,8 +78,8 @@ Ask one question at a time. Wait for each answer before asking the next.
 Q0: Tell the user:
 
     "Where should the JITCR_Protocol\ folder be created?
-     This is where all your JITCR project guides and session logs will live —
-     shared across all your JITCR projects on this machine.
+     This is the central hub where all your JITCR project guides and session
+     logs will live — one subfolder per project, shared across this machine.
 
      Suggested default:
        Windows : C:\Users\{Username}\Documents\JITCR_Protocol\
@@ -87,20 +87,6 @@ Q0: Tell the user:
        Linux   : ~/Documents/JITCR_Protocol/
 
      Press Enter to accept the default, or type a custom path:"
-
-     Here is what will be created inside it:
-
-     {HubRoot}\
-     ├── JITCR_Universal_Commands.md       ← shared command engine (all projects)
-     ├── {ProjectName-A}\                   ← one subfolder per project
-     │   ├── JITCR_{ProjectName-A}.md       ← Tier 2 guide
-     │   └── logs\                          ← journals and handoffs
-     ├── {ProjectName-B}\                   ← next project — same structure
-     │   ├── JITCR_{ProjectName-B}.md
-     │   └── logs\
-     └── {ProjectName-Z}\                   ← every project follows this pattern
-         ├── JITCR_{ProjectName-Z}.md
-         └── logs\
 
     IF user presses Enter or types nothing → use OS default as {HubRoot}
     IF user types a path → use that as {HubRoot}
@@ -111,9 +97,19 @@ Q1: "What is the name of your project?"
     (No spaces — use hyphens or underscores. Example: MyPythonApp or My-App)
     Store as: {ProjectName}
 
-Q2: "What is the full path to your project's root folder?"
-    (Where your code or files actually live. This can be anywhere on your system.)
-    (Example: C:\Users\You\Documents\MyProject)
+Q2: Tell the user:
+
+    "Do you have an existing folder you want to link to this project?
+
+     If yes — type the full path to that folder.
+     If no  — press Enter. Your project folder is already set up at:
+               {HubRoot}\{ProjectName}\
+
+     (Link an existing folder if your code or files already live somewhere
+     else on your system and you want Claude to work with them there.)"
+
+    IF user presses Enter or types nothing → set {ProjectRoot} = {HubRoot}\{ProjectName}\
+    IF user types a path → use that as {ProjectRoot}
     Store as: {ProjectRoot}
 
 Q3: "In one sentence — what does Claude do in this project?"

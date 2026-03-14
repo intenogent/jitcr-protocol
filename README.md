@@ -433,16 +433,24 @@ jitcr-protocol\                              ← GitHub repo (what you're readin
 **Step 1:** Create a new Claude Desktop Project.
 *(Claude Desktop → Projects → New Project)*
 
-**Step 2:** Paste this as your **first chat message** in the new project:
+**Step 2:** Download `JITCR_Installer_Prompt.md` from this repo (click the file →
+click the download icon), then attach it to a new chat message in your project
+along with this trigger prompt:
 
 ```
-Fetch and run the JITCR Protocol installer via shell-command MCP:
-https://raw.githubusercontent.com/intenogent/jitcr-protocol/main/JITCR_Installer_Prompt.md
-Read the full file content and follow its instructions exactly, starting with Phase 1.
+You are running inside Claude Desktop with filesystem MCP and shell-command MCP
+available. Please use the attached file to set up the JITCR Protocol for this
+project. Follow its instructions exactly, starting with Phase 1.
 ```
 
-Claude downloads the installer from GitHub and runs it interactively — checking your
-MCPs, asking a few questions about your project, and creating all files and folders.
+When Claude asks for confirmation to proceed, type `yes`. The installer runs
+interactively — checking your MCPs, asking a few questions, and creating all
+files and folders automatically.
+
+> **Note on Q2 — Project folder:** The installer will ask if you have an existing
+> folder to link. If this is a new project, just press Enter — your project folder
+> is already created inside `JITCR_Protocol\` as part of setup. Only type a path
+> if you have existing code or files elsewhere you want Claude to work with.
 
 **Step 3:** When the installer finishes, it outputs your **Tier 1 text**. Copy it and
 paste it into **Project → Settings → Project Instructions**. Start a new chat and
