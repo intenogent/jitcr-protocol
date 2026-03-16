@@ -122,10 +122,34 @@ Q4: "What is your OS, editor, language, and key tools?"
     Store as: {Environment}
 
 Q5: "Do you want git initialized for this project?"
-    - yes — initialize a new git repo in the project root
-    - no — skip git for now
+    - yes     — initialize a new git repo in the project root
+    - no      — skip git for now (GitHub questions will be skipped)
     - already — git repo already exists there
     Store as: {GitChoice}
+
+    IF GitChoice = yes OR already:
+
+      Q5a: "Do you plan to push this project to GitHub?"
+           - yes — I have or will create a GitHub repo for this project
+           - no  — local git only, no GitHub
+           Store as: {GitHubPush}
+
+      IF GitHubPush = yes:
+
+        Q5b: "What is the GitHub remote URL for this project?"
+             (Example: https://github.com/username/repo-name.git)
+             Store as: {GitHubRemote}
+
+             Run: git -C "{ProjectRoot}" remote add origin "{GitHubRemote}"
+             Confirm: "GitHub remote set → {GitHubRemote}"
+
+      IF GitHubPush = no:
+        Store {GitHubRemote} = none
+        Note silently — push will never be prompted for this project.
+
+    IF GitChoice = no:
+      Store {GitHubPush} = no
+      Store {GitHubRemote} = none
 
 After all answers, show the user what will be created:
 
@@ -141,6 +165,8 @@ After all answers, show the user what will be created:
      JITCR_Universal_Commands.md  → {HubRoot}\ folder (only if missing)
 
   {If GitChoice = yes: "🔧 Git will be initialized in {ProjectRoot}"}
+  {If GitHubPush = yes: "🔗 GitHub remote will be set → {GitHubRemote}"}
+  {If GitHubPush = no or GitChoice = no: "💾 Local git only — no GitHub push configured"}
 
   Shall I proceed? (yes / no)"
 
@@ -202,6 +228,8 @@ STEP 3 — Write JITCR_{ProjectName}.md:
 | Session Logs | {HubRoot}\{ProjectName}\logs\ |
 | Universal Commands | {HubRoot}\JITCR_Universal_Commands.md |
 | Git | {active / not initialized} |
+| GitHub Remote | {GitHubRemote} |
+| GitHub Push | {GitHubPush} |
 
 ## Project Purpose
 {RoleDescription}
@@ -222,8 +250,8 @@ STEP 3 — Write JITCR_{ProjectName}.md:
 | > handoff | Create handoff snapshot |
 | > save | journal + handoff |
 | > status | Show last handoff, journal, git status |
-| > commit | Git commit |
-| > end | save + optional commit + session summary |
+| > commit | Commit project files to local git |
+| > end | save + commit locally + optional GitHub push |
 | > backup | Zip project root |
 | > ? | Show all available commands |
 
@@ -248,6 +276,7 @@ STEP 4 — Git initialization (only if GitChoice = yes):
 
 STEP 5 — Confirm everything:
   Show a clean summary of every folder and file created or found.
+  Include GitHub remote status: configured or not configured.
 
 ────────────────────────────────────────────────────────────────────────────
 PHASE 4 — HAND OFF TO USER
@@ -292,5 +321,3 @@ After pasting, start a new chat in this project and type:
   > start
 
 That's it — JITCR is running. 🚀"
-
-

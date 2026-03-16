@@ -1,5 +1,5 @@
 # JITCR Universal Commands
-**Protocol Version:** 2.0
+**Protocol Version:** 2.4
 **Author:** LaserWhiz
 **Created:** 2026-03-06
 **Purpose:** Shared command engine for all JITCR Protocol implementations.
@@ -91,11 +91,20 @@ STEP 4: Git status check
                    If no           → git commands disabled, no errors
         Result C — repo, no remote → note silently, local commits only
 
-STEP 5: Load Tier 2
+STEP 5: Load GitHub config from Tier 2
+        Read {GitHub Remote} and {GitHub Push} fields from Tier 2 guide
+        IF {GitHub Push} = yes AND {GitHub Remote} is set and not "none"
+          → store as session variables: {github_remote}, {push_enabled} = true
+          → confirm silently: GitHub push enabled for this session
+        IF {GitHub Push} = no OR {GitHub Remote} is blank or "none"
+          → store: {push_enabled} = false
+          → GitHub push will never be prompted this session
+
+STEP 6: Load Tier 2
         Read JITCR_[ProjectName].md from project root via filesystem MCP
         Confirm loaded. Display approximate token count.
 
-STEP 6: Load Tier 3 — Conditional
+STEP 7: Load Tier 3 — Conditional
         ALWAYS   → read latest handoff_*.md from JITCR_Protocol\{ProjectName}\logs\
                    (if no handoff exists → note "First session for this project")
         ONLY IF  → handoff status = BLOCKED
@@ -103,12 +112,13 @@ STEP 6: Load Tier 3 — Conditional
                  → also read last 3 journal_*.md from same logs\ folder
         IF git active → run: git log -5 --oneline
 
-STEP 7: Display session header
+STEP 8: Display session header
         ┌─────────────────────────────────────────┐
         │ Project  : {ProjectName}                │
         │ OS       : {detected OS}                │
         │ Started  : {YYYY-MM-DD HH:MM}           │
         │ Git      : {active | inactive | no repo}│
+        │ GitHub   : {push enabled | local only}  │
         │ Loaded   : Tier 2 + {Tier 3 files}      │
         │ Commands : > journal, save, handoff,    │
         │            status, commit, end, backup  │
@@ -206,15 +216,21 @@ STEP 7: Display session header
 
 ---
 
-## `> commit` — Git Commit
+## `> commit` — Git Commit (Local Only)
 
 ```
+PURPOSE: Mid-session checkpoint — commits project root content to local git.
+         What gets committed is controlled by {project_root}/.gitignore.
+         Session logs (logs\) are never committed if excluded by .gitignore.
+         This is a LOCAL commit only — nothing is pushed to GitHub.
+         Push to GitHub only happens at > end, if configured.
+
 IF no git repo active → skip silently
                         note: "Git not active for this project — skipped"
 IF git active:
   1. git -C "{project_root}" add -A
   2. git -C "{project_root}" commit -m "{message}"
-  3. Confirm: "Committed → {hash} : {message}"
+  3. Confirm: "Committed locally → {hash} : {message}"
 ```
 
 **Commit Message Template:**
@@ -231,15 +247,37 @@ IF git active:
 ## `> end` — End Session
 
 ```
+PURPOSE: Saves session logs, always commits locally, then asks about
+         GitHub push only if the project was configured for it at setup.
+
 1. Run > save
-2. IF git active → prompt: "Commit changes before ending? (yes/no)"
-   If yes        → run > commit
-3. Display session summary:
+   Confirm: "Journal + handoff written."
+
+2. Local commit — always, no prompt:
+   IF git active:
+     Run: git -C "{project_root}" add -A
+     Run: git -C "{project_root}" commit -m "Session end — {YYYY-MM-DD HH:MM}"
+     Confirm: "Local commit done → {hash}"
+   IF git not active:
+     Note: "Git not active — local commit skipped."
+
+3. GitHub push — only if configured:
+   IF {push_enabled} = true:
+     Prompt: "Push to GitHub now? (yes/no)"
+     If yes → git -C "{project_root}" push {github_remote}
+              Confirm: "Pushed to GitHub → {github_remote}"
+     If no  → Confirm: "Changes committed locally. Push skipped for this session."
+   IF {push_enabled} = false:
+     No prompt — silent. Local commit is the final step.
+
+4. Display session summary:
    ┌─────────────────────────────────────────┐
    │ Session Ended  : {YYYY-MM-DD HH:MM}     │
    │ Journal        : {filename}             │
    │ Handoff        : {filename}             │
-   │ Git            : {committed | skipped}  │
+   │ Local commit   : {hash | skipped}       │
+   │ GitHub push    : {pushed | skipped |    │
+   │                   not configured}       │
    │ Next session   : {top priority from     │
    │                   handoff}              │
    └─────────────────────────────────────────┘
@@ -323,8 +361,8 @@ Most sessions only pay the token cost of the handoff file.
 │  > handoff  Create session handoff snapshot         │
 │  > save     journal + handoff together              │
 │  > status   Last handoff, journal, git status       │
-│  > commit   Git commit all project files            │
-│  > end      save + optional commit + summary        │
+│  > commit   Commit project files to local git       │
+│  > end      save + commit locally + optional push   │
 │  > backup   Zip project root to backup file         │
 │  > ?        Show this help                          │
 └─────────────────────────────────────────────────────┘
@@ -359,3 +397,4 @@ To run a single test:
 | 2.1 | 2026-03-07 | Added > qa command — QA test suite runner |
 | 2.2 | 2026-03-07 | Fixed OS detection: $env:OS unreliable via shell-command MCP; use OSVersion.Platform |
 | 2.3 | 2026-03-13 | Removed Sessions\ folder — logs now live in JITCR_Protocol\{ProjectName}\logs\; all path references now use literal JITCR_Protocol\ root |
+| 2.4 | 2026-03-16 | GitHub push guardrail: > end always commits locally (no prompt); push to GitHub only if configured at setup and confirmed at > end; > commit clarified as local-only; > start loads GitHub config from Tier 2; session header shows GitHub status |

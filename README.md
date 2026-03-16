@@ -16,6 +16,9 @@
 - [How to Install](#how-to-install)
   - [Pre-requisites](#pre-requisites)
   - [How JITCR Organizes Your Files](#how-jitcr-organizes-your-files)
+    - [Where JITCR_Protocol\ Is Created](#where-jitcr_protocol-is-created)
+    - [Two Paths: JITCR Management vs. Your Project](#two-paths-jitcr-management-vs-your-project)
+    - [What Gets Committed and Pushed](#what-gets-committed-and-pushed)
   - [Installation — 3 Steps](#installation--3-steps)
 - [Repo Contents](#repo-contents)
 - [Requirements](#requirements)
@@ -80,7 +83,7 @@ TIER 1 — Project Instructions (always-on, ~200–300 tokens)
 TIER 2 — JITCR_{ProjectName}.md (loaded once per session)
   Lives in : JITCR_Protocol\{ProjectName}\ on your machine
   Loads    : Once at > start via filesystem MCP
-  Contains : Project purpose, architecture, key paths, commands, notes
+  Contains : Project purpose, architecture, key paths, GitHub config, commands, notes
 
 TIER 3 — Session logs (loaded conditionally)
   Lives in : JITCR_Protocol\{ProjectName}\logs\
@@ -101,13 +104,17 @@ Claude automatically:
 1. Detects your OS (Windows, macOS, or Linux)
 2. Checks that your project logs folder exists — creates it if not
 3. Checks git status in your project root
-4. Loads Tier 2 — reads `JITCR_{ProjectName}.md` from your machine via filesystem MCP
-5. Loads Tier 3 — reads the latest handoff file from JITCR_Protocol\{ProjectName}\logs\;
+4. Loads GitHub config from Tier 2 — reads `GitHub Remote` and `GitHub Push` fields
+   and stores them for the session (silently)
+5. Loads Tier 2 — reads `JITCR_{ProjectName}.md` from your machine via filesystem MCP
+6. Loads Tier 3 — reads the latest handoff file from `JITCR_Protocol\{ProjectName}\logs\`;
    reads recent journals only if the last session was marked BLOCKED or had unresolved issues
-6. Displays a session header confirming everything is loaded and ready
+7. Displays a session header confirming everything is loaded and ready, including
+   whether GitHub push is enabled or local-only for this project
 
 This means Claude enters every session already knowing your project, your last
-session's state, and any open issues — without you typing a word of explanation.
+session's state, open issues, and whether GitHub push is configured — without you
+typing a word of explanation.
 
 ---
 
@@ -170,8 +177,8 @@ Claude is the development assistant for {ProjectName}.
 > handoff Create structured session handoff
 > save    journal + handoff together
 > status  Show last handoff, last journal, git status
-> commit  Git commit all project files
-> end     save + optional commit + session summary
+> commit  Git commit all project files locally
+> end     save + commit locally + optional GitHub push
 
 ## Latest Session State
 Status: IN PROGRESS
@@ -223,9 +230,11 @@ Claude is the development assistant for {ProjectName}.
 | Project Name   | {ProjectName}                                           |
 | OS             | {OS}                                                    |
 | Project Root   | {ProjectRoot}                                           |
-| Session Logs   | JITCR_Protocol\{ProjectName}\logs\                     |
+| Session Logs   | JITCR_Protocol\{ProjectName}\logs\                      |
 | Universal Cmds | JITCR_Protocol\JITCR_Universal_Commands.md              |
 | Git            | active                                                  |
+| GitHub Remote  | {https://github.com/username/repo.git or none}          |
+| GitHub Push    | {yes / no}                                              |
 
 ## Project Purpose
 {RoleDescription}
@@ -234,19 +243,19 @@ Claude is the development assistant for {ProjectName}.
 | File           | Path                                                    |
 |----------------|---------------------------------------------------------|
 | This file (T2) | JITCR_Protocol\{ProjectName}\JITCR_{ProjectName}.md     |
-| Session logs   | JITCR_Protocol\{ProjectName}\logs\                     |
+| Session logs   | JITCR_Protocol\{ProjectName}\logs\                      |
 | Project root   | {ProjectRoot}                                           |
 
 ## Quick Command Reference
-| Command   | Action                                        |
-|-----------|-----------------------------------------------|
-| > start   | Initialize session — load context, check git  |
-| > journal | Write journal entry                           |
-| > handoff | Create handoff snapshot                       |
-| > save    | journal + handoff                             |
-| > status  | Show last handoff, journal, git status        |
-| > commit  | Git commit                                    |
-| > end     | save + optional commit + session summary      |
+| Command   | Action                                              |
+|-----------|-----------------------------------------------------|
+| > start   | Initialize session — load context, check git        |
+| > journal | Write journal entry                                 |
+| > handoff | Create handoff snapshot                             |
+| > save    | journal + handoff (no git)                          |
+| > status  | Show last handoff, journal, git status              |
+| > commit  | Commit project files to local git only              |
+| > end     | save + commit locally + optional GitHub push        |
 
 Full command logic → JITCR_Universal_Commands.md
 ```
@@ -314,17 +323,45 @@ Once JITCR is running, every project session has these commands available:
 
 | Command | What It Does |
 |---|---|
-| `> start` | Loads Tier 2 + Tier 3, checks git, displays session header |
+| `> start` | Loads Tier 2 + Tier 3, checks git, loads GitHub config, displays session header |
 | `> journal` | Writes timestamped activity log entry to `{ProjectName}\logs\` |
 | `> handoff` | Creates a structured snapshot of the current session state |
-| `> save` | Runs journal + handoff together in one step |
+| `> save` | Runs journal + handoff together — no git involved |
 | `> status` | Shows last handoff, last journal entry, and git status |
-| `> commit` | Git commits all project files with a structured message |
-| `> end` | save + optional commit + displays session summary |
+| `> commit` | Commits project files to **local git only** — never pushes to GitHub |
+| `> end` | Runs save + always commits locally + asks about GitHub push if configured |
 | `> ?` | Display all available commands |
 
 > Commands accept natural extensions — e.g. `> commit "my message"` or
 > `> ? journal` for details on a specific command.
+
+### How `> commit` and `> end` differ
+
+| | `> commit` | `> end` |
+|---|---|---|
+| Saves journal + handoff | ❌ | ✅ always |
+| Commits to local git | ✅ always | ✅ always |
+| Pushes to GitHub | ❌ never | ✅ asks — only if configured |
+| When to use | Mid-session checkpoint | End of session |
+
+**The rule is simple:**
+- Use `> commit` often during a session to checkpoint your work locally
+- Use `> end` when you are done — it saves everything, commits locally, and
+  asks whether to push to GitHub if your project is configured for it
+- If your project has no GitHub remote configured, `> end` never asks about push —
+  local commit is always the final step
+
+### GitHub push is opt-in — configured at setup
+
+During the JITCR installer, you are asked whether this project will push to GitHub
+and what the remote URL is. This is stored in your Tier 2 guide (`GitHub Remote`
+and `GitHub Push` fields). From then on:
+
+- If `GitHub Push = yes` — `> end` will ask "Push to GitHub now? (yes/no)" every session
+- If `GitHub Push = no` — push is never mentioned, local commit is always final
+
+This means local-only projects are never prompted about GitHub, and GitHub-connected
+projects are always reminded at the right moment — end of session.
 
 All logs and handoffs are saved as plain markdown files on your own machine —
 no cloud, no external service, fully under your control.
@@ -337,8 +374,8 @@ no cloud, no external service, fully under your control.
   model and continue without losing any context
 - **Returning after days** — the handoff tells you exactly where you left off,
   what decisions were made, and what comes next
-- **Protecting work** — local git backup means every session is versioned and
-  recoverable even if Claude's context is lost
+- **Protecting work** — local git commit at every `> end` means your work is always
+  versioned locally, even if you never push to GitHub
 - **Collaborating** — another person runs `> start` on the same project and
   gets full context immediately from the same files
 
@@ -367,15 +404,155 @@ Download from [git-scm.com](https://git-scm.com) if needed.
 
 ### How JITCR Organizes Your Files
 
-JITCR creates a single folder on your machine — `JITCR_Protocol\` — that acts
-as the central location for all your JITCR-managed projects. Every project gets
-its own subfolder inside it, containing both its Tier 2 guide and its session logs.
-There is no separate Sessions folder — everything for a project lives together.
+#### Where `JITCR_Protocol\` Is Created
+
+The first thing the installer asks (Q0) is where to create the `JITCR_Protocol\`
+folder — the central hub for all your JITCR-managed projects on this machine.
+**You are in full control of this location.** The installer suggests OS-based defaults:
+
+| OS | Default location |
+|---|---|
+| Windows | `C:\Users\{YourUsername}\Documents\JITCR_Protocol\` |
+| macOS | `~/Documents/JITCR_Protocol/` |
+| Linux | `~/Documents/JITCR_Protocol/` |
+
+Press Enter to accept the default, or type any custom path. This folder is created
+once and shared across all your JITCR projects on this machine.
+
+> **Important:** `JITCR_Protocol\` is the JITCR management hub only — it stores
+> Tier 2 guides and session logs. Your actual project files stay wherever they
+> already are. See [Two Paths](#two-paths-jitcr-management-vs-your-project) below.
+
+---
+
+#### Two Paths: JITCR Management vs. Your Project
+
+This is the most important concept to understand before installing JITCR.
+Every JITCR project has **two distinct paths** that serve completely different purposes:
+
+**Path A — JITCR Management Path**
+`JITCR_Protocol\{ProjectName}\`
+
+This is where JITCR stores its own operational files:
+- `JITCR_{ProjectName}.md` — the Tier 2 guide (project context, paths, GitHub config)
+- `logs\` — all journals and handoffs (session memory)
+
+These files are **private by design**. They are never committed to git and never
+pushed to GitHub. They exist only to give Claude context across sessions.
+
+**Path B — Project Root**
+`{ProjectRoot}` — anywhere on your machine
+
+This is where your actual work lives — code, writing, presentations, protocol
+files, or any content Claude is helping you build. This is what git tracks.
+This is what gets committed by `> commit` and pushed by `> end`.
+
+**These two paths are intentionally separate** and the installer asks you to
+define them independently at Q2.
+
+---
+
+**Three common setups:**
+
+```
+SETUP 1 — Separate paths (recommended for most projects)
+
+  JITCR_Protocol\MyApp\                  ← Path A: JITCR management only
+    ├── JITCR_MyApp.md                   ← Tier 2 guide
+    └── logs\                            ← journals + handoffs (never committed)
+
+  C:\Dev\MyApp\                          ← Path B: your actual project
+    ├── src\
+    ├── README.md
+    └── .gitignore                       ← controls what git tracks here
+
+  → JITCR management and project files are cleanly separated.
+    Git only sees C:\Dev\MyApp\ — logs never at risk of being committed.
+
+
+SETUP 2 — Same path (press Enter at Q2 — simplest setup)
+
+  JITCR_Protocol\MyApp\                  ← Path A AND Path B in one folder
+    ├── JITCR_MyApp.md                   ← Tier 2 guide
+    ├── logs\                            ← journals + handoffs
+    └── [your project files here]        ← also here
+
+  → Works fine, but your .gitignore MUST exclude logs\ and JITCR_MyApp.md
+    to prevent session memory from being committed to git.
+
+
+SETUP 3 — Linking an existing project (type path at Q2)
+
+  JITCR_Protocol\MyApp\                  ← Path A: JITCR management only
+    ├── JITCR_MyApp.md
+    └── logs\
+
+  C:\Users\Me\Documents\Existing-Work\   ← Path B: pre-existing folder linked at Q2
+    ├── [existing files]
+    └── .gitignore
+
+  → Ideal when your project already exists somewhere else on your machine.
+    Just point JITCR at it — nothing moves, nothing changes in your project folder.
+```
+
+> **Recommendation — Project naming:** Use the same name for your JITCR project
+> (Q1) as your Claude Desktop project name. This keeps `JITCR_Protocol\{ProjectName}\`
+> clearly linked to the right Claude Desktop project, especially when managing multiple projects.
+
+---
+
+#### What Gets Committed and Pushed
+
+> ⚠️ **Read this before using git with JITCR.**
+
+`> commit` and `> end` operate on **Path B (Project Root)** only — not on the
+JITCR management path. What gets committed and what gets pushed is controlled
+entirely by the `.gitignore` file in your Project Root.
+
+**Key rules:**
+
+- **JITCR session logs are private** — journals and handoffs in `logs\` should
+  always be excluded from git, whether they live in the same folder as your
+  project or not. Add `logs/` to your `.gitignore` if they share a folder.
+
+- **Public repos need a whitelist** — if your project root is a public GitHub
+  repo, use a whitelist `.gitignore` (like this protocol does) that explicitly
+  names only the files you want published. Everything else is excluded by default.
+
+- **Private/local projects** — git tracks everything not excluded by `.gitignore`.
+  Make sure your `.gitignore` is correct before running `> end` with GitHub push enabled.
+
+- **`> commit` is always local** — it never touches GitHub regardless of your
+  `.gitignore`. Only `> end` can push, and only after you confirm.
+
+- **If in doubt, use Setup 1** — keeping Path A and Path B separate eliminates
+  any risk of accidentally committing JITCR management files.
+
+**Example `.gitignore` for a public repo (whitelist approach):**
+```
+# Exclude everything by default
+*
+
+# Explicitly allow only what should be published
+!.gitignore
+!README.md
+!src/
+!src/**
+```
+
+**Example `.gitignore` for a private project with JITCR in the same folder:**
+```
+# Exclude JITCR management files
+logs/
+JITCR_*.md
+```
+
+---
 
 **The `JITCR_Protocol\` folder on your machine (created by the installer):**
 
 ```
-JITCR_Protocol\                               ← your local JITCR root (all projects)
+JITCR_Protocol\                               ← your local JITCR hub (Path A for all projects)
 │
 ├── JITCR_Universal_Commands.md               ← shared command engine (all projects)
 │
@@ -385,23 +562,19 @@ JITCR_Protocol\                               ← your local JITCR root (all pro
 │       ├── journal_YYYY-MM-DD_HHMM.md        ← activity log
 │       └── handoff_YYYY-MM-DD_HHMM.md        ← session handoff
 │
-├── {ProjectName-B}\                          ← second project — same structure
+├── {ProjectName-B}\
 │   ├── JITCR_{ProjectName-B}.md
 │   └── logs\
-│       ├── journal_YYYY-MM-DD_HHMM.md
-│       └── handoff_YYYY-MM-DD_HHMM.md
 │
-└── {ProjectName-Z}\                          ← every additional project follows the same pattern
+└── {ProjectName-Z}\
     ├── JITCR_{ProjectName-Z}.md
     └── logs\
-        ├── journal_YYYY-MM-DD_HHMM.md
-        └── handoff_YYYY-MM-DD_HHMM.md
 ```
 
-> Each project gets its own subfolder directly under `JITCR_Protocol\`.
-> Tier 2 guide and session logs live together inside that subfolder — nothing is split across separate folders.
-> The `JITCR_Universal_Commands.md` file is shared — one copy at the root, used by all projects.
-> The installer creates the full structure for each project automatically when you run it.
+> Each project's JITCR management files live under `JITCR_Protocol\{ProjectName}\`.
+> The actual project files live at `{ProjectRoot}` — wherever you defined it at Q2.
+> The `JITCR_Universal_Commands.md` file is shared — one copy at the hub root,
+> used by all projects.
 
 **What the `logs\` folder contains:**
 Every time you run `> save`, JITCR writes two files into `{ProjectName}\logs\`:
@@ -433,6 +606,10 @@ jitcr-protocol\                              ← GitHub repo (what you're readin
 **Step 1:** Create a new Claude Desktop Project.
 *(Claude Desktop → Projects → New Project)*
 
+> **Recommendation:** Name your Claude Desktop project the same as your JITCR
+> project name (Q1 in the installer). This keeps your `JITCR_Protocol\{ProjectName}\`
+> folder clearly linked to the right Claude Desktop project when managing multiple projects.
+
 **Step 2:** Download `JITCR_Installer_Prompt.md` from this repo (click the file →
 click the download icon), then attach it to a new chat message in your project
 along with this trigger prompt:
@@ -447,10 +624,23 @@ When Claude asks for confirmation to proceed, type `yes`. The installer runs
 interactively — checking your MCPs, asking a few questions, and creating all
 files and folders automatically.
 
-> **Note on Q2 — Project folder:** The installer will ask if you have an existing
-> folder to link. If this is a new project, just press Enter — your project folder
-> is already created inside `JITCR_Protocol\` as part of setup. Only type a path
-> if you have existing code or files elsewhere you want Claude to work with.
+> **Note on Q0 — Hub location:** The installer asks where to create
+> `JITCR_Protocol\`. Press Enter to accept the OS default or type a custom path.
+> See [Where JITCR_Protocol\ Is Created](#where-jitcr_protocol-is-created) above.
+
+> **Note on Q2 — Project folder:** The installer asks whether you have an existing
+> folder to link as your Project Root. If this is a new project, press Enter —
+> your project folder defaults to `JITCR_Protocol\{ProjectName}\` (same as the
+> JITCR management path). If your project already exists elsewhere on your machine,
+> type that path. See [Two Paths](#two-paths-jitcr-management-vs-your-project)
+> above for implications of each choice.
+
+> **Note on Q5 — Git and GitHub:** The installer asks whether you want git
+> initialized and whether you plan to push to GitHub. If you provide a GitHub
+> remote URL, it is stored in your Tier 2 guide and used by `> end` to offer
+> a push at the end of every session. If you choose local-only, GitHub push
+> is never mentioned again for that project. See
+> [What Gets Committed and Pushed](#what-gets-committed-and-pushed) above.
 
 **Step 3:** When the installer finishes, it outputs your **Tier 1 text**. Copy it and
 paste it into **Project → Settings → Project Instructions**. Start a new chat and
