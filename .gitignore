@@ -5,5 +5,8 @@
 *
 !.gitignore
 !README.md
+!CONTRIBUTING.md
 !JITCR_Installer_Prompt.md
 !JITCR_Universal_Commands.md
+!.github/
+!.github/**
