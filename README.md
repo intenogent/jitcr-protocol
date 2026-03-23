@@ -7,6 +7,7 @@
 
 - [The Problem](#the-problem)
 - [What JITCR Does](#what-jitcr-does)
+- [Control Layers — Safety Architecture](#control-layers--safety-architecture)
 - [What Are MCPs?](#what-are-mcps)
 - [The Three Tiers](#the-three-tiers)
 - [How > start Works](#how--start-works)
@@ -29,7 +30,7 @@
 
 ## The Problem
 
-If you use Claude Desktop for real projects, you have likely hit two walls:
+If you use Claude Desktop for real projects, you have likely hit three walls:
 
 **1. Token burn.**
 Your Project Instructions load on *every single message* — whether Claude needs
@@ -40,13 +41,18 @@ tokens and accelerating context compaction.
 When a session ends — token limit hit, starting fresh, or switching to a different
 LLM — you lose everything. Back to re-explaining your project from scratch every time.
 
-JITCR Protocol solves both.
+**3. Risk and safety in AI workflows.**
+As AI assistants gain more capabilities (file access, git commands, external operations),
+how do you ensure they operate safely? Default constraints are needed, plus approval
+workflows for critical operations, and full transparency about what's happening.
+
+JITCR Protocol solves all three.
 
 ---
 
 ## What JITCR Does
 
-JITCR (Just-In-Time Context Retrieval) is a protocol for Claude Desktop with two features:
+JITCR (Just-In-Time Context Retrieval) is a protocol for Claude Desktop with three features:
 
 **Feature 1 — Token Management**
 Split project instructions across three tiers. Each tier loads only when needed —
@@ -56,6 +62,66 @@ not on every API call. The same context costs far fewer tokens across a session.
 Every session gets a running activity log, a structured handoff document, and an
 optional local git backup. Start any new session — even on a different LLM — type
 `> start` and full context is restored instantly from your own files.
+
+**Feature 3 — Control Layers (Safety Architecture)**
+A multi-layered approach to safety combining preventive guardrails, human-in-the-loop 
+approvals, and full transparency. Default controls protect every project; both 
+prevention and approval can be customized per project's specific needs.
+
+---
+
+## Control Layers — Safety Architecture
+
+JITCR implements a defense-in-depth approach to AI safety:
+
+### Layer 1: Preventive Guardrails (Defaults)
+
+Default constraints that stop harmful actions before they occur:
+
+- Never delete files without explicit user permission
+- Never modify .env without explicit user permission
+- Read existing files before overwriting — preserve content
+- Shell commands: always use forward slashes in paths
+- On > start: read from explicit, verified paths only
+
+These guardrails are automatically included in every project's Tier 1 instructions.
+
+### Layer 2: Human-in-the-Loop Approval (Defaults)
+
+Critical operations require explicit user confirmation:
+
+- **GitHub push approval** — User confirms before pushing to GitHub at `> end`
+- **Git initialization approval** — User chooses whether to initialize git during setup
+- **GitHub configuration approval** — User selects push behavior at setup time (yes/no/local-only)
+
+### Layer 3: Transparency & Observability
+
+Users know exactly what's enabled and what's happening:
+
+- **Session headers** display git status and GitHub configuration at session start
+- **Handoff files** track completions, decisions, and open issues
+- **All logs stored locally** as readable markdown files — no cloud, full control
+
+### Customizable Per Project
+
+These defaults apply to all JITCR projects. Both prevention guardrails and approval 
+workflows can be customized to match your project's specific requirements, sensitivity 
+levels, and team workflows.
+
+See your project's Tier 2 guide (`JITCR_[ProjectName].md`) to extend or modify controls 
+for your specific needs. Examples include:
+
+- Adding approval workflows for risky operations
+- Defining rules for sensitive data handling (API keys, credentials)
+- Customizing path verification rules
+- Requiring additional confirmations before git operations
+- Implementing compliance or audit requirements
+
+**Why Layered Controls Matter**
+
+Default controls provide immediate safety for any JITCR project. Customizable layers 
+let teams implement controls matching their specific risk profiles — sensitive data 
+handling, compliance requirements, team workflows, and project sensitivity levels.
 
 ---
 
@@ -78,7 +144,7 @@ files. Setup instructions for MCPs are covered in the How to Install section bel
 TIER 1 — Project Instructions (always-on, ~200–300 tokens)
   Lives in : Claude Desktop → Project → Settings → Project Instructions
   Loads    : Every message
-  Contains : Role, project name, root path, 5 guardrail rules, > start trigger
+  Contains : Role, project name, root path, guardrails, > start trigger
 
 TIER 2 — JITCR_{ProjectName}.md (loaded once per session)
   Lives in : JITCR_Protocol\{ProjectName}\ on your machine
