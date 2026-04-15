@@ -6,6 +6,9 @@ Thanks for your interest in helping with JITCR! We genuinely appreciate it.
 
 JITCR is currently maintained by @intenogent as a solo project, so I review contributions personally. I'm committed to responding within a few days (not hours) — I do my best to keep things moving.
 
+I actively review and merge contributions that follow these guidelines. You won't wait months — I respond within a few days and take your work seriously.
+
+
 **You can help in these ways:**
 
 1. **Report bugs** — Open an Issue (no discussion needed)
