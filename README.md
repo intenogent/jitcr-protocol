@@ -1,3 +1,34 @@
+JITCR Protocol
+Context management protocol for Claude Desktop. 3-tier architecture: 65% token savings, session continuity across LLMs, defense-in-depth safety controls.
+What This Is
+JITCR Protocol is a specification and setup guide — not a downloadable tool or software you run.
+This repository contains:
+📋 The JITCR Protocol specification (how context management works)
+📖 Setup instructions for your Claude Desktop project
+🗂️ Directory structure guidelines
+⚙️ Command templates and workflows
+You don't clone this to run it. Instead, you read it and implement it in your own Claude Desktop projects.
+How to Use This Repository
+Read the specification sections to understand how JITCR works
+Copy the setup instructions from JITCR_Installer_Prompt.md
+Paste those instructions into your Claude Desktop project settings
+Follow the directory structure guide to organize your context
+Use the commands and workflows from JITCR_Universal_Commands.md
+That's it. You're now using JITCR.
+Why JITCR?
+Without proper context management in Claude Desktop, you run into:
+📈 Token bloat — unnecessary repetition wastes tokens and costs
+🔄 Lost context — sessions don't maintain continuity across conversations
+⚠️ No safety guardrails — unstructured context can lead to errors
+JITCR solves this by organizing your context into three safety layers with built-in efficiency checks.
+Quick Start
+Want to see if JITCR is right for you?
+Check out the "The Problem" section in the README
+Skim the "What JITCR Does" section
+Review "The Three Tiers" to understand the approach
+If interested, jump to "How to Install" to get started
+
+
 # JITCR Protocol
 **Just-In-Time Context Retrieval for Claude Desktop**
 
