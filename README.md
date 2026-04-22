@@ -48,7 +48,7 @@ If interested, jump to "How to Install" to get started
 - [How to Install](#how-to-install)
   - [Pre-requisites](#pre-requisites)
   - [How JITCR Organizes Your Files](#how-jitcr-organizes-your-files)
-    - [Where JITCR_Protocol\ Is Created](#where-jitcr_protocol-is-created)
+    - [Where JITCR_Protocol/ Is Created](#where-jitcr_protocol-is-created)
     - [Two Paths: JITCR Management vs. Your Project](#two-paths-jitcr-management-vs-your-project)
     - [What Gets Committed and Pushed](#what-gets-committed-and-pushed)
   - [Installation — 3 Steps](#installation--3-steps)
@@ -178,12 +178,12 @@ TIER 1 — Project Instructions (always-on, ~200–300 tokens)
   Contains : Role, project name, root path, guardrails, > start trigger
 
 TIER 2 — JITCR_{ProjectName}.md (loaded once per session)
-  Lives in : JITCR_Protocol\{ProjectName}\ on your machine
+  Lives in : JITCR_Protocol/{ProjectName}/ on your machine
   Loads    : Once at > start via filesystem MCP
   Contains : Project purpose, architecture, key paths, GitHub config, commands, notes
 
 TIER 3 — Session logs (loaded conditionally)
-  Lives in : JITCR_Protocol\{ProjectName}\logs\
+  Lives in : JITCR_Protocol/{ProjectName}/logs/
   Loads    : Latest handoff always + recent journals only if status = BLOCKED
   Contains : What was done, decisions made, open issues, what comes next
 ```
@@ -204,7 +204,7 @@ Claude automatically:
 4. Loads GitHub config from Tier 2 — reads `GitHub Remote` and `GitHub Push` fields
    and stores them for the session (silently)
 5. Loads Tier 2 — reads `JITCR_{ProjectName}.md` from your machine via filesystem MCP
-6. Loads Tier 3 — reads the latest handoff file from `JITCR_Protocol\{ProjectName}\logs\`;
+6. Loads Tier 3 — reads the latest handoff file from `JITCR_Protocol/{ProjectName}/logs/`;
    reads recent journals only if the last session was marked BLOCKED or had unresolved issues
 7. Displays a session header confirming everything is loaded and ready, including
    whether GitHub push is enabled or local-only for this project
@@ -242,16 +242,16 @@ Claude is the development assistant for {ProjectName}.
 - Name: {ProjectName}
 - OS: {OS}
 - Root: {ProjectRoot}
-- Session logs : JITCR_Protocol\{ProjectName}\logs\
-- Universal Commands: JITCR_Protocol\JITCR_Universal_Commands.md
+- Session logs : JITCR_Protocol/{ProjectName}/logs/
+- Universal Commands: JITCR_Protocol/JITCR_Universal_Commands.md
 - Git: active
 
 ## Project Purpose
 {RoleDescription}
 
 ## Key File Paths
-- Tier 2 guide : JITCR_Protocol\{ProjectName}\JITCR_{ProjectName}.md
-- Session logs : JITCR_Protocol\{ProjectName}\logs\
+- Tier 2 guide : JITCR_Protocol/{ProjectName}/JITCR_{ProjectName}.md
+- Session logs : JITCR_Protocol/{ProjectName}/logs/
 - Project root : {ProjectRoot}
 
 ## File Access Rules
@@ -309,7 +309,7 @@ Claude is the development assistant for {ProjectName}.
 - Read files before overwriting — preserve content
 - Shell commands: always use forward slashes in paths
 - On > start: read JITCR_{ProjectName}.md from:
-  JITCR_Protocol\{ProjectName}\
+  JITCR_Protocol/{ProjectName}/
 
 ## Environment
 {Environment}
@@ -327,8 +327,8 @@ Claude is the development assistant for {ProjectName}.
 | Project Name   | {ProjectName}                                           |
 | OS             | {OS}                                                    |
 | Project Root   | {ProjectRoot}                                           |
-| Session Logs   | JITCR_Protocol\{ProjectName}\logs\                      |
-| Universal Cmds | JITCR_Protocol\JITCR_Universal_Commands.md              |
+| Session Logs   | JITCR_Protocol/{ProjectName}/logs/                      |
+| Universal Cmds | JITCR_Protocol/JITCR_Universal_Commands.md              |
 | Git            | active                                                  |
 | GitHub Remote  | {https://github.com/username/repo.git or none}          |
 | GitHub Push    | {yes / no}                                              |
@@ -339,8 +339,8 @@ Claude is the development assistant for {ProjectName}.
 ## Key File Paths
 | File           | Path                                                    |
 |----------------|---------------------------------------------------------|
-| This file (T2) | JITCR_Protocol\{ProjectName}\JITCR_{ProjectName}.md     |
-| Session logs   | JITCR_Protocol\{ProjectName}\logs\                      |
+| This file (T2) | JITCR_Protocol/{ProjectName}/JITCR_{ProjectName}.md     |
+| Session logs   | JITCR_Protocol/{ProjectName}/logs/                      |
 | Project root   | {ProjectRoot}                                           |
 
 ## Quick Command Reference
@@ -421,7 +421,7 @@ Once JITCR is running, every project session has these commands available:
 | Command | What It Does |
 |---|---|
 | `> start` | Loads Tier 2 + Tier 3, checks git, loads GitHub config, displays session header |
-| `> journal` | Writes timestamped activity log entry to `{ProjectName}\logs\` |
+| `> journal` | Writes timestamped activity log entry to `{ProjectName}/logs/` |
 | `> handoff` | Creates a structured snapshot of the current session state |
 | `> save` | Runs journal + handoff together — no git involved |
 | `> status` | Shows last handoff, last journal entry, and git status |
@@ -501,22 +501,22 @@ Download from [git-scm.com](https://git-scm.com) if needed.
 
 ### How JITCR Organizes Your Files
 
-#### Where `JITCR_Protocol\` Is Created
+#### Where `JITCR_Protocol/` Is Created
 
-The first thing the installer asks (Q0) is where to create the `JITCR_Protocol\`
+The first thing the installer asks (Q0) is where to create the `JITCR_Protocol/`
 folder — the central hub for all your JITCR-managed projects on this machine.
 **You are in full control of this location.** The installer suggests OS-based defaults:
 
 | OS | Default location |
 |---|---|
-| Windows | `C:\Users\{YourUsername}\Documents\JITCR_Protocol\` |
+| Windows | `C:\Users\{YourUsername}\Documents\JITCR_Protocol/` |
 | macOS | `~/Documents/JITCR_Protocol/` |
 | Linux | `~/Documents/JITCR_Protocol/` |
 
 Press Enter to accept the default, or type any custom path. This folder is created
 once and shared across all your JITCR projects on this machine.
 
-> **Important:** `JITCR_Protocol\` is the JITCR management hub only — it stores
+> **Important:** `JITCR_Protocol/` is the JITCR management hub only — it stores
 > Tier 2 guides and session logs. Your actual project files stay wherever they
 > already are. See [Two Paths](#two-paths-jitcr-management-vs-your-project) below.
 
@@ -528,11 +528,11 @@ This is the most important concept to understand before installing JITCR.
 Every JITCR project has **two distinct paths** that serve completely different purposes:
 
 **Path A — JITCR Management Path**
-`JITCR_Protocol\{ProjectName}\`
+`JITCR_Protocol/{ProjectName}/`
 
 This is where JITCR stores its own operational files:
 - `JITCR_{ProjectName}.md` — the Tier 2 guide (project context, paths, GitHub config)
-- `logs\` — all journals and handoffs (session memory)
+- `logs/` — all journals and handoffs (session memory)
 
 These files are **private by design**. They are never committed to git and never
 pushed to GitHub. They exist only to give Claude context across sessions.
@@ -554,9 +554,9 @@ define them independently at Q2.
 ```
 SETUP 1 — Separate paths (recommended for most projects)
 
-  JITCR_Protocol\MyApp\                  ← Path A: JITCR management only
+  JITCR_Protocol/MyApp\                  ← Path A: JITCR management only
     ├── JITCR_MyApp.md                   ← Tier 2 guide
-    └── logs\                            ← journals + handoffs (never committed)
+    └── logs/                            ← journals + handoffs (never committed)
 
   C:\Dev\MyApp\                          ← Path B: your actual project
     ├── src\
@@ -569,20 +569,20 @@ SETUP 1 — Separate paths (recommended for most projects)
 
 SETUP 2 — Same path (press Enter at Q2 — simplest setup)
 
-  JITCR_Protocol\MyApp\                  ← Path A AND Path B in one folder
+  JITCR_Protocol/MyApp\                  ← Path A AND Path B in one folder
     ├── JITCR_MyApp.md                   ← Tier 2 guide
-    ├── logs\                            ← journals + handoffs
+    ├── logs/                            ← journals + handoffs
     └── [your project files here]        ← also here
 
-  → Works fine, but your .gitignore MUST exclude logs\ and JITCR_MyApp.md
+  → Works fine, but your .gitignore MUST exclude logs/ and JITCR_MyApp.md
     to prevent session memory from being committed to git.
 
 
 SETUP 3 — Linking an existing project (type path at Q2)
 
-  JITCR_Protocol\MyApp\                  ← Path A: JITCR management only
+  JITCR_Protocol/MyApp\                  ← Path A: JITCR management only
     ├── JITCR_MyApp.md
-    └── logs\
+    └── logs/
 
   C:\Users\Me\Documents\Existing-Work\   ← Path B: pre-existing folder linked at Q2
     ├── [existing files]
@@ -593,7 +593,7 @@ SETUP 3 — Linking an existing project (type path at Q2)
 ```
 
 > **Recommendation — Project naming:** Use the same name for your JITCR project
-> (Q1) as your Claude Desktop project name. This keeps `JITCR_Protocol\{ProjectName}\`
+> (Q1) as your Claude Desktop project name. This keeps `JITCR_Protocol/{ProjectName}/`
 > clearly linked to the right Claude Desktop project, especially when managing multiple projects.
 
 ---
@@ -608,7 +608,7 @@ entirely by the `.gitignore` file in your Project Root.
 
 **Key rules:**
 
-- **JITCR session logs are private** — journals and handoffs in `logs\` should
+- **JITCR session logs are private** — journals and handoffs in `logs/` should
   always be excluded from git, whether they live in the same folder as your
   project or not. Add `logs/` to your `.gitignore` if they share a folder.
 
@@ -646,35 +646,35 @@ JITCR_*.md
 
 ---
 
-**The `JITCR_Protocol\` folder on your machine (created by the installer):**
+**The `JITCR_Protocol/` folder on your machine (created by the installer):**
 
 ```
-JITCR_Protocol\                               ← your local JITCR hub (Path A for all projects)
+JITCR_Protocol/                               ← your local JITCR hub (Path A for all projects)
 │
 ├── JITCR_Universal_Commands.md               ← shared command engine (all projects)
 │
 ├── {ProjectName-A}\                          ← one subfolder per project
 │   ├── JITCR_{ProjectName-A}.md              ← Tier 2 guide for this project
-│   └── logs\                                 ← all session logs for this project
+│   └── logs/                                 ← all session logs for this project
 │       ├── journal_YYYY-MM-DD_HHMM.md        ← activity log
 │       └── handoff_YYYY-MM-DD_HHMM.md        ← session handoff
 │
 ├── {ProjectName-B}\
 │   ├── JITCR_{ProjectName-B}.md
-│   └── logs\
+│   └── logs/
 │
 └── {ProjectName-Z}\
     ├── JITCR_{ProjectName-Z}.md
-    └── logs\
+    └── logs/
 ```
 
-> Each project's JITCR management files live under `JITCR_Protocol\{ProjectName}\`.
+> Each project's JITCR management files live under `JITCR_Protocol/{ProjectName}/`.
 > The actual project files live at `{ProjectRoot}` — wherever you defined it at Q2.
 > The `JITCR_Universal_Commands.md` file is shared — one copy at the hub root,
 > used by all projects.
 
-**What the `logs\` folder contains:**
-Every time you run `> save`, JITCR writes two files into `{ProjectName}\logs\`:
+**What the `logs/` folder contains:**
+Every time you run `> save`, JITCR writes two files into `{ProjectName}/logs/`:
 
 | File | Purpose |
 |---|---|
@@ -704,7 +704,7 @@ jitcr-protocol\                              ← GitHub repo (what you're readin
 *(Claude Desktop → Projects → New Project)*
 
 > **Recommendation:** Name your Claude Desktop project the same as your JITCR
-> project name (Q1 in the installer). This keeps your `JITCR_Protocol\{ProjectName}\`
+> project name (Q1 in the installer). This keeps your `JITCR_Protocol/{ProjectName}/`
 > folder clearly linked to the right Claude Desktop project when managing multiple projects.
 
 **Step 2:** Download `JITCR_Installer_Prompt.md` from this repo (click the file →
@@ -722,12 +722,12 @@ interactively — checking your MCPs, asking a few questions, and creating all
 files and folders automatically.
 
 > **Note on Q0 — Hub location:** The installer asks where to create
-> `JITCR_Protocol\`. Press Enter to accept the OS default or type a custom path.
-> See [Where JITCR_Protocol\ Is Created](#where-jitcr_protocol-is-created) above.
+> `JITCR_Protocol/`. Press Enter to accept the OS default or type a custom path.
+> See [Where JITCR_Protocol/ Is Created](#where-jitcr_protocol-is-created) above.
 
 > **Note on Q2 — Project folder:** The installer asks whether you have an existing
 > folder to link as your Project Root. If this is a new project, press Enter —
-> your project folder defaults to `JITCR_Protocol\{ProjectName}\` (same as the
+> your project folder defaults to `JITCR_Protocol/{ProjectName}/` (same as the
 > JITCR management path). If your project already exists elsewhere on your machine,
 > type that path. See [Two Paths](#two-paths-jitcr-management-vs-your-project)
 > above for implications of each choice.
@@ -776,3 +776,5 @@ MIT — use it, fork it, adapt it freely.
 
 Built by [@intenogent](https://github.com/intenogent)
 Issues and contributions welcome — open a GitHub issue or PR.
+
+

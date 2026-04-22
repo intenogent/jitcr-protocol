@@ -77,12 +77,12 @@ Ask one question at a time. Wait for each answer before asking the next.
 
 Q0: Tell the user:
 
-    "Where should the JITCR_Protocol\ folder be created?
+    "Where should the JITCR_Protocol/ folder be created?
      This is the central hub where all your JITCR project guides and session
      logs will live — one subfolder per project, shared across this machine.
 
      Suggested default:
-       Windows : C:\Users\{Username}\Documents\JITCR_Protocol\
+       Windows : C:\Users\{Username}\Documents\JITCR_Protocol/
        macOS   : ~/Documents/JITCR_Protocol/
        Linux   : ~/Documents/JITCR_Protocol/
 
@@ -103,12 +103,12 @@ Q2: Tell the user:
 
      If yes — type the full path to that folder.
      If no  — press Enter. Your project folder is already set up at:
-               {HubRoot}\{ProjectName}\
+               {HubRoot}/{ProjectName}/
 
      (Link an existing folder if your code or files already live somewhere
      else on your system and you want Claude to work with them there.)"
 
-    IF user presses Enter or types nothing → set {ProjectRoot} = {HubRoot}\{ProjectName}\
+    IF user presses Enter or types nothing → set {ProjectRoot} = {HubRoot}/{ProjectName}/
     IF user types a path → use that as {ProjectRoot}
     Store as: {ProjectRoot}
 
@@ -157,12 +157,12 @@ After all answers, show the user what will be created:
 
   📁 Folders to create:
      {HubRoot}                              (if missing)
-     {HubRoot}\{ProjectName}\              (Tier 2 guide and session logs live here)
-     {HubRoot}\{ProjectName}\logs\         (journals and handoffs live here)
+     {HubRoot}/{ProjectName}/              (Tier 2 guide and session logs live here)
+     {HubRoot}/{ProjectName}/logs/         (journals and handoffs live here)
 
   📄 Files to create:
-     JITCR_{ProjectName}.md       → {HubRoot}\{ProjectName}\ folder
-     JITCR_Universal_Commands.md  → {HubRoot}\ folder (only if missing)
+     JITCR_{ProjectName}.md       → {HubRoot}/{ProjectName}/ folder
+     JITCR_Universal_Commands.md  → {HubRoot}/ folder (only if missing)
 
   {If GitChoice = yes: "🔧 Git will be initialized in {ProjectRoot}"}
   {If GitHubPush = yes: "🔗 GitHub remote will be set → {GitHubRemote}"}
@@ -179,12 +179,12 @@ Execute only after user confirms.
 
 STEP 1 — Create folder structure using filesystem MCP:
   Create: {HubRoot}
-  Create: {HubRoot}\{ProjectName}\
-  Create: {HubRoot}\{ProjectName}\logs\
+  Create: {HubRoot}/{ProjectName}/
+  Create: {HubRoot}/{ProjectName}/logs/
   Confirm each folder created.
 
 STEP 2 — Download JITCR_Universal_Commands.md (only if not already present):
-  Check if {HubRoot}\JITCR_Universal_Commands.md exists.
+  Check if {HubRoot}/JITCR_Universal_Commands.md exists.
   IF exists → skip (do not overwrite). Confirm: "Universal Commands already present — skipped."
   IF missing → download from GitHub using shell-command MCP:
 
@@ -198,13 +198,13 @@ STEP 2 — Download JITCR_Universal_Commands.md (only if not already present):
   IF download failed → tell the user:
     "⚠️  Could not download JITCR_Universal_Commands.md. Please download it manually from:
     https://github.com/intenogent/jitcr-protocol/blob/main/JITCR_Universal_Commands.md
-    and place it in: {HubRoot}\
+    and place it in: {HubRoot}/
     Then type 'continue' to proceed."
     Wait for user to confirm before continuing.
-  IF download succeeded → confirm: "JITCR_Universal_Commands.md downloaded → {HubRoot}\"
+  IF download succeeded → confirm: "JITCR_Universal_Commands.md downloaded → {HubRoot}/"
 
 STEP 3 — Write JITCR_{ProjectName}.md:
-  File path: {HubRoot}\{ProjectName}\JITCR_{ProjectName}.md
+  File path: {HubRoot}/{ProjectName}/JITCR_{ProjectName}.md
   Write the following content, substituting all {placeholders} with the user's answers:
 
 ---
@@ -225,8 +225,8 @@ STEP 3 — Write JITCR_{ProjectName}.md:
 | Project Name | {ProjectName} |
 | OS | {OS} |
 | Project Root | {ProjectRoot} |
-| Session Logs | {HubRoot}\{ProjectName}\logs\ |
-| Universal Commands | {HubRoot}\JITCR_Universal_Commands.md |
+| Session Logs | {HubRoot}/{ProjectName}/logs/ |
+| Universal Commands | {HubRoot}/JITCR_Universal_Commands.md |
 | Git | {active / not initialized} |
 | GitHub Remote | {GitHubRemote} |
 | GitHub Push | {GitHubPush} |
@@ -237,9 +237,9 @@ STEP 3 — Write JITCR_{ProjectName}.md:
 ## Key File Paths
 | File | Path |
 |---|---|
-| This file (Tier 2) | {HubRoot}\{ProjectName}\JITCR_{ProjectName}.md |
-| Universal Commands | {HubRoot}\JITCR_Universal_Commands.md |
-| Session logs | {HubRoot}\{ProjectName}\logs\ |
+| This file (Tier 2) | {HubRoot}/{ProjectName}/JITCR_{ProjectName}.md |
+| Universal Commands | {HubRoot}/JITCR_Universal_Commands.md |
+| Session logs | {HubRoot}/{ProjectName}/logs/ |
 | Project root | {ProjectRoot} |
 
 ## Commands
@@ -307,7 +307,7 @@ Project Instructions for this project:
 - Read files before overwriting — preserve content
 - Shell commands: always use forward slashes in paths
 - On > start: read JITCR_{ProjectName}.md from:
-  {HubRoot}\{ProjectName}\
+  {HubRoot}/{ProjectName}/
 
 ## Environment
 {Environment}
@@ -321,3 +321,4 @@ After pasting, start a new chat in this project and type:
   > start
 
 That's it — JITCR is running. 🚀"
+

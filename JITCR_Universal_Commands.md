@@ -43,24 +43,24 @@ All subsequent path and shell operations use the detected OS context.
 ## Session Logs Location
 
 Session logs (journals + handoffs) for every project are stored under:
-`JITCR_Protocol\{ProjectName}\logs\`
+`JITCR_Protocol/{ProjectName}/logs/`
 
-`JITCR_Protocol\` is the fixed root folder created during install. Every project
-gets its own subfolder inside it, with `logs\` for journals and handoffs.
+`JITCR_Protocol/` is the fixed root folder created during install. Every project
+gets its own subfolder inside it, with `logs/` for journals and handoffs.
 
-Every project has its own `logs\` subfolder directly inside its project folder:
+Every project has its own `logs/` subfolder directly inside its project folder:
 ```
-JITCR_Protocol\
+JITCR_Protocol/
 ├── JITCR_Universal_Commands.md        ← this file
 ├── {ProjectName-A}\
 │   ├── JITCR_{ProjectName-A}.md          ← Tier 2 guide
-│   └── logs\                             ← journals and handoffs
+│   └── logs/                             ← journals and handoffs
 ├── {ProjectName-B}\
 │   ├── JITCR_{ProjectName-B}.md
-│   └── logs\
+│   └── logs/
 └── {ProjectName-Z}\
     ├── JITCR_{ProjectName-Z}.md
-    └── logs\
+    └── logs/
 
 ---
 
@@ -73,12 +73,12 @@ STEP 1: OS Detection (silent)
         Linux   → uname = "Linux"        → bash syntax
 
 STEP 2: Read project name from Tier 1 Project Instructions
-        Logs path: JITCR_Protocol\{ProjectName}\logs\
+        Logs path: JITCR_Protocol/{ProjectName}/logs/
 
 STEP 3: Check and create logs folder if missing
-        IF JITCR_Protocol\{ProjectName}\logs\ does not exist
-          → create JITCR_Protocol\{ProjectName}\
-          → create JITCR_Protocol\{ProjectName}\logs\
+        IF JITCR_Protocol/{ProjectName}/logs/ does not exist
+          → create JITCR_Protocol/{ProjectName}/
+          → create JITCR_Protocol/{ProjectName}/logs/
           → confirm: "Created logs folder for {ProjectName}"
 
 STEP 4: Git status check
@@ -105,11 +105,11 @@ STEP 6: Load Tier 2
         Confirm loaded. Display approximate token count.
 
 STEP 7: Load Tier 3 — Conditional
-        ALWAYS   → read latest handoff_*.md from JITCR_Protocol\{ProjectName}\logs\
+        ALWAYS   → read latest handoff_*.md from JITCR_Protocol/{ProjectName}/logs/
                    (if no handoff exists → note "First session for this project")
         ONLY IF  → handoff status = BLOCKED
                    OR handoff contains open/unresolved issues
-                 → also read last 3 journal_*.md from same logs\ folder
+                 → also read last 3 journal_*.md from same logs/ folder
         IF git active → run: git log -5 --oneline
 
 STEP 8: Display session header
@@ -132,7 +132,7 @@ STEP 8: Display session header
 ```
 1. Get current timestamp (YYYY-MM-DD HH:MM)
 2. Determine journal file path:
-   JITCR_Protocol\{ProjectName}\logs\journal_YYYY-MM-DD_HHMM.md
+   JITCR_Protocol/{ProjectName}/logs/journal_YYYY-MM-DD_HHMM.md
 3. If file does not exist → create it with header
 4. Append entry using template below
 5. Confirm: "Journal updated → journal_YYYY-MM-DD_HHMM.md"
@@ -165,7 +165,7 @@ STEP 8: Display session header
 ```
 1. Get current timestamp (YYYY-MM-DD HH:MM)
 2. Create file:
-   JITCR_Protocol\{ProjectName}\logs\handoff_YYYY-MM-DD_HHMM.md
+   JITCR_Protocol/{ProjectName}/logs/handoff_YYYY-MM-DD_HHMM.md
 3. Write handoff using template below
 4. Confirm: "Handoff saved → handoff_YYYY-MM-DD_HHMM.md"
 ```
@@ -221,7 +221,7 @@ STEP 8: Display session header
 ```
 PURPOSE: Mid-session checkpoint — commits project root content to local git.
          What gets committed is controlled by {project_root}/.gitignore.
-         Session logs (logs\) are never committed if excluded by .gitignore.
+         Session logs (logs/) are never committed if excluded by .gitignore.
          This is a LOCAL commit only — nothing is pushed to GitHub.
          Push to GitHub only happens at > end, if configured.
 
@@ -304,9 +304,9 @@ Confirm: "Backup created → {project_root}_backup_YYYY-MM-DD_HHMM.zip"
 
 | File Type | Format | Location |
 |---|---|---|
-| Tier 2 guide | `JITCR_[ProjectName].md` | `JITCR_Protocol\{ProjectName}\` |
-| Journal | `journal_YYYY-MM-DD_HHMM.md` | `JITCR_Protocol\{ProjectName}\logs\` |
-| Handoff | `handoff_YYYY-MM-DD_HHMM.md` | `JITCR_Protocol\{ProjectName}\logs\` |
+| Tier 2 guide | `JITCR_[ProjectName].md` | `JITCR_Protocol/{ProjectName}/` |
+| Journal | `journal_YYYY-MM-DD_HHMM.md` | `JITCR_Protocol/{ProjectName}/logs/` |
+| Handoff | `handoff_YYYY-MM-DD_HHMM.md` | `JITCR_Protocol/{ProjectName}/logs/` |
 | Backup | `{ProjectName}_backup_YYYY-MM-DD_HHMM.zip` | Project root or designated backup path |
 
 > All type prefixes are always **lowercase**: `journal_`, `handoff_`
@@ -379,7 +379,7 @@ Tip: Commands accept natural extensions — e.g. > commit "my message"
 2. Execute each test in sequence
 3. Report PASS/FAIL per test inline as tests run
 4. On completion, write results to:
-   JITCR_Protocol\{ProjectName}\logs\qa_YYYY-MM-DD_HHMM.md
+   JITCR_Protocol/{ProjectName}/logs/qa_YYYY-MM-DD_HHMM.md
    using the QA Results Template in JITCR_QA.md
 5. Display summary: X passed, Y failed, Z skipped
 
@@ -396,5 +396,6 @@ To run a single test:
 | 2.0 | 2026-03-06 | Initial universal commands file — JITCR Protocol v2.0 |
 | 2.1 | 2026-03-07 | Added > qa command — QA test suite runner |
 | 2.2 | 2026-03-07 | Fixed OS detection: $env:OS unreliable via shell-command MCP; use OSVersion.Platform |
-| 2.3 | 2026-03-13 | Removed Sessions\ folder — logs now live in JITCR_Protocol\{ProjectName}\logs\; all path references now use literal JITCR_Protocol\ root |
+| 2.3 | 2026-03-13 | Removed Sessions\ folder — logs now live in JITCR_Protocol/{ProjectName}/logs/; all path references now use literal JITCR_Protocol/ root |
 | 2.4 | 2026-03-16 | GitHub push guardrail: > end always commits locally (no prompt); push to GitHub only if configured at setup and confirmed at > end; > commit clarified as local-only; > start loads GitHub config from Tier 2; session header shows GitHub status |
+
