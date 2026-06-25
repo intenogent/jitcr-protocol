@@ -1,7 +1,8 @@
 # JITCR Universal Commands
-**Protocol Version:** 2.4
+**Protocol Version:** 2.5
 **Author:** LaserWhiz
 **Created:** 2026-03-06
+**Last Enhanced:** 2026-06-25
 **Purpose:** Shared command engine for all JITCR Protocol implementations.
            This file is referenced by every project's JITCR_[ProjectName].md.
 
@@ -40,45 +41,205 @@ All subsequent path and shell operations use the detected OS context.
 
 ---
 
+## File Access Protocol — MCP Tool Selection (CRITICAL)
+
+⚠️ **CRITICAL**: Claude has multiple file-access tools. Using the WRONG tool will fail silently.
+   This section ensures correct tool selection on every OS, every session.
+
+### Tool Capability Matrix
+
+| Tool | OS Support | Purpose | Path Format | Activation | Use Case |
+|---|---|---|---|---|---|
+| `view` | Linux only | Read container mounts | `/mnt/...` | Always active | NOT for project work |
+| `bash_tool` | Linux container | Run commands in VM | forward slashes | Always active | NOT for project work |
+| **`filesystem:*`** | **Windows + macOS + Linux** | **Read/write native host files** | **Native OS paths** | **LOAD via tool_search** | ✅ **Project file R/W** |
+| **`shell-command`** | **Windows + macOS + Linux** | **Run native OS commands** | **Forward slashes** | **LOAD via tool_search** | ✅ **Project commands** |
+
+**KEY INSIGHT:**
+- `view` and `bash_tool` run in Claude's Linux container environment
+- `filesystem` and `shell-command` MCPs run on YOUR actual OS (Windows/macOS/Linux)
+- Files written to `/mnt/` paths are NOT visible on your disk
+- **ALWAYS use filesystem/shell-command MCPs for project work**
+
+### Path Syntax Rules by OS
+
+#### **IF Project OS = Windows**
+
+**MCP Tools to Use:**
+- Read files → `filesystem:read_text_file(path)`
+- Write files → `filesystem:write_file(path, content)`
+- List dirs → `filesystem:list_directory(path)`
+- Run commands → `shell-command:execute_command(command)`
+
+**Path Format Rules:**
+| Operation | Format | Example |
+|---|---|---|
+| filesystem:read_text_file | Native backslash | `C:\Users\LaserMaster\Documents\file.md` |
+| filesystem:write_file | Native backslash | `C:\project\output.txt` |
+| filesystem:list_directory | Native backslash | `C:\project\logs` |
+| shell-command | Forward slashes ALWAYS | `dir C:/Users/LaserMaster/Documents` |
+| Git commands | Forward slashes ALWAYS | `git -C "C:/project" status` |
+
+**If you accidentally use Linux paths:**
+- ❌ `filesystem:read_text_file("/mnt/c/Users/...")` → FAIL
+- ❌ `view("/mnt/c/Users/...")` → FAIL (reads container, not disk)
+- ✅ `filesystem:read_text_file("C:\Users\...")` → SUCCESS
+
+#### **IF Project OS = macOS**
+
+**MCP Tools to Use:**
+- Read files → `filesystem:read_text_file(path)`
+- Write files → `filesystem:write_file(path, content)`
+- List dirs → `filesystem:list_directory(path)`
+- Run commands → `shell-command:execute_command(command)`
+
+**Path Format Rules:**
+| Operation | Format | Example |
+|---|---|---|
+| filesystem:read_text_file | Forward slash | `/Users/LaserMaster/Documents/file.md` |
+| filesystem:write_file | Forward slash | `/Users/user/project/output.txt` |
+| filesystem:list_directory | Forward slash | `/Users/user/project/logs` |
+| shell-command | Forward slash | `ls /Users/LaserMaster/Documents` |
+| Git commands | Forward slash | `git -C "/Users/user/project" status` |
+
+#### **IF Project OS = Linux**
+
+**MCP Tools to Use:**
+- Read files → `filesystem:read_text_file(path)`
+- Write files → `filesystem:write_file(path, content)`
+- List dirs → `filesystem:list_directory(path)`
+- Run commands → `shell-command:execute_command(command)`
+
+**Path Format Rules:**
+| Operation | Format | Example |
+|---|---|---|
+| filesystem:read_text_file | Forward slash | `/home/user/Documents/file.md` |
+| filesystem:write_file | Forward slash | `/home/user/project/output.txt` |
+| filesystem:list_directory | Forward slash | `/home/user/project/logs` |
+| shell-command | Forward slash | `ls /home/user/Documents` |
+| Git commands | Forward slash | `git -C "/home/user/project" status` |
+
+### Decision Tree: Which Tool to Use
+
+```
+You need to READ a file on Windows/macOS/Linux?
+  └─ Use: filesystem:read_text_file(native_path)
+     Load first via: tool_search("filesystem")
+     Path format: Determined by project OS (see above)
+     Example (Windows): filesystem:read_text_file("C:\project\file.md")
+     Example (macOS): filesystem:read_text_file("/Users/user/project/file.md")
+
+You need to WRITE/CREATE a file?
+  └─ Use: filesystem:write_file(native_path, content)
+     Load first via: tool_search("filesystem")
+     Path format: Determined by project OS
+
+You need to RUN a command (git, dir, ls, etc.)?
+  └─ Use: shell-command:execute_command(command)
+     Load first via: tool_search("shell command")
+     Path format: Forward slashes ALWAYS, regardless of OS
+     Example (Windows): shell-command("dir C:/Users/...")
+     Example (macOS): shell-command("git -C '/Users/user/project' status")
+
+Do TEMPORARY work in Claude's Linux container (NOT recommended)?
+  └─ Use: view() or bash_tool()
+     ⚠️ Files NOT visible on your disk
+     Use ONLY for temporary, non-project work
+```
+
+### Troubleshooting: File Access Errors
+
+**Error: "Path not found" or "No such file or directory"**
+
+Checklist:
+1. ☐ Did you load MCP tools via `tool_search("filesystem")`?
+   - If no → load now, then retry
+2. ☐ Are you using the CORRECT tool?
+   - File read? → use `filesystem:read_text_file`
+   - Command run? → use `shell-command:execute_command`
+   - Using container tools? → That's the problem
+3. ☐ Is the path format correct for YOUR project OS?
+   - Windows? → Backslash for filesystem:*, forward slash for shell-command
+   - macOS/Linux? → Forward slashes for both
+4. ☐ Does the file actually exist?
+   - Run: `filesystem:list_directory("parent_folder")` to verify
+
+**Error: "File was created but I can't see it on my disk"**
+
+Diagnosis: You used `view()` or `bash_tool()` instead of filesystem MCPs.
+- **Solution:** Use `filesystem:write_file()` with proper MCP loading
+
+---
+
 ## Session Logs Location
 
 Session logs (journals + handoffs) for every project are stored under:
-`JITCR_Protocol/{ProjectName}/logs/`
+`JITCR_Protocol\{ProjectName}\logs\`
 
-`JITCR_Protocol/` is the fixed root folder created during install. Every project
-gets its own subfolder inside it, with `logs/` for journals and handoffs.
+`JITCR_Protocol\` is the fixed root folder created during install. Every project
+gets its own subfolder inside it, with `logs\` for journals and handoffs.
 
-Every project has its own `logs/` subfolder directly inside its project folder:
+Every project has its own `logs\` subfolder directly inside its project folder:
 ```
-JITCR_Protocol/
+JITCR_Protocol\
 ├── JITCR_Universal_Commands.md        ← this file
 ├── {ProjectName-A}\
 │   ├── JITCR_{ProjectName-A}.md          ← Tier 2 guide
-│   └── logs/                             ← journals and handoffs
+│   └── logs\                             ← journals and handoffs
 ├── {ProjectName-B}\
 │   ├── JITCR_{ProjectName-B}.md
-│   └── logs/
+│   └── logs\
 └── {ProjectName-Z}\
     ├── JITCR_{ProjectName-Z}.md
-    └── logs/
+    └── logs\
+```
 
 ---
 
 ## `> start` — Initialize Session
 
 ```
+STEP 0: Load MCP Tools (NEW — CRITICAL)
+        Before any file operations:
+        A. tool_search("filesystem read file windows")
+           → Loads: filesystem:read_text_file, filesystem:write_file, 
+                    filesystem:list_directory, etc.
+           → Confirm: "Filesystem MCPs loaded"
+        B. tool_search("shell command execute")
+           → Loads: shell-command:execute_command
+           → Confirm: "Shell-command MCP loaded"
+        C. These enable native file access on your OS
+           (NOT in Claude's Linux container)
+
 STEP 1: OS Detection (silent)
-        Windows → [System.Environment]::OSVersion.Platform = "Win32NT" → PowerShell syntax
-        macOS   → uname = "Darwin"       → bash syntax
-        Linux   → uname = "Linux"        → bash syntax
+        Windows → [System.Environment]::OSVersion.Platform = "Win32NT"
+                → {runtime_os} = Windows
+                → {path_sep} = "\"
+                → {shell} = PowerShell
+        macOS   → uname = "Darwin"
+                → {runtime_os} = macOS
+                → {path_sep} = "/"
+                → {shell} = bash
+        Linux   → uname = "Linux"
+                → {runtime_os} = Linux
+                → {path_sep} = "/"
+                → {shell} = bash
+
+STEP 1b: Compare Runtime OS vs Project OS (NEW)
+         Read "OS" field from Tier 2 if present
+         IF {runtime_os} ≠ {project_os}:
+           ⚠️  WARN: "Runtime OS differs from Project OS.
+                      File paths may behave differently."
+         ELSE:
+           Silent confirmation: "OS detected: {runtime_os}"
 
 STEP 2: Read project name from Tier 1 Project Instructions
-        Logs path: JITCR_Protocol/{ProjectName}/logs/
+        Logs path: JITCR_Protocol\{ProjectName}\logs\
 
 STEP 3: Check and create logs folder if missing
-        IF JITCR_Protocol/{ProjectName}/logs/ does not exist
-          → create JITCR_Protocol/{ProjectName}/
-          → create JITCR_Protocol/{ProjectName}/logs/
+        IF JITCR_Protocol\{ProjectName}\logs\ does not exist
+          → create JITCR_Protocol\{ProjectName}\
+          → create JITCR_Protocol\{ProjectName}\logs\
           → confirm: "Created logs folder for {ProjectName}"
 
 STEP 4: Git status check
@@ -105,17 +266,17 @@ STEP 6: Load Tier 2
         Confirm loaded. Display approximate token count.
 
 STEP 7: Load Tier 3 — Conditional
-        ALWAYS   → read latest handoff_*.md from JITCR_Protocol/{ProjectName}/logs/
+        ALWAYS   → read latest handoff_*.md from JITCR_Protocol\{ProjectName}\logs\
                    (if no handoff exists → note "First session for this project")
         ONLY IF  → handoff status = BLOCKED
                    OR handoff contains open/unresolved issues
-                 → also read last 3 journal_*.md from same logs/ folder
+                 → also read last 3 journal_*.md from same logs\ folder
         IF git active → run: git log -5 --oneline
 
 STEP 8: Display session header
         ┌─────────────────────────────────────────┐
         │ Project  : {ProjectName}                │
-        │ OS       : {detected OS}                │
+        │ OS       : {runtime_os}                 │
         │ Started  : {YYYY-MM-DD HH:MM}           │
         │ Git      : {active | inactive | no repo}│
         │ GitHub   : {push enabled | local only}  │
@@ -132,7 +293,7 @@ STEP 8: Display session header
 ```
 1. Get current timestamp (YYYY-MM-DD HH:MM)
 2. Determine journal file path:
-   JITCR_Protocol/{ProjectName}/logs/journal_YYYY-MM-DD_HHMM.md
+   JITCR_Protocol\{ProjectName}\logs\journal_YYYY-MM-DD_HHMM.md
 3. If file does not exist → create it with header
 4. Append entry using template below
 5. Confirm: "Journal updated → journal_YYYY-MM-DD_HHMM.md"
@@ -165,7 +326,7 @@ STEP 8: Display session header
 ```
 1. Get current timestamp (YYYY-MM-DD HH:MM)
 2. Create file:
-   JITCR_Protocol/{ProjectName}/logs/handoff_YYYY-MM-DD_HHMM.md
+   JITCR_Protocol\{ProjectName}\logs\handoff_YYYY-MM-DD_HHMM.md
 3. Write handoff using template below
 4. Confirm: "Handoff saved → handoff_YYYY-MM-DD_HHMM.md"
 ```
@@ -221,7 +382,7 @@ STEP 8: Display session header
 ```
 PURPOSE: Mid-session checkpoint — commits project root content to local git.
          What gets committed is controlled by {project_root}/.gitignore.
-         Session logs (logs/) are never committed if excluded by .gitignore.
+         Session logs (logs\) are never committed if excluded by .gitignore.
          This is a LOCAL commit only — nothing is pushed to GitHub.
          Push to GitHub only happens at > end, if configured.
 
@@ -304,9 +465,9 @@ Confirm: "Backup created → {project_root}_backup_YYYY-MM-DD_HHMM.zip"
 
 | File Type | Format | Location |
 |---|---|---|
-| Tier 2 guide | `JITCR_[ProjectName].md` | `JITCR_Protocol/{ProjectName}/` |
-| Journal | `journal_YYYY-MM-DD_HHMM.md` | `JITCR_Protocol/{ProjectName}/logs/` |
-| Handoff | `handoff_YYYY-MM-DD_HHMM.md` | `JITCR_Protocol/{ProjectName}/logs/` |
+| Tier 2 guide | `JITCR_[ProjectName].md` | `JITCR_Protocol\{ProjectName}\` |
+| Journal | `journal_YYYY-MM-DD_HHMM.md` | `JITCR_Protocol\{ProjectName}\logs\` |
+| Handoff | `handoff_YYYY-MM-DD_HHMM.md` | `JITCR_Protocol\{ProjectName}\logs\` |
 | Backup | `{ProjectName}_backup_YYYY-MM-DD_HHMM.zip` | Project root or designated backup path |
 
 > All type prefixes are always **lowercase**: `journal_`, `handoff_`
@@ -379,7 +540,7 @@ Tip: Commands accept natural extensions — e.g. > commit "my message"
 2. Execute each test in sequence
 3. Report PASS/FAIL per test inline as tests run
 4. On completion, write results to:
-   JITCR_Protocol/{ProjectName}/logs/qa_YYYY-MM-DD_HHMM.md
+   JITCR_Protocol\{ProjectName}\logs\qa_YYYY-MM-DD_HHMM.md
    using the QA Results Template in JITCR_QA.md
 5. Display summary: X passed, Y failed, Z skipped
 
@@ -396,6 +557,6 @@ To run a single test:
 | 2.0 | 2026-03-06 | Initial universal commands file — JITCR Protocol v2.0 |
 | 2.1 | 2026-03-07 | Added > qa command — QA test suite runner |
 | 2.2 | 2026-03-07 | Fixed OS detection: $env:OS unreliable via shell-command MCP; use OSVersion.Platform |
-| 2.3 | 2026-03-13 | Removed Sessions\ folder — logs now live in JITCR_Protocol/{ProjectName}/logs/; all path references now use literal JITCR_Protocol/ root |
+| 2.3 | 2026-03-13 | Removed Sessions\ folder — logs now live in JITCR_Protocol\{ProjectName}\logs\; all path references now use literal JITCR_Protocol\ root |
 | 2.4 | 2026-03-16 | GitHub push guardrail: > end always commits locally (no prompt); push to GitHub only if configured at setup and confirmed at > end; > commit clarified as local-only; > start loads GitHub config from Tier 2; session header shows GitHub status |
-
+| **2.5** | **2026-06-25** | **NEW: Added File Access Protocol section — explicit OS detection + MCP tool loading + OS-specific path rules. Added STEP 0 to > start for MCP tool loading. Added OS field comparison (runtime vs project). Multi-OS support enhanced for Windows/macOS/Linux users.** |
