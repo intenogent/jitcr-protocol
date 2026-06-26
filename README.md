@@ -893,11 +893,17 @@ jitcr-protocol/
 
 ## License
 
-MIT — use it, fork it, adapt it freely.
+Copyright © 2026 Arshia (intenogent). All Rights Reserved.
+
+We are working on something bigger for JITCR Protocol.
+Licensing terms are currently under review — this project is temporarily
+unavailable for public use or contribution.
+
+For more information or to express interest in what's coming,
+contact us directly: https://github.com/intenogent
 
 ---
 
 ## Author
 
 Built by [@intenogent](https://github.com/intenogent)
-Issues and contributions welcome — open a GitHub issue or PR.
