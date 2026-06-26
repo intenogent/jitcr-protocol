@@ -322,3 +322,125 @@ After pasting, start a new chat in this project and type:
 
 That's it — JITCR is running. 🚀"
 
+────────────────────────────────────────────────────────────────────────────
+PHASE 5 — AGENT STARTUP PROCEDURE (CRITICAL FOR NEW AGENTS)
+────────────────────────────────────────────────────────────────────────────
+
+⚠️ **THIS SECTION IS FOR CLAUDE AGENTS, NOT USERS.**
+
+When a new agent starts a session in a JITCR project, it MUST follow this
+procedure. The project instructions tell the agent to run "> start", but this
+section explains what MUST happen inside that command.
+
+**MANDATORY STARTUP SEQUENCE (DO NOT SKIP):**
+
+STEP 0 — Load MCP Tools (CRITICAL)
+  A. tool_search("filesystem read file windows")
+  B. tool_search("shell command execute")
+  C. These MCPs enable reading files on the user's native OS
+
+STEP 1 — Read Project Instructions from Claude Desktop
+  The user has pasted a project instructions block into Claude Desktop.
+  This block contains the PROJECT PATHS that are SPECIFIC TO THIS USER'S SETUP.
+
+  Look for these fields in the Project Instructions:
+    - Name: {ProjectName}
+    - Root: {ProjectRoot}
+    - OS: {OS}
+
+  These paths come from the installation phase and are UNIQUE to this project.
+  Store these as session variables: {ProjectName}, {ProjectRoot}, {OS}
+
+STEP 2 — Calculate Tier 2 Path (CRITICAL)
+  The Tier 2 file is ALWAYS at: {HubRoot}/{ProjectName}/JITCR_{ProjectName}.md
+
+  BUT WAIT — you don't know {HubRoot} from project instructions.
+  The project instructions DO contain a HINT — the "On > start:" line says:
+    "read JITCR_{ProjectName}.md from: {HubRoot}/{ProjectName}/"
+
+  This line tells you the DIRECTORY PATH to Tier 2, but you still need {HubRoot}.
+
+  SOLUTION: Use the {ProjectRoot} from project instructions.
+    The installer sets {ProjectRoot} EITHER as {HubRoot}/{ProjectName}/ 
+    (default) OR as a custom user-provided path.
+    
+    So Tier 2 file location is:
+      {HubRoot}/{ProjectName}/JITCR_{ProjectName}.md
+    
+    IF {ProjectRoot} was the default, then:
+      {HubRoot} = parent directory of {ProjectRoot}
+    
+    PRACTICAL: Look for the Tier 2 file at:
+      {ProjectRoot}/JITCR_{ProjectName}.md (most common location)
+      OR parent({ProjectRoot})/JITCR_{ProjectName}.md (if custom {ProjectRoot})
+
+STEP 3 — Read Tier 2 File (MUST HAPPEN BEFORE ANYTHING ELSE)
+  CRITICAL: You must read Tier 2 BEFORE loading any session context.
+  This file contains the ACTUAL project paths and configuration for THIS project.
+
+  Use filesystem MCP (loaded in STEP 0):
+    filesystem:read_text_file("{ProjectRoot}/JITCR_{ProjectName}.md")
+    
+  If file not found at {ProjectRoot}, try:
+    filesystem:read_text_file(parent({ProjectRoot})/JITCR_{ProjectName}.md")
+
+  Store this file content. Extract:
+    - {HubRoot} from "Session Logs" field (parent directory of logs)
+    - {ProjectRoot} (should match project instructions)
+    - {GitHubRemote} and {GitHubPush} status (for later use)
+
+STEP 4 — Verify Paths Work
+  Before proceeding, confirm:
+    - Tier 2 file was readable
+    - {HubRoot}/{ProjectName}/logs/ directory exists
+    - You can list files in that directory
+  
+  If any path fails: STOP and ask user to provide the correct {HubRoot}/{ProjectName} path
+
+STEP 5 — Load Session Context (Tier 3 conditional)
+  ONLY AFTER Tier 2 is loaded, load Tier 3:
+    - Read latest handoff from {HubRoot}/{ProjectName}/logs/
+    - IF handoff status = BLOCKED, also read last 3 journals
+    - IF git active: run git log -5 --oneline
+  
+  This keeps Tier 3 truly just-in-time (only load when needed).
+
+STEP 6 — Display Session Header and Begin Work
+  Show user:
+    ┌────────────────────────────────┐
+    │ Project  : {ProjectName}       │
+    │ OS       : {OS}                │
+    │ Root     : {ProjectRoot}       │
+    │ Started  : {current_time}      │
+    │ Loaded   : Tier 2 + Tier 3     │
+    │ Commands : > journal, save...  │
+    └────────────────────────────────┘
+
+  Now proceed with user's request.
+
+**WHY THIS MATTERS:**
+
+The old approach: Try to use hardcoded paths → fail on different systems
+The new approach: Read Tier 2 FIRST → extract ACTUAL user paths → work everywhere
+
+Different users have different {HubRoot} paths:
+  - User A: C:\Users\Alice\Documents\JITCR_Protocol\
+  - User B: /Users/bob/Documents/JITCR_Protocol/
+  - User C: /home/charlie/Documents/JITCR_Protocol/
+
+The Tier 2 file stores the ACTUAL path, so ANY agent can read it and find the right files.
+This is how JITCR works across Windows, macOS, and Linux without assumptions.
+
+**DO NOT:**
+- Assume any hardcoded paths
+- Skip reading Tier 2 to save time
+- Try to find files without reading Tier 2 first
+- Use Project Instructions paths directly without reading Tier 2
+
+**DO:**
+- Load MCPs first (STEP 0)
+- Read Tier 2 (STEP 3) — this is NON-NEGOTIABLE
+- Extract actual paths from Tier 2
+- Use those paths for all operations
+- Ask user if paths don't work
+
