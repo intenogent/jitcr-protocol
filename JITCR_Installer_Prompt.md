@@ -279,7 +279,7 @@ STEP 5 — Confirm everything:
   Include GitHub remote status: configured or not configured.
 
 ────────────────────────────────────────────────────────────────────────────
-PHASE 4 — HAND OFF TO USER
+PHASE 4 — HAND OFF TO USER (UPDATED — NEW PROJECT INSTRUCTIONS TEMPLATE)
 ────────────────────────────────────────────────────────────────────────────
 
 Tell the user:
@@ -293,6 +293,20 @@ Project Instructions for this project:
   Replace everything there with this text:
 
 ════════════════════════════════════════════════════
+## CRITICAL: Before anything else
+⚠️ **NEW AGENTS: Read this section FIRST before any other action!**
+
+1. Load MCP Tools:
+   - tool_search("filesystem read file windows")
+   - tool_search("shell command execute")
+
+2. READ THIS TIER 2 FILE FIRST (MANDATORY):
+   {HubRoot}/{ProjectName}/JITCR_{ProjectName}.md
+   
+   (This file contains your actual project paths. Do NOT use hardcoded paths.)
+
+3. Extract paths from that file and then proceed with > start
+
 ## Role
 {RoleDescription}
 
@@ -306,8 +320,7 @@ Project Instructions for this project:
 - Never modify .env without explicit user permission
 - Read files before overwriting — preserve content
 - Shell commands: always use forward slashes in paths
-- On > start: read JITCR_{ProjectName}.md from:
-  {HubRoot}/{ProjectName}/
+- On > start: STEP 2 = READ TIER 2 FILE FIRST (see CRITICAL section above)
 
 ## Environment
 {Environment}
@@ -351,96 +364,70 @@ STEP 1 — Read Project Instructions from Claude Desktop
   These paths come from the installation phase and are UNIQUE to this project.
   Store these as session variables: {ProjectName}, {ProjectRoot}, {OS}
 
-STEP 2 — Calculate Tier 2 Path (CRITICAL)
-  The Tier 2 file is ALWAYS at: {HubRoot}/{ProjectName}/JITCR_{ProjectName}.md
-
-  BUT WAIT — you don't know {HubRoot} from project instructions.
-  The project instructions DO contain a HINT — the "On > start:" line says:
-    "read JITCR_{ProjectName}.md from: {HubRoot}/{ProjectName}/"
-
-  This line tells you the DIRECTORY PATH to Tier 2, but you still need {HubRoot}.
-
-  SOLUTION: Use the {ProjectRoot} from project instructions.
-    The installer sets {ProjectRoot} EITHER as {HubRoot}/{ProjectName}/ 
-    (default) OR as a custom user-provided path.
-    
-    So Tier 2 file location is:
-      {HubRoot}/{ProjectName}/JITCR_{ProjectName}.md
-    
-    IF {ProjectRoot} was the default, then:
-      {HubRoot} = parent directory of {ProjectRoot}
-    
-    PRACTICAL: Look for the Tier 2 file at:
-      {ProjectRoot}/JITCR_{ProjectName}.md (most common location)
-      OR parent({ProjectRoot})/JITCR_{ProjectName}.md (if custom {ProjectRoot})
-
-STEP 3 — Read Tier 2 File (MUST HAPPEN BEFORE ANYTHING ELSE)
-  CRITICAL: You must read Tier 2 BEFORE loading any session context.
-  This file contains the ACTUAL project paths and configuration for THIS project.
-
-  Use filesystem MCP (loaded in STEP 0):
-    filesystem:read_text_file("{ProjectRoot}/JITCR_{ProjectName}.md")
-    
-  If file not found at {ProjectRoot}, try:
-    filesystem:read_text_file(parent({ProjectRoot})/JITCR_{ProjectName}.md")
-
-  Store this file content. Extract:
-    - {HubRoot} from "Session Logs" field (parent directory of logs)
-    - {ProjectRoot} (should match project instructions)
-    - {GitHubRemote} and {GitHubPush} status (for later use)
-
-STEP 4 — Verify Paths Work
-  Before proceeding, confirm:
-    - Tier 2 file was readable
-    - {HubRoot}/{ProjectName}/logs/ directory exists
-    - You can list files in that directory
+STEP 2 — READ TIER 2 FILE FIRST (NON-NEGOTIABLE)
+  ⚠️ This is the most important step. Project Instructions now have the EXACT path.
   
-  If any path fails: STOP and ask user to provide the correct {HubRoot}/{ProjectName} path
-
-STEP 5 — Load Session Context (Tier 3 conditional)
-  ONLY AFTER Tier 2 is loaded, load Tier 3:
-    - Read latest handoff from {HubRoot}/{ProjectName}/logs/
-    - IF handoff status = BLOCKED, also read last 3 journals
-    - IF git active: run git log -5 --oneline
+  The CRITICAL section of Project Instructions states:
+    "READ THIS TIER 2 FILE FIRST: {HubRoot}/{ProjectName}/JITCR_{ProjectName}.md"
   
-  This keeps Tier 3 truly just-in-time (only load when needed).
+  This path is PROVIDED in the Project Instructions — you don't need to guess it.
+  
+  A. Read Tier 2 using filesystem MCP:
+     filesystem:read_text_file("{HubRoot}/{ProjectName}/JITCR_{ProjectName}.md")
+  
+  B. Extract from Tier 2 and store as session variables:
+     - {HubRoot} (from "Session Logs" field parent)
+     - {ProjectRoot} (confirmed from "Project Root" field)
+     - {ProjectName} (confirmed)
+     - {GitHubRemote} and {GitHubPush} status
+  
+  C. Confirm: "Tier 2 loaded → {HubRoot}/{ProjectName}/JITCR_{ProjectName}.md"
 
-STEP 6 — Display Session Header and Begin Work
-  Show user:
-    ┌────────────────────────────────┐
-    │ Project  : {ProjectName}       │
-    │ OS       : {OS}                │
-    │ Root     : {ProjectRoot}       │
-    │ Started  : {current_time}      │
-    │ Loaded   : Tier 2 + Tier 3     │
-    │ Commands : > journal, save...  │
-    └────────────────────────────────┘
+STEP 3: Verify Paths Work
+  A. Try to list logs directory:
+     filesystem:list_directory("{HubRoot}/{ProjectName}/logs/")
+  
+  B. IF path fails:
+     → STOP
+     → Ask user: "Logs directory not found. Can you confirm your paths?"
+     → Help user locate correct paths
+     → Do NOT proceed until paths are verified
+  
+  C. Confirm: "Paths verified ✓"
 
-  Now proceed with user's request.
+STEP 4: Retrieve System Time
+  Windows: shell-command("powershell -Command "Get-Date -Format 'yyyy-MM-dd HHmm'"")
+  macOS/Linux: shell-command("date +"%Y-%m-%d %H%M"")
+  Store as {session_time}
+  Confirm: "Time retrieved: {session_time}"
 
-**WHY THIS MATTERS:**
+STEP 5: OS Detection
+  Windows → {runtime_os} = Windows
+  macOS   → {runtime_os} = macOS
+  Linux   → {runtime_os} = Linux
 
-The old approach: Try to use hardcoded paths → fail on different systems
-The new approach: Read Tier 2 FIRST → extract ACTUAL user paths → work everywhere
+STEP 6: Git Status Check
+  Run: git -C "{ProjectRoot}" status
+  Result A — repo active → git commands enabled
+  Result B — no repo → prompt user (initialize or skip)
+  Result C — repo, no remote → note silently, local commits only
 
-Different users have different {HubRoot} paths:
-  - User A: C:\Users\Alice\Documents\JITCR_Protocol\
-  - User B: /Users/bob/Documents/JITCR_Protocol/
-  - User C: /home/charlie/Documents/JITCR_Protocol/
+STEP 7: Load Tier 3 (Conditional)
+  ALWAYS → read latest handoff from {HubRoot}/{ProjectName}/logs/
+  CONDITIONALLY → if handoff status = BLOCKED, also read last 3 journals
+  CONDITIONALLY → if git active, run: git log -5 --oneline
 
-The Tier 2 file stores the ACTUAL path, so ANY agent can read it and find the right files.
-This is how JITCR works across Windows, macOS, and Linux without assumptions.
+STEP 8: Display Session Header
+  ┌────────────────────────────────────┐
+  │ Project  : {ProjectName}           │
+  │ OS       : {runtime_os}            │
+  │ Root     : {ProjectRoot}           │
+  │ Started  : {session_time}          │
+  │ Git      : {active | inactive}     │
+  │ GitHub   : {push enabled | local}  │
+  │ Loaded   : Tier 2 + Tier 3         │
+  │ Commands : > journal, save, end... │
+  └────────────────────────────────────┘
 
-**DO NOT:**
-- Assume any hardcoded paths
-- Skip reading Tier 2 to save time
-- Try to find files without reading Tier 2 first
-- Use Project Instructions paths directly without reading Tier 2
-
-**DO:**
-- Load MCPs first (STEP 0)
-- Read Tier 2 (STEP 3) — this is NON-NEGOTIABLE
-- Extract actual paths from Tier 2
-- Use those paths for all operations
-- Ask user if paths don't work
-
+STEP 9: Begin Session
+  Ready to help with user's task
