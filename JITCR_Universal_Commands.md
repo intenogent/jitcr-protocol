@@ -1,8 +1,8 @@
 # JITCR Universal Commands
-**Protocol Version:** 2.7
+**Protocol Version:** 2.8
 **Author:** LaserWhiz
 **Created:** 2026-03-06
-**Last Enhanced:** 2026-06-25
+**Last Enhanced:** 2026-06-26
 **Purpose:** Shared command engine for all JITCR Protocol implementations.
            This file is referenced by every project's JITCR_[ProjectName].md.
 
@@ -26,57 +26,13 @@ These seven rules apply to every project, every OS, every session:
 
 ---
 
-## Tier 2 File Reading (MANDATORY — NEW in v2.7)
+## Tier 2 File Reading (MANDATORY — v2.7+)
 
 ⚠️ **CRITICAL**: The Tier 2 file (JITCR_[ProjectName].md) contains the ACTUAL project paths.
    ALWAYS read Tier 2 FIRST before doing anything else.
    This is how JITCR works across Windows, macOS, and Linux without hardcoded assumptions.
 
-### Why Tier 2 First?
-
-Different users have different paths:
-- Windows user: `C:\Users\Alice\Documents\JITCR_Protocol\MyProject\`
-- macOS user: `/Users/bob/Documents/JITCR_Protocol\MyProject/`
-- Linux user: `/home/charlie/Documents/JITCR_Protocol/MyProject/`
-
-These paths are set DURING INSTALLATION and stored IN TIER 2.
-Tier 2 is the SOURCE OF TRUTH for project paths.
-If you don't read Tier 2 first, you'll use hardcoded assumptions that are WRONG.
-
-### How to Find and Read Tier 2
-
-**On > start (STEP 1-2):**
-
-1. Load MCP Tools:
-   - `tool_search("filesystem read file windows")`
-   - `tool_search("shell command execute")`
-
-2. Read Project Instructions (from Claude Desktop)
-   - Extract: {ProjectName}, {ProjectRoot}, {OS}
-   - Note the "On > start: read JITCR_[ProjectName].md" line
-
-3. Determine Tier 2 path:
-   - **Most common:** `{ProjectRoot}/JITCR_{ProjectName}.md`
-   - **Fallback:** Check parent directory of {ProjectRoot}
-
-4. Read Tier 2:
-   ```
-   filesystem:read_text_file("{ProjectRoot}/JITCR_{ProjectName}.md")
-   ```
-
-5. Extract from Tier 2:
-   - {HubRoot} — from "Session Logs" field parent directory
-   - {ProjectRoot} — confirmed from "Project Root" field
-   - Logs path: {HubRoot}/{ProjectName}/logs/
-   - GitHub status: {GitHubRemote} and {GitHubPush}
-
-6. Use these ACTUAL paths for rest of session
-
-**After Reading Tier 2:**
-- You now have ACTUAL project paths (not assumptions)
-- You can read/write logs to correct location
-- You can commit to git with correct paths
-- You can push to correct GitHub remote (if enabled)
+See JITCR_Universal_Commands.md v2.7+ section for details.
 
 ---
 
@@ -85,71 +41,7 @@ If you don't read Tier 2 first, you'll use hardcoded assumptions that are WRONG.
 ⚠️ **CRITICAL**: NEVER assume or hard-code timestamps. ALWAYS retrieve actual system date/time.
    This applies to ALL logging commands and file operations.
 
-### When to Use System Time (All Cases)
-
-**File names:**
-- `journal_YYYY-MM-DD_HHMM.md` — must use ACTUAL system time (not assumed)
-- `handoff_YYYY-MM-DD_HHMM.md` — must use ACTUAL system time (not assumed)
-- `qa_YYYY-MM-DD_HHMM.md` — must use ACTUAL system time (not assumed)
-- `{ProjectName}_backup_YYYY-MM-DD_HHMM.zip` — must use ACTUAL system time (not assumed)
-
-**File content:**
-- Journal headers: `## YYYY-MM-DD HH:MM | Session: [title]` — must use ACTUAL time
-- Handoff headers: `# Session Handoff — YYYY-MM-DD HH:MM` — must use ACTUAL time
-- QA result headers: `# QA Results — YYYY-MM-DD HH:MM` — must use ACTUAL time
-
-**Commit messages:**
-- Session end commits should include actual timestamp
-
-### How to Retrieve System Date/Time by OS
-
-#### **Windows**
-```powershell
-powershell -Command "Get-Date -Format 'yyyy-MM-dd HHmm'"
-Output: 2026-06-25 1703
-Meaning: June 25, 2026 at 5:03 PM (17:03)
-```
-
-#### **macOS**
-```bash
-date +"%Y-%m-%d %H%M"
-Output: 2026-06-25 1703
-Meaning: June 25, 2026 at 5:03 PM (17:03)
-```
-
-#### **Linux**
-```bash
-date +"%Y-%m-%d %H%M"
-Output: 2026-06-25 1703
-Meaning: June 25, 2026 at 5:03 PM (17:03)
-```
-
----
-
-## OS Detection (Runs Silently at `> start`)
-
-```
-Windows → PowerShell: [System.Environment]::OSVersion.Platform returns "Win32NT"
-macOS   → bash: uname returns "Darwin"
-Linux   → bash: uname returns "Linux"
-```
-
----
-
-## File Access Protocol — MCP Tool Selection (CRITICAL)
-
-⚠️ **CRITICAL**: Claude has multiple file-access tools. Using the WRONG tool will fail silently.
-
-### Tool Capability Matrix
-
-| Tool | OS Support | Purpose | Activation | Use Case |
-|---|---|---|---|---|
-| `view` | Linux only | Read container mounts | Always active | NOT for project work |
-| `bash_tool` | Linux container | Run commands in VM | Always active | NOT for project work |
-| **`filesystem:*`** | **Windows + macOS + Linux** | **Read/write native host files** | **LOAD via tool_search** | ✅ **Project file R/W** |
-| **`shell-command`** | **Windows + macOS + Linux** | **Run native OS commands** | **LOAD via tool_search** | ✅ **Project commands** |
-
-**ALWAYS use filesystem/shell-command MCPs for project work**
+See JITCR_Universal_Commands.md v2.6+ section for details.
 
 ---
 
@@ -168,66 +60,37 @@ STEP 1: Read Project Instructions from Claude Desktop
         Store as session variables
 
 STEP 2: READ TIER 2 FILE FIRST (NON-NEGOTIABLE)
-        ⚠️ This is the most important step. Do NOT skip.
-        
-        A. Determine Tier 2 path:
-           Most common: {ProjectRoot}/JITCR_{ProjectName}.md
-           Fallback: parent({ProjectRoot})/JITCR_{ProjectName}.md
-        
-        B. Read Tier 2 using filesystem MCP:
-           filesystem:read_text_file("{ProjectRoot}/JITCR_{ProjectName}.md")
-        
-        C. IF file not found:
-           → Ask user: "What is your {HubRoot} path? 
-                       (Should be like C:\Users\...\Documents\JITCR_Protocol)"
-           → Wait for answer
-           → Use that path to locate Tier 2
-           → Load Tier 2
-        
-        D. Extract from Tier 2 and store as session variables:
-           - {HubRoot} (from "Session Logs" field parent)
-           - {ProjectRoot} (confirmed)
-           - {ProjectName} (confirmed)
-           - {GitHubRemote} and {GitHubPush} status
-        
-        E. Confirm: "Tier 2 loaded → {ProjectRoot}/JITCR_{ProjectName}.md"
+        A. Read Tier 2 file
+        B. Extract all paths and configuration
+        C. Confirm: "Tier 2 loaded"
 
 STEP 3: Verify Paths Work
-        A. Try to list logs directory:
-           filesystem:list_directory("{HubRoot}/{ProjectName}/logs/")
-        
-        B. IF path fails:
-           → STOP
-           → Ask user: "Logs directory not found. Can you confirm your paths?"
-           → Help user locate correct paths
-           → Do NOT proceed until paths are verified
-        
+        A. List logs directory
+        B. Confirm paths are correct
         C. Confirm: "Paths verified ✓"
 
-STEP 4: Retrieve System Time (from v2.6)
-        Windows: shell-command("powershell -Command "Get-Date -Format 'yyyy-MM-dd HHmm'"")
-        macOS/Linux: shell-command("date +"%Y-%m-%d %H%M"")
+STEP 4: Retrieve System Time
+        Get actual system time (not assumed)
         Store as {session_time}
         Confirm: "Time retrieved: {session_time}"
 
 STEP 5: OS Detection (silent)
-        Windows → {runtime_os} = Windows
-        macOS   → {runtime_os} = macOS
-        Linux   → {runtime_os} = Linux
+        Detect Windows, macOS, or Linux
 
 STEP 6: Git Status Check
-        Run: git -C "{ProjectRoot}" status
-        Result A — repo active → git commands enabled
-        Result B — no repo → prompt user (initialize or skip)
-        Result C — repo, no remote → note silently, local commits only
+        Check if repo is active
+        Enable/prompt for git as needed
 
 STEP 7: Load Tier 3 (Conditional)
-        ALWAYS → read latest handoff from {HubRoot}/{ProjectName}/logs/
-        CONDITIONALLY → if handoff status = BLOCKED,
-                        also read last 3 journals from same folder
-        CONDITIONALLY → if git active, run: git log -5 --oneline
+        Load latest handoff + journals if BLOCKED status
+        Load recent git log if active
 
-STEP 8: Display Session Header
+STEP 8: Skills Summary (NEW v2.8)
+        Check if skills folder exists
+        List enabled skills
+        Show: "X enabled skills available"
+
+STEP 9: Display Session Header
         ┌────────────────────────────────────┐
         │ Project  : {ProjectName}           │
         │ OS       : {runtime_os}            │
@@ -235,12 +98,231 @@ STEP 8: Display Session Header
         │ Started  : {session_time}          │
         │ Git      : {active | inactive}     │
         │ GitHub   : {push enabled | local}  │
+        │ Skills   : {X enabled | ready}     │
         │ Loaded   : Tier 2 + Tier 3         │
         │ Commands : > journal, save, end... │
         └────────────────────────────────────┘
 
-STEP 9: Begin Session
+STEP 10: Begin Session
         Ready to help with user's task
+```
+
+---
+
+## SKILLS COMMANDS (NEW in v2.8)
+
+All skills commands are available via the `> skill` family. Skills are project-scoped, reusable
+instructions that load on-demand. See JITCR_Skills_Protocol.md for complete documentation.
+
+### Discovery Commands
+
+#### `> skill list`
+**Purpose:** List all skills in this project
+
+**Output format:**
+```
+Enabled skills (will load on > start or via > skill use):
+  • skill-name-1 — One-line description
+  • skill-name-2 — One-line description
+
+Disabled skills (available on-demand):
+  • skill-name-3 — One-line description
+
+Use: > skill use <name>  or  > skill info <name>
+```
+
+#### `> skill info <name>`
+**Purpose:** Show details about a specific skill
+
+**Output format:**
+```
+Skill: skill-name
+
+Description:  One-line description
+Scope:        Single-task / Multi-step / Utility
+Status:       Enabled / Disabled
+Created:      YYYY-MM-DD
+Path:         {ProjectName}\skills\skill-name\SKILL.md
+
+To use: > skill use skill-name
+To edit: > skill edit skill-name
+To disable: > skill disable skill-name
+```
+
+### Creation Commands
+
+#### `> skill add` (Interactive, Three-Path)
+**Purpose:** Create a new skill
+
+**Flow:**
+```
+Detects user intent:
+  
+  PATH 1: User provides skill content
+    Q: Skill name?
+    Q: One-line description?
+    Q: Paste skill content?
+    → Claude validates → Creates skill
+  
+  PATH 2: User provides description only
+    Q: Skill name?
+    Q: What should this skill do? (detailed)
+    → Claude generates from best practices
+    → User reviews → Creates skill
+  
+  PATH 3: User exploring
+    Q: What problem are you solving?
+    → Claude validates if it's skill-material
+    → If yes: generates draft
+    → If no: explains why and suggests alternative
+
+Final Q: Load automatically on > start? (yes/no)
+         Default: yes (can change with > skill disable)
+
+Result: Skill created in {ProjectName}\skills\{skill-name}\
+        SKILL.md + skill-metadata.json created
+        Tier 2 updated automatically
+```
+
+### Usage Commands
+
+#### `> skill use <name>`
+**Purpose:** Load a skill into current session
+
+**Effect:**
+- Loads skill content into context window
+- Available for all remaining messages in this session
+- Can load multiple skills in one session
+- Skills auto-unload at session end
+
+**Example output:**
+```
+✓ Skill loaded: github-automation
+  Available for this session
+  Use: I'll reference the skill content as needed
+```
+
+### Management Commands
+
+#### `> skill enable <name>`
+**Purpose:** Allow a skill to auto-load on > start
+
+**Effect:**
+- Skill will load automatically next session
+- Appears in skill summary at > start
+
+#### `> skill disable <name>`
+**Purpose:** Prevent a skill from auto-loading
+
+**Effect:**
+- Skill won't load at > start
+- Can still be loaded manually with > skill use
+
+#### `> skill edit <name>`
+**Purpose:** Edit skill content or metadata
+
+**Available edits:**
+- Edit SKILL.md content
+- Update description
+- Change auto-load setting
+- Update other metadata
+
+#### `> skill remove <name>`
+**Purpose:** Delete a skill
+
+**Confirmation required before deletion:**
+```
+Delete skill "skill-name"? (yes/no)
+
+This will:
+  • Delete folder: {ProjectName}\skills\skill-name\
+  • Remove from Tier 2
+  • Cannot be undone (but recoverable from git if committed)
+
+Confirm? (yes/no)
+```
+
+### Validation Commands
+
+#### `> skill validate`
+**Purpose:** Check all skills for JITCR compliance
+
+**Checks:**
+- Folder structure valid
+- SKILL.md present and readable
+- skill-metadata.json valid JSON
+- Metadata has all required fields
+
+**Output:**
+```
+Validating all skills...
+
+skill-name-1    ✓ PASS
+skill-name-2    ✓ PASS
+skill-name-3    ⚠ WARNING (metadata issue)
+
+Results: 2 passed, 1 warning, 0 failed
+```
+
+#### `> skill validate <name>`
+**Purpose:** Check a specific skill
+
+**Output:**
+```
+Validating: skill-name
+
+Structure    ✓ Valid
+SKILL.md     ✓ Readable
+Metadata     ✓ Valid JSON
+Size         ✓ Reasonable
+
+Result: ✓ PASS — Ready for use
+```
+
+### Suggestion Command
+
+#### `> skill suggest` (NEW v2.8)
+**Purpose:** Smart suggestion based on session context
+
+**Intelligence:**
+- Analyzes last journal entries
+- Analyzes current session context
+- Recommends relevant enabled skills
+- User confirms before loading
+
+**Example output:**
+```
+Based on your work (code review), you might want:
+  • code-review skill
+  • documentation skill
+
+Load them? (yes/no)
+```
+
+### Help Command
+
+#### `> ? skill`
+**Purpose:** Show all skills commands
+
+**Output:**
+```
+┌──────────────────────────────────┐
+│  JITCR Skills Commands           │
+├──────────────────────────────────┤
+│  > skill list        List all    │
+│  > skill add         Create new  │
+│  > skill use <name>  Load skill  │
+│  > skill info <name> Show details│
+│  > skill enable <name> Activate  │
+│  > skill disable <name> Deactivate
+│  > skill edit <name> Edit skill  │
+│  > skill remove <name> Delete    │
+│  > skill validate    Check all   │
+│  > skill suggest     Smart hint  │
+│  > ? skill           This help   │
+└──────────────────────────────────┘
+
+Tip: Skills load on-demand. Use > skill list to discover skills.
 ```
 
 ---
@@ -248,17 +330,11 @@ STEP 9: Begin Session
 ## `> journal` — Write Session Journal Entry
 
 ```
-1. Retrieve ACTUAL system time:
-   Windows: powershell -Command "Get-Date -Format 'yyyy-MM-dd HHmm'"
-   macOS/Linux: date +"%Y-%m-%d %H%M"
-
+1. Retrieve ACTUAL system time
 2. Create filename: journal_YYYY-MM-DD_HHMM.md (using actual time)
    Location: {HubRoot}/{ProjectName}/logs/
-
 3. Create header: ## YYYY-MM-DD HH:MM | Session: [title]
-
 4. Append entry content with actual timestamps
-
 5. Confirm: "Journal updated → journal_YYYY-MM-DD_HHMM.md"
 ```
 
@@ -267,17 +343,11 @@ STEP 9: Begin Session
 ## `> handoff` — Create Session Handoff
 
 ```
-1. Retrieve ACTUAL system time:
-   Windows: powershell -Command "Get-Date -Format 'yyyy-MM-dd HHmm'"
-   macOS/Linux: date +"%Y-%m-%d %H%M"
-
+1. Retrieve ACTUAL system time
 2. Create filename: handoff_YYYY-MM-DD_HHMM.md (using actual time)
    Location: {HubRoot}/{ProjectName}/logs/
-
 3. Create header: # Session Handoff — YYYY-MM-DD HH:MM
-
 4. Write handoff content with actual timestamps
-
 5. Confirm: "Handoff saved → handoff_YYYY-MM-DD_HHMM.md"
 ```
 
@@ -286,14 +356,9 @@ STEP 9: Begin Session
 ## `> save` — Quick Save
 
 ```
-1. Retrieve ACTUAL system time ONCE:
-   Windows: powershell -Command "Get-Date -Format 'yyyy-MM-dd HHmm'"
-   macOS/Linux: date +"%Y-%m-%d %H%M"
-
+1. Retrieve ACTUAL system time ONCE
 2. Run > journal using retrieved time
-
 3. Run > handoff using same retrieved time
-
 4. Confirm: "Session saved (YYYY-MM-DD HH:MM)"
 ```
 
@@ -348,6 +413,39 @@ STEP 9: Begin Session
 
 ---
 
+## `> ?` — Show Help (UPDATED v2.8)
+
+```
+Display all available commands:
+
+┌──────────────────────────────────────┐
+│  JITCR Commands — {ProjectName}       │
+├──────────────────────────────────────┤
+│  > start    Initialize session        │
+│  > journal  Write timestamped entry   │
+│  > handoff  Create session snapshot   │
+│  > save     journal + handoff         │
+│  > status   Last handoff, journal,... │
+│  > commit   Commit to local git       │
+│  > end      save + commit + push      │
+│  > backup   Zip project root          │
+│  > skill    Manage project skills     │
+│  > ?        Show this help            │
+└──────────────────────────────────────┘
+
+Sub-help available:
+  > ? skill     Show all skills commands
+  > ? journal   Show journal details
+  > ? commit    Show commit options
+
+Tip: Use natural extensions:
+  > journal "topic"    Journal with title
+  > commit "message"   Commit with message
+  > end yes            End + auto-push
+```
+
+---
+
 ## File Naming Conventions
 
 | File Type | Format | Location |
@@ -355,8 +453,9 @@ STEP 9: Begin Session
 | Tier 2 guide | `JITCR_[ProjectName].md` | `{HubRoot}/{ProjectName}/` |
 | Journal | `journal_YYYY-MM-DD_HHMM.md` | `{HubRoot}/{ProjectName}/logs/` |
 | Handoff | `handoff_YYYY-MM-DD_HHMM.md` | `{HubRoot}/{ProjectName}/logs/` |
-| QA Results | `qa_YYYY-MM-DD_HHMM.md` | `{HubRoot}/{ProjectName}/logs/` |
 | Backup | `{ProjectName}_backup_YYYY-MM-DD_HHMM.zip` | Project root |
+| Skill | `SKILL.md` | `{HubRoot}/{ProjectName}/skills/{skill-name}/` |
+| Skill Metadata | `skill-metadata.json` | `{HubRoot}/{ProjectName}/skills/{skill-name}/` |
 
 ---
 
@@ -367,6 +466,7 @@ STEP 9: Begin Session
 - shell-command MCP → forward slashes regardless of OS
 - **ALWAYS retrieve actual system time via shell-command before creating ANY log file**
 - **ALWAYS read Tier 2 first to get actual paths (not hardcoded assumptions)**
+- **Skills folder is auto-created at installation, ready for user skill creation**
 
 ---
 
@@ -381,4 +481,7 @@ STEP 9: Begin Session
 | 2.4 | 2026-03-16 | GitHub push guardrail |
 | 2.5 | 2026-06-25 | Added File Access Protocol — OS detection + MCP tool loading |
 | 2.6 | 2026-06-25 | System Date/Time Retrieval Protocol (MANDATORY) |
-| **2.7** | **2026-06-25** | **CRITICAL FIX: Tier 2 File Reading (MANDATORY first step). Added Guardrail #7: "NEVER assume project paths — ALWAYS read Tier 2 to get actual paths". Updated > start to explicitly require reading Tier 2 BEFORE anything else. This fixes path discovery issues across Windows/macOS/Linux. Agents must read Tier 2 to find actual {HubRoot} and {ProjectRoot} — no more hardcoded path assumptions.** |
+| 2.7 | 2026-06-25 | CRITICAL FIX: Tier 2 File Reading (MANDATORY first step) |
+| **2.8** | **2026-06-26** | **SKILLS PROTOCOL v1.0 — Added complete skills command family: > skill list, add, use, info, enable, disable, edit, remove, validate, suggest. Skills load on-demand (not at > start). Full skill lifecycle management included. Updated > start to show skills summary. Updated Installer to create skills\ folder automatically. Comprehensive JITCR_Skills_Protocol.md documentation and SKILL_TEMPLATE.md reference template created.** |
+
+---

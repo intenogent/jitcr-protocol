@@ -45,13 +45,14 @@ If interested, jump to "How to Install" to get started
 - [Before & After JITCR](#before-jitcr-vs-after-jitcr)
 - [Token Savings](#token-savings--the-formula)
 - [Session Continuity & Commands](#feature-2--session-continuity)
+- [Skills — Project-Specific Instructions](#skills--project-specific-instructions)
 - [How to Install](#how-to-install)
   - [Pre-requisites](#pre-requisites)
   - [How JITCR Organizes Your Files](#how-jitcr-organizes-your-files)
     - [Where JITCR_Protocol/ Is Created](#where-jitcr_protocol-is-created)
     - [Two Paths: JITCR Management vs. Your Project](#two-paths-jitcr-management-vs-your-project)
     - [What Gets Committed and Pushed](#what-gets-committed-and-pushed)
-  - [Installation — 3 Steps](#installation--3-steps)
+  - [Installation — 6 Steps](#installation--6-steps)
 - [Repo Contents](#repo-contents)
 - [Requirements](#requirements)
 - [License](#license)
@@ -478,6 +479,46 @@ no cloud, no external service, fully under your control.
 
 ---
 
+## Skills — Project-Specific Instructions
+
+Skills are reusable instruction sets you create for your specific project — loaded
+on demand, not at every `> start`. They let you teach Claude how to handle
+recurring tasks in your project without burning tokens every session.
+
+**Examples of skills:**
+- A coding style guide Claude follows when writing code for your project
+- A specific workflow for reviewing pull requests
+- Instructions for how to write in your personal writing style
+- A checklist Claude runs before committing changes
+
+**Skills live in your project's skills folder:**
+```
+JITCR_Protocol/{ProjectName}/skills/
+  └── my-skill.md     ← one file per skill
+```
+
+**Skills commands:**
+
+| Command | What It Does |
+|---|---|
+| `> skill list` | Show all skills for this project |
+| `> skill add` | Create a new skill (interactive) |
+| `> skill use <name>` | Load a skill into the current session |
+| `> skill info <name>` | Show details about a skill |
+| `> skill remove <name>` | Delete a skill |
+
+**How it works:**
+1. Create a skill with `> skill add` — Claude walks you through it interactively
+2. Load it when needed with `> skill use <name>`
+3. Claude follows the skill's instructions for the rest of the session
+4. Skills are never auto-loaded — you choose when to use them
+
+The installer creates a `skills/` folder and downloads `SKILL_TEMPLATE.md`
+automatically. See `JITCR_Skills_Protocol.md` in your JITCR hub for the
+complete skills guide.
+
+---
+
 ## How to Install
 
 ### Pre-requisites
@@ -486,8 +527,28 @@ no cloud, no external service, fully under your control.
 Download from [claude.ai/download](https://claude.ai/download) if you don't have it.
 
 **2. filesystem MCP — required**
-This allows Claude to read and write files on your machine. Add it to your
-`claude_desktop_config.json`. Without this, JITCR cannot function.
+This allows Claude to read and write files on your machine. Without this,
+JITCR cannot function. Add it to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem",
+               "C:\\Users\\{YourUsername}\\Documents"],
+      "type": "stdio"
+    }
+  }
+}
+```
+
+Config file location:
+- Windows : `%APPDATA%\Claude\claude_desktop_config.json`
+- macOS   : `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Linux   : `~/.config/Claude/claude_desktop_config.json`
+
+After editing, fully quit and reopen Claude Desktop.
 
 **3. shell-command MCP — recommended**
 Allows Claude to run terminal commands. Needed for `> commit` and `> end`.
@@ -513,8 +574,8 @@ folder — the central hub for all your JITCR-managed projects on this machine.
 | macOS | `~/Documents/JITCR_Protocol/` |
 | Linux | `~/Documents/JITCR_Protocol/` |
 
-Press Enter to accept the default, or type any custom path. This folder is created
-once and shared across all your JITCR projects on this machine.
+Type 1 to accept the default, or type 2 to enter a custom path. This folder is
+created once and shared across all your JITCR projects on this machine.
 
 > **Important:** `JITCR_Protocol/` is the JITCR management hub only — it stores
 > Tier 2 guides and session logs. Your actual project files stay wherever they
@@ -533,6 +594,7 @@ Every JITCR project has **two distinct paths** that serve completely different p
 This is where JITCR stores its own operational files:
 - `JITCR_{ProjectName}.md` — the Tier 2 guide (project context, paths, GitHub config)
 - `logs/` — all journals and handoffs (session memory)
+- `skills/` — project-specific skill files
 
 These files are **private by design**. They are never committed to git and never
 pushed to GitHub. They exist only to give Claude context across sessions.
@@ -556,7 +618,8 @@ SETUP 1 — Separate paths (recommended for most projects)
 
   JITCR_Protocol/MyApp\                  ← Path A: JITCR management only
     ├── JITCR_MyApp.md                   ← Tier 2 guide
-    └── logs/                            ← journals + handoffs (never committed)
+    ├── logs/                            ← journals + handoffs (never committed)
+    └── skills/                          ← project skills (never committed)
 
   C:\Dev\MyApp\                          ← Path B: your actual project
     ├── src\
@@ -572,17 +635,19 @@ SETUP 2 — Same path (press Enter at Q2 — simplest setup)
   JITCR_Protocol/MyApp\                  ← Path A AND Path B in one folder
     ├── JITCR_MyApp.md                   ← Tier 2 guide
     ├── logs/                            ← journals + handoffs
+    ├── skills/                          ← project skills
     └── [your project files here]        ← also here
 
-  → Works fine, but your .gitignore MUST exclude logs/ and JITCR_MyApp.md
-    to prevent session memory from being committed to git.
+  → Works fine, but your .gitignore MUST exclude logs/, skills/, and
+    JITCR_MyApp.md to prevent session memory from being committed to git.
 
 
 SETUP 3 — Linking an existing project (type path at Q2)
 
   JITCR_Protocol/MyApp\                  ← Path A: JITCR management only
     ├── JITCR_MyApp.md
-    └── logs/
+    ├── logs/
+    └── skills/
 
   C:\Users\Me\Documents\Existing-Work\   ← Path B: pre-existing folder linked at Q2
     ├── [existing files]
@@ -641,6 +706,7 @@ entirely by the `.gitignore` file in your Project Root.
 ```
 # Exclude JITCR management files
 logs/
+skills/
 JITCR_*.md
 ```
 
@@ -652,26 +718,31 @@ JITCR_*.md
 JITCR_Protocol/                               ← your local JITCR hub (Path A for all projects)
 │
 ├── JITCR_Universal_Commands.md               ← shared command engine (all projects)
+├── JITCR_Skills_Protocol.md                  ← skills guide (all projects)
 │
 ├── {ProjectName-A}\                          ← one subfolder per project
 │   ├── JITCR_{ProjectName-A}.md              ← Tier 2 guide for this project
-│   └── logs/                                 ← all session logs for this project
-│       ├── journal_YYYY-MM-DD_HHMM.md        ← activity log
-│       └── handoff_YYYY-MM-DD_HHMM.md        ← session handoff
+│   ├── logs/                                 ← all session logs for this project
+│   │   ├── journal_YYYY-MM-DD_HHMM.md        ← activity log
+│   │   └── handoff_YYYY-MM-DD_HHMM.md        ← session handoff
+│   └── skills/                               ← project-specific skills
+│       └── SKILL_TEMPLATE.md                 ← template for creating new skills
 │
 ├── {ProjectName-B}\
 │   ├── JITCR_{ProjectName-B}.md
-│   └── logs/
+│   ├── logs/
+│   └── skills/
 │
 └── {ProjectName-Z}\
     ├── JITCR_{ProjectName-Z}.md
-    └── logs/
+    ├── logs/
+    └── skills/
 ```
 
 > Each project's JITCR management files live under `JITCR_Protocol/{ProjectName}/`.
 > The actual project files live at `{ProjectRoot}` — wherever you defined it at Q2.
-> The `JITCR_Universal_Commands.md` file is shared — one copy at the hub root,
-> used by all projects.
+> The `JITCR_Universal_Commands.md` and `JITCR_Skills_Protocol.md` files are shared
+> — one copy at the hub root, used by all projects.
 
 **What the `logs/` folder contains:**
 Every time you run `> save`, JITCR writes two files into `{ProjectName}/logs/`:
@@ -687,18 +758,22 @@ instantly without re-explaining anything. All files are plain markdown, readable
 any text editor, transferable to any LLM, and fully under your control.
 
 **This is separate from the GitHub repo**, which contains only the published
-protocol files (README, installer prompt, and command engine):
+protocol files:
 
 ```
 jitcr-protocol\                              ← GitHub repo (what you're reading now)
 ├── README.md                                ← full documentation
-├── JITCR_Installer_Prompt.md               ← one-click copy — paste as first message
-└── JITCR_Universal_Commands.md             ← full command engine
+├── JITCR_Installer_Prompt.md               ← installer — downloaded automatically at install time
+├── JITCR_Universal_Commands.md             ← full command engine for all > commands
+├── JITCR_Skills_Protocol.md               ← complete skills guide
+├── SKILL_TEMPLATE.md                       ← template for creating project skills
+├── CONTRIBUTING.md                         ← contribution guidelines
+└── LICENSE                                 ← MIT license
 ```
 
 ---
 
-### Installation — 3 Steps
+### Installation — 6 Steps
 
 **Step 1:** Create a new Claude Desktop Project.
 *(Claude Desktop → Projects → New Project)*
@@ -707,41 +782,75 @@ jitcr-protocol\                              ← GitHub repo (what you're readin
 > project name (Q1 in the installer). This keeps your `JITCR_Protocol/{ProjectName}/`
 > folder clearly linked to the right Claude Desktop project when managing multiple projects.
 
-**Step 2:** Download `JITCR_Installer_Prompt.md` from this repo (click the file →
-click the download icon), then attach it to a new chat message in your project
-along with this trigger prompt:
+**Step 2:** Paste the following into **Project → Settings → Project Instructions**:
 
 ```
-You are running inside Claude Desktop with filesystem MCP and shell-command MCP
-available. Please use the attached file to set up the JITCR Protocol for this
-project. Follow its instructions exactly, starting with Phase 1.
+## Role
+You are the JITCR Protocol Installer agent for this project.
+
+## Your Job
+When the user attaches JITCR_Installer_Prompt.md and says "see the attached":
+- Read the file immediately
+- Execute it phase by phase exactly as written
+- Start with Phase 1 silently — no greeting, no questions first
+- Do not summarize the file
+- Do not ask what to do with it
+- Just run it
+
+## MCP Tools
+Load these at the start:
+- tool_search("filesystem read file windows")
+- tool_search("shell command execute")
 ```
 
-When Claude asks for confirmation to proceed, type `yes`. The installer runs
-interactively — checking your MCPs, asking a few questions, and creating all
-files and folders automatically.
+**Step 3:** Download `JITCR_Installer_Prompt.md` from this repo (click the file →
+click the download icon). Start a new chat in your project, attach the file, and say:
 
-> **Note on Q0 — Hub location:** The installer asks where to create
-> `JITCR_Protocol/`. Press Enter to accept the OS default or type a custom path.
-> See [Where JITCR_Protocol/ Is Created](#where-jitcr_protocol-is-created) above.
+```
+see the attached
+```
+
+The installer runs automatically — silently checking your system, then walking
+you through a few questions about your project.
+
+**Step 4:** Follow the installer questions:
+- Choose where to store JITCR files (type `1` for default or `2` for custom path)
+- Enter your project name
+- Confirm your project root folder
+- Describe what this project is for (one sentence)
+- Choose whether to use git
+
+When the installer shows the **Ready to Install** summary, review it and type `y`
+to confirm. The installer creates all folders, downloads all required files from
+GitHub, and sets up your project automatically.
+
+**Step 5:** When the installer finishes, it outputs your **Tier 1 Project Instructions**.
+Copy that text and paste it into **Project → Settings → Project Instructions**,
+**replacing** the installer instructions you pasted in Step 2.
+
+**Step 6:** Start a new chat in your project and type:
+
+```
+> start
+```
+
+JITCR is running. 🚀
+
+---
 
 > **Note on Q2 — Project folder:** The installer asks whether you have an existing
-> folder to link as your Project Root. If this is a new project, press Enter —
+> folder to link as your Project Root. If this is a new project, type `1` —
 > your project folder defaults to `JITCR_Protocol/{ProjectName}/` (same as the
 > JITCR management path). If your project already exists elsewhere on your machine,
-> type that path. See [Two Paths](#two-paths-jitcr-management-vs-your-project)
+> type `2` and enter that path. See [Two Paths](#two-paths-jitcr-management-vs-your-project)
 > above for implications of each choice.
 
-> **Note on Q5 — Git and GitHub:** The installer asks whether you want git
+> **Note on Q4 — Git and GitHub:** The installer asks whether you want git
 > initialized and whether you plan to push to GitHub. If you provide a GitHub
 > remote URL, it is stored in your Tier 2 guide and used by `> end` to offer
 > a push at the end of every session. If you choose local-only, GitHub push
 > is never mentioned again for that project. See
 > [What Gets Committed and Pushed](#what-gets-committed-and-pushed) above.
-
-**Step 3:** When the installer finishes, it outputs your **Tier 1 text**. Copy it and
-paste it into **Project → Settings → Project Instructions**. Start a new chat and
-type `> start`. JITCR is running. 🚀
 
 ---
 
@@ -749,9 +858,13 @@ type `> start`. JITCR is running. 🚀
 
 ```
 jitcr-protocol/
-├── README.md                      ← You are here — full documentation
-├── JITCR_Installer_Prompt.md      ← Installer prompt — fetched automatically at install time
-└── JITCR_Universal_Commands.md    ← Full command engine for all > commands
+├── README.md                  ← You are here — full documentation
+├── JITCR_Installer_Prompt.md  ← Installer — downloaded automatically at install time
+├── JITCR_Universal_Commands.md← Full command engine for all > commands
+├── JITCR_Skills_Protocol.md   ← Complete guide to creating and using skills
+├── SKILL_TEMPLATE.md          ← Template for creating your own project skills
+├── CONTRIBUTING.md            ← Contribution guidelines
+└── LICENSE                    ← MIT license
 ```
 
 ---
@@ -776,5 +889,3 @@ MIT — use it, fork it, adapt it freely.
 
 Built by [@intenogent](https://github.com/intenogent)
 Issues and contributions welcome — open a GitHub issue or PR.
-
-
