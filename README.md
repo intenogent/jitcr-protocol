@@ -1,536 +1,402 @@
-JITCR Protocol
-Context management protocol for Claude Desktop. 3-tier architecture: 65% token savings, session continuity across LLMs, defense-in-depth safety controls.
-
-What This Is
-JITCR Protocol is an automated installer and context management system for Claude Desktop.
-This repository contains everything needed to set up and run JITCR on your machine:
-📋 JITCR_Installer_Prompt.md — the installer file you attach to Claude Desktop to run setup
-📖 JITCR_Universal_Commands.md — the full command engine downloaded automatically at install time
-🗂️ JITCR_Skills_Protocol.md + SKILL_TEMPLATE.md — skills system downloaded automatically at install time
-📄 README.md — full documentation
-
-How to Use This Repository
-1. Read the "How to Install" section below
-2. Create a new Claude Desktop project
-3. Copy the installer agent prompt from the Installation — 6 Steps section and paste it into Project Instructions
-4. Download JITCR_Installer_Prompt.md from this repo and attach it to a new chat
-5. Say "see the attached" — the installer agent does the rest automatically
-
-Why JITCR?
-Without proper context management in Claude Desktop, you run into:
-📈 Token bloat — unnecessary repetition wastes tokens and costs
-🔄 Lost context — sessions don't maintain continuity across conversations
-⚠️ No safety guardrails — unstructured context can lead to errors
-JITCR solves this by organizing your context into three safety layers with built-in efficiency checks.
-
-Quick Start
-Want to see if JITCR is right for you?
-Check out the "The Problem" section in the README
-Skim the "What JITCR Does" section
-Review "The Three Tiers" to understand the approach
-If interested, jump to "How to Install" to get started
-
-
 # JITCR Protocol
-**Just-In-Time Context Retrieval for Claude Desktop**
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Any%20AI%20Assistant-green)](#platform-compatibility)
+[![Protocol](https://img.shields.io/badge/Protocol-v2.9-orange)](JITCR_Universal_Commands.md)
+
+**Just-In-Time Context Retrieval -- AI session management for any platform.**
+
+Every AI session starts from zero. Projects lose context. Tokens burn. Models degrade. JITCR fixes all of it.
 
 ---
 
-## Table of Contents
+## The Philosophy
 
-- [The Problem](#the-problem)
-- [What JITCR Does](#what-jitcr-does)
-- [Control Layers — Safety Architecture](#control-layers--safety-architecture)
-- [What Are MCPs?](#what-are-mcps)
-- [The Three Tiers](#the-three-tiers)
-- [How > start Works](#how--start-works)
-- [Before & After JITCR](#before-jitcr-vs-after-jitcr)
-- [Token Savings](#token-savings--the-formula)
-- [Session Continuity & Commands](#feature-2--session-continuity)
-- [Skills — Project-Specific Instructions](#skills--project-specific-instructions)
-- [How to Install](#how-to-install)
-  - [Pre-requisites](#pre-requisites)
-  - [How JITCR Organizes Your Files](#how-jitcr-organizes-your-files)
-    - [Where JITCR_Protocol/ Is Created](#where-jitcr_protocol-is-created)
-    - [Two Paths: JITCR Management vs. Your Project](#two-paths-jitcr-management-vs-your-project)
-    - [What Gets Committed and Pushed](#what-gets-committed-and-pushed)
-  - [Installation — 6 Steps](#installation--6-steps)
-- [Repo Contents](#repo-contents)
-- [Requirements](#requirements)
-- [License](#license)
-- [Author](#author)
+Close the chat. Hit a token limit. Switch models. Come back three days later.
+
+JITCR remembers -- because you told it to.
+
+```
+  > end      (Tuesday, 5:42 PM)
+             Saves journal + handoff. Commits locally.
+
+             ...three days pass...
+
+  > start    (Friday, 9:15 AM)
+             Reads the handoff. Restores full project context.
+             No re-explaining. No "let me catch you up."
+```
+
+The AI reads exactly what you left behind -- what was done, what was decided, what's still open, what comes next -- and picks up mid-thought. If one handoff isn't enough, `> start` reaches further back through your journals automatically. You decide how much history matters. JITCR makes sure it gets read.
+
+That same principle runs through everything else in JITCR. This is not a fixed tool with a fixed feature set -- it is a customizable framework. You bring your own knowledge, your own skills, your own validation rules, your own guardrails. A skill is not a built-in feature. It is domain expertise, a repeated process, an industry-specific rule, an output format your team requires -- whatever *you* define -- sitting on your machine, invisible, costing nothing until the moment you call it.
+
+Nothing is hard-coded except the protocol itself. The protocol is the chassis. You build the agent.
 
 ---
 
 ## The Problem
 
-If you use Claude Desktop for real projects, you have likely hit three walls:
+AI assistants forget everything between sessions, degrade as context grows, and lock your work to a single model and platform. Research confirms it: every frontier model tested shows accuracy drops as context length increases -- up to 85% degradation, no exceptions. Meanwhile, your project instructions reload on every single message whether the AI needs them or not.
 
-**1. Token burn.**
-Your Project Instructions load on *every single message* — whether Claude needs
-that context or not. Everything in one block, repeated on every API call, burning
-tokens and accelerating context compaction.
-
-**2. Lost context between sessions.**
-When a session ends — token limit hit, starting fresh, or switching to a different
-LLM — you lose everything. Back to re-explaining your project from scratch every time.
-
-**3. Risk and safety in AI workflows.**
-As AI assistants gain more capabilities (file access, git commands, external operations),
-how do you ensure they operate safely? Default constraints are needed, plus approval
-workflows for critical operations, and full transparency about what's happening.
-
-JITCR Protocol solves all three.
+JITCR solves the full range: token waste, context degradation, lost session state, no reusable knowledge, no portable continuity, no domain validation, no real safety controls, no version discipline, and no path toward a shared ecosystem of AI capabilities.
 
 ---
 
-## What JITCR Does
+## What You Get
 
-JITCR (Just-In-Time Context Retrieval) is a protocol for Claude Desktop with three features:
-
-**Feature 1 — Token Management**
-Split project instructions across three tiers. Each tier loads only when needed —
-not on every API call. The same context costs far fewer tokens across a session.
-
-**Feature 2 — Session Continuity**
-Every session gets a running activity log, a structured handoff document, and an
-optional local git backup. Start any new session — even on a different LLM — type
-`> start` and full context is restored instantly from your own files.
-
-**Feature 3 — Control Layers (Safety Architecture)**
-A multi-layered approach to safety combining preventive guardrails, human-in-the-loop 
-approvals, and full transparency. Default controls protect every project; both 
-prevention and approval can be customized per project's specific needs.
+| Theme | Capabilities |
+|---|---|
+| **Context Retrieval** | Just-in-time loading, multi-layer architecture, OS-aware operation |
+| **Session Continuity** | Cross-session persistence, cross-model portability, actual timestamps, automatic path discovery |
+| **Skills and Knowledge** | On-demand skills, fully user-defined and extensible, project-local RAG, custom input/output/interaction templates -- bring any knowledge, any rules, any workflow |
+| **Validation** | Structural checks, conceptual validation, configurable multi-mode validation |
+| **Guardrails** | Protocol-level rules, project-level custom rules, skill-level scoped rules, defense-in-depth safety |
+| **Version Control** | Local git, optional GitHub push, timestamped project backup |
+| **Commands** | 9 core commands, 10 skill-family commands, extensible framework |
+| **Installer** | Automated setup, MCP error handling, automatic file downloads |
+| **Ecosystem** | Marketplace-ready architecture, shared skills ecosystem |
 
 ---
 
-## Control Layers — Safety Architecture
+## How It Works
 
-JITCR implements a defense-in-depth approach to AI safety:
-
-### Layer 1: Preventive Guardrails (Defaults)
-
-Default constraints that stop harmful actions before they occur:
-
-- Never delete files without explicit user permission
-- Never modify .env without explicit user permission
-- Read existing files before overwriting — preserve content
-- Shell commands: always use forward slashes in paths
-- On > start: read from explicit, verified paths only
-
-These guardrails are automatically included in every project's Tier 1 instructions.
-
-### Layer 2: Human-in-the-Loop Approval (Defaults)
-
-Critical operations require explicit user confirmation:
-
-- **GitHub push approval** — User confirms before pushing to GitHub at `> end`
-- **Git initialization approval** — User chooses whether to initialize git during setup
-- **GitHub configuration approval** — User selects push behavior at setup time (yes/no/local-only)
-
-### Layer 3: Transparency & Observability
-
-Users know exactly what's enabled and what's happening:
-
-- **Session headers** display git status and GitHub configuration at session start
-- **Handoff files** track completions, decisions, and open issues
-- **All logs stored locally** as readable markdown files — no cloud, full control
-
-### Customizable Per Project
-
-These defaults apply to all JITCR projects. Both prevention guardrails and approval 
-workflows can be customized to match your project's specific requirements, sensitivity 
-levels, and team workflows.
-
-See your project's Tier 2 guide (`JITCR_[ProjectName].md`) to extend or modify controls 
-for your specific needs. Examples include:
-
-- Adding approval workflows for risky operations
-- Defining rules for sensitive data handling (API keys, credentials)
-- Customizing path verification rules
-- Requiring additional confirmations before git operations
-- Implementing compliance or audit requirements
-
-**Why Layered Controls Matter**
-
-Default controls provide immediate safety for any JITCR project. Customizable layers 
-let teams implement controls matching their specific risk profiles — sensitive data 
-handling, compliance requirements, team workflows, and project sensitivity levels.
-
----
-
-## What Are MCPs?
-
-MCPs (Model Context Protocol servers) are connectors that give Claude Desktop
-access to your local machine. JITCR uses two:
-
-- **filesystem MCP** — lets Claude read and write files on your computer
-- **shell-command MCP** — lets Claude run terminal commands (needed for git)
-
-Without at least the filesystem MCP, JITCR cannot read or write your project
-files. Setup instructions for MCPs are covered in the How to Install section below.
-
----
-
-## The Three Tiers
+JITCR organizes project context across layers. Each layer loads at the right time -- not all at once.
 
 ```
-TIER 1 — Project Instructions (always-on, ~200–300 tokens)
-  Lives in : Claude Desktop → Project → Settings → Project Instructions
+LAYER 1 -- Project Instructions (~200-300 tokens, every message)
+  Lives in : AI platform persistent instructions
+             (Claude Desktop Project Instructions, ChatGPT custom
+              instructions, Gemini Gems, Copilot notebooks, or any
+              equivalent your platform provides)
   Loads    : Every message
   Contains : Role, project name, root path, guardrails, > start trigger
 
-TIER 2 — JITCR_{ProjectName}.md (loaded once per session)
+LAYER 2 -- JITCR_{ProjectName}.md (~350 tokens, once per session)
   Lives in : JITCR_Protocol/{ProjectName}/ on your machine
-  Loads    : Once at > start via filesystem MCP
-  Contains : Project purpose, architecture, key paths, GitHub config, commands, notes
+  Loads    : Once at > start via file access tools
+  Contains : Project purpose, key paths, GitHub config,
+             project guardrails, skills registry, commands
 
-TIER 3 — Session logs (loaded conditionally)
+LAYER 3 -- Session logs (~150 tokens, once per session)
   Lives in : JITCR_Protocol/{ProjectName}/logs/
-  Loads    : Latest handoff always + recent journals only if status = BLOCKED
-  Contains : What was done, decisions made, open issues, what comes next
+  Loads    : Latest handoff always + recent journals if needed
+  Contains : What was done, decisions made, open issues, next steps
 ```
+
+Type `> start` and the AI reads all three layers automatically, checks git, detects your OS, retrieves real system time, and enters the session already knowing your project. Here is what that actually looks like on screen:
+
+```
++--------------------------------------+
+| Project  : BlogRewrite               |
+| OS       : Windows                   |
+| Root     : C:\Users\You\Documents\   |
+|            BlogRewrite               |
+| Started  : 2026-07-02 08:30          |
+| Git      : active                    |
+| GitHub   : local only                |
+| Loaded   : Tier 2 + Tier 3          |
+| Skills   : none                      |
+| Commands : > journal, save, end...   |
++--------------------------------------+
+
+Picking up from handoff 2026-06-29_1742. Last session
+you finished the outline draft and were about to start
+the introduction. Ready to continue, or something else?
+```
+
+No screen-sharing. No re-explaining. The AI already knows.
+
+This is also where JITCR differs from approaches like a persistent chat thread, a synced notes app, or a folder of saved prompts: those keep a record, but they still rely on you to re-read it and re-explain what matters. JITCR's layers are read by the AI itself, every session, automatically — the record becomes context, not homework.
+
+> See [HOWTO.md](HOWTO.md) for the full architecture deep dive, the complete first-session walkthrough, and step-by-step `> start` explanation.
 
 ---
 
-## How `> start` Works
+## Quick Start
 
-`> start` is the command that activates JITCR at the beginning of every session.
+**Three things before you begin, then the installer takes over.**
 
-It is defined in Tier 1 (your Project Instructions) as the trigger that tells
-Claude to load the rest of the context. When you type `> start` in a new session,
-Claude automatically:
+1. Install Claude Desktop and add the filesystem MCP to your config file
+2. Create a project and paste the installer agent block into Project Instructions
+3. Download `JITCR_Installer_Prompt.md` from this repo, attach it to a chat, and type `see the attached`
 
-1. Detects your OS (Windows, macOS, or Linux)
-2. Checks that your project logs folder exists — creates it if not
-3. Checks git status in your project root
-4. Loads GitHub config from Tier 2 — reads `GitHub Remote` and `GitHub Push` fields
-   and stores them for the session (silently)
-5. Loads Tier 2 — reads `JITCR_{ProjectName}.md` from your machine via filesystem MCP
-6. Loads Tier 3 — reads the latest handoff file from `JITCR_Protocol/{ProjectName}/logs/`;
-   reads recent journals only if the last session was marked BLOCKED or had unresolved issues
-7. Displays a session header confirming everything is loaded and ready, including
-   whether GitHub push is enabled or local-only for this project
+The installer runs five guided questions, shows you a full summary before creating anything, and outputs your permanent Layer 1 Project Instructions at the end.
 
-This means Claude enters every session already knowing your project, your last
-session's state, open issues, and whether GitHub push is configured — without you
-typing a word of explanation.
+> Full installation guide with all config details, MCP setup, and step-by-step walkthrough: [How to Install](#how-to-install)
 
 ---
 
-## Before JITCR vs. After JITCR
+## Features
 
-The following side-by-side shows the exact same project context organized two ways.
+### Theme A: Context Retrieval Architecture
 
-**Before JITCR:** everything lives in one block inside Claude Desktop's Project
-Instructions — loaded on every single message, whether Claude needs it or not.
+**Just-In-Time Context Retrieval** is the core philosophy. Context is not preloaded. It is retrieved on demand -- at the exact moment the session needs it, in the exact amount the session needs. Nothing loads that is not needed. Nothing that is not loaded costs tokens.
 
-**After JITCR:** the same content is split across three tiers. Only Tier 1
-(~225 tokens) loads every message. Tiers 2 and 3 load once at `> start` via
-your filesystem MCP — then they're done. The content is identical. The token
-cost across a session is not.
+**Multi-layer selective context loading** organizes AI instructions across any number of priority layers. Only the minimum loads on every message. The rest loads once at session start -- or on demand when you call it.
+
+**OS-aware, platform-agnostic operation** means JITCR detects your operating system at session start and adjusts its behavior accordingly. Windows, macOS, Linux -- the protocol adapts to the environment. You do not adapt to the protocol.
 
 ---
 
-### BEFORE — Everything in Project Instructions
+### Theme B: Session Continuity
 
-All context in one block, loaded on **every single message**:
+**Cross-session context persistence** means no more re-explaining. Every session writes a structured handoff and journal to your local machine. Start a new session after a token limit, a model switch, or a week away -- type `> start` and full context is restored from your own files. Instantly.
 
-```markdown
-## Role
-Claude is the development assistant for {ProjectName}.
-{RoleDescription}
+**Cross-model portability** means session files are plain text. Any AI model that can read files can pick up where the last session left off. Hand a JITCR handoff to a different model and continue without losing a thing.
 
-## Project
-- Name: {ProjectName}
-- OS: {OS}
-- Root: {ProjectRoot}
-- Session logs : JITCR_Protocol/{ProjectName}/logs/
-- Universal Commands: JITCR_Protocol/JITCR_Universal_Commands.md
-- Git: active
+**Actual system time retrieval** means JITCR never assumes or hard-codes timestamps. Every session retrieves the real system time before writing any log. Every filename, every journal entry, every handoff reflects when it actually happened.
 
-## Project Purpose
-{RoleDescription}
+**Automatic path discovery** means JITCR always reads your project configuration first to get real paths. No hard-coded assumptions. No failures when paths differ across machines or team members.
 
-## Key File Paths
-- Tier 2 guide : JITCR_Protocol/{ProjectName}/JITCR_{ProjectName}.md
-- Session logs : JITCR_Protocol/{ProjectName}/logs/
-- Project root : {ProjectRoot}
-
-## File Access Rules
-- To read/write files: use filesystem MCP with native OS paths
-- To run commands (git, etc): use shell-command MCP with forward slashes
-
-## Guardrails
-- Never delete files without explicit user permission
-- Never modify .env without explicit user permission
-- Read files before overwriting — preserve content
-- Shell commands: always use forward slashes in paths
-- On > start: read JITCR_{ProjectName}.md from project root
-
-## Environment
-{Environment}
-
-## Commands
-> start   Initialize session — load context, check git
-> journal Write timestamped journal entry
-> handoff Create structured session handoff
-> save    journal + handoff together
-> status  Show last handoff, last journal, git status
-> commit  Git commit all project files locally
-> end     save + commit locally + optional GitHub push
-
-## Latest Session State
-Status: IN PROGRESS
-Completed last session: [list of what was done]
-Open issues: [any blockers]
-Next session should: [priority list]
-Files modified: [list of changed files]
-```
-
-**Estimated cost: ~725 tokens loaded on every single message.**
+> See [HOWTO.md -- Session Continuity Workflow](HOWTO.md#7-session-continuity--workflow-guide) for the full workflow and model-switching guide.
 
 ---
 
-### AFTER — Same content, split across three tiers
+### Theme C: Skills and Knowledge
 
-**Tier 1 — Project Instructions (~225 tokens, loads every message)**
+**On-demand skills** are reusable instruction sets that live in your project and load only when you call them. Zero tokens until invoked. Automatic unload when the session ends.
 
-```markdown
-## Role
-Claude is the development assistant for {ProjectName}.
-{RoleDescription}
+**User-defined, fully customizable skills** are yours to build. A skill is not a preset. It is whatever you need it to be -- domain knowledge, a process, a reference, a workflow. You own it. It lives on your machine.
 
-## Project
-- Name: {ProjectName}
-- OS: {OS}
-- Root: {ProjectRoot}
+**Project-local RAG** is a local, file-based knowledge retrieval system. No vector database. No cloud. No external service. Your knowledge files live in your project, under your control, and load only when the session needs them.
 
-## Guardrails
-- Never delete files without explicit user permission
-- Never modify .env without explicit user permission
-- Read files before overwriting — preserve content
-- Shell commands: always use forward slashes in paths
-- On > start: read JITCR_{ProjectName}.md from:
-  JITCR_Protocol/{ProjectName}/
+**Custom input templates** define exactly how you give information to the AI for a specific workflow. Package a structured input format as a skill. Load it when needed. The AI follows your format every time.
 
-## Environment
-{Environment}
+**Custom output layout templates** define exactly how the AI structures its response. Package it as a skill, load on demand. Consistent output every time, across every session.
 
-## Command Prefix
-> = execute command — full reference in JITCR_{ProjectName}.md
-```
+**Custom interaction templates** combine input and output into a single, complete framework for a specific workflow. One skill loads the whole interaction contract -- how you provide information and how the AI responds.
 
-**Tier 2 — JITCR_{ProjectName}.md (~350 tokens, loaded once at `> start`)**
+**Three-path intelligent skill creation** meets you where you are. Have content ready? Paste it in. Have an idea? Describe it and the AI generates the skill. Exploring? Describe the problem and get guidance on whether a skill is the right approach.
 
-```markdown
-## Project Identity
-| Field          | Value                                                   |
-|----------------|---------------------------------------------------------|
-| Project Name   | {ProjectName}                                           |
-| OS             | {OS}                                                    |
-| Project Root   | {ProjectRoot}                                           |
-| Session Logs   | JITCR_Protocol/{ProjectName}/logs/                      |
-| Universal Cmds | JITCR_Protocol/JITCR_Universal_Commands.md              |
-| Git            | active                                                  |
-| GitHub Remote  | {https://github.com/username/repo.git or none}          |
-| GitHub Push    | {yes / no}                                              |
+**Smart skill suggestions** analyze the current session context and suggest skills that would help -- based on what you are actually doing, not a static menu.
 
-## Project Purpose
-{RoleDescription}
+**Automatic Layer 2 updates** keep your project configuration current whenever you add, modify, or remove a skill. The skills registry stays accurate without manual maintenance.
 
-## Key File Paths
-| File           | Path                                                    |
-|----------------|---------------------------------------------------------|
-| This file (T2) | JITCR_Protocol/{ProjectName}/JITCR_{ProjectName}.md     |
-| Session logs   | JITCR_Protocol/{ProjectName}/logs/                      |
-| Project root   | {ProjectRoot}                                           |
-
-## Quick Command Reference
-| Command   | Action                                              |
-|-----------|-----------------------------------------------------|
-| > start   | Initialize session — load context, check git        |
-| > journal | Write journal entry                                 |
-| > handoff | Create handoff snapshot                             |
-| > save    | journal + handoff (no git)                          |
-| > status  | Show last handoff, journal, git status              |
-| > commit  | Commit project files to local git only              |
-| > end     | save + commit locally + optional GitHub push        |
-
-Full command logic → JITCR_Universal_Commands.md
-```
-
-**Tier 3 — Latest handoff file (~150 tokens, loaded once at `> start`)**
-
-```markdown
-# Session Handoff — YYYY-MM-DD HH:MM
-
-## Project Status
-**Status: IN PROGRESS**
-[One paragraph summary of current state]
-
-## Completed This Session
-- [what was accomplished]
-
-## Current File States
-| File | Status | Notes |
-|------|--------|-------|
-|      |        |       |
-
-## Open Issues
-- [issue]: [details]
-
-## Next Session Should
-1. [priority 1]
-2. [priority 2]
-```
+> See [HOWTO.md -- Skills System](HOWTO.md#3-skills-system--complete-guide) for the full skills guide, folder structure, and creation walkthrough.
+> See [HOWTO.md -- Custom Templates](HOWTO.md#4-custom-templates--complete-guide) for input, output, and interaction template walkthroughs.
 
 ---
 
-### Token Savings — The Formula
+### Theme D: Validation
 
-The savings come from **when** content loads, not just how much there is.
+**Structural skill validation** checks every skill for the required folder structure, SKILL.md presence, metadata file, and size constraints before the skill is admitted to the project.
+
+**Conceptual skill validation** goes further. The AI reasons against a set of protocol-defined disqualifier rules -- checking whether the proposed skill is appropriate, coherent, and protocol-compliant as a matter of logic, not just structure.
+
+**Configurable multi-mode validation** is JITCR's most novel capability. Any feature can implement any combination of validation behaviors in any configuration:
+
+- **Protocol-governed** -- built-in JITCR structural and conceptual checks
+- **No-validation** -- bypass entirely for workflows where speed matters
+- **User-defined rule-based** -- you write your own domain-specific rules; the AI validates against them and returns specific failure reports identifying exactly which rule was violated and how
+- **Agent-assisted intelligent** -- AI reasoning applied to your rules, catching violations that pattern matching would miss
+
+Any combination. Any configuration. No equivalent exists in any AI protocol or tool as of this writing.
+
+> See [HOWTO.md -- Configurable Multi-Mode Validation](HOWTO.md#5-configurable-multi-mode-validation--reference) for full configuration reference and examples.
+
+---
+
+### Theme E: Guardrails and Safety
+
+**Protocol-level guardrails** are seven universal rules built into JITCR. They apply to every project, every session, every platform. They cannot be disabled:
+
+1. Never delete files without explicit user permission
+2. Never modify .env files without explicit user permission
+3. Read existing files before overwriting -- preserve content
+4. Shell commands always use forward slashes in paths
+5. Always read the project guide first at session start
+6. Never assume or hard-code timestamps -- always retrieve actual time
+7. Never assume project paths -- always read from the project guide
+
+What this looks like in practice: if the AI is about to overwrite a file, it reads the existing content first and tells you what's there before making any change -- it never silently replaces something it hasn't looked at. If you ask it to delete a file, it states what it's about to delete and waits for your explicit "yes," every time, no exceptions.
+
+**Project-level custom guardrails** are defined in your Layer 2 project guide and loaded at `> start`. Active for the entire session. Encode compliance requirements, approval workflows, access controls, domain-specific safety rules -- whatever your project needs.
+
+**Skill-level guardrails** are embedded inside individual skills. They activate only when that skill loads and unload automatically when the session ends. Rules that cost nothing until they are needed.
+
+**Defense-in-depth safety** means all three guardrail layers operate simultaneously and independently. No single layer depends on another.
+
+**Human-in-the-loop approval workflows** mean critical operations require your explicit confirmation before the AI acts. GitHub push at `> end`. Skill deletion at `> skill remove`. No autonomous action on high-stakes operations.
+
+**Full transparency and observability** means you always know what is loaded, what happened, and what is coming next. Session header at `> start`. Handoffs track all decisions and open issues. All logs are plain markdown on your local machine. No hidden state. No cloud.
+
+> See [HOWTO.md -- Guardrails Configuration](HOWTO.md#6-guardrails--configuration-guide) for the full configuration guide across all three levels.
+
+---
+
+### Theme F: Version Control and Backup
+
+**Local git version control** via `> commit` -- always local, never pushes automatically. Use it as a mid-session checkpoint or end-of-session save.
+
+**GitHub push** is opt-in, configured once at install. The AI asks before pushing at `> end`. Every session. No exceptions.
+
+**Project backup** via `> backup` creates a timestamped zip of your project root, on demand, on your machine.
+
+---
+
+### Theme G: Extensibility and Commands
+
+**An extensible self-configuring command framework** means new capabilities automatically generate their own command interfaces. As JITCR grows, new commands appear without manual registration.
+
+**A full session command set** covers everything from session initialization to git operations to skill management. Nine core commands. Ten skill-family commands. All extensible.
+
+---
+
+### Theme H: Installer and Setup
+
+**Automated installation** via a single attached file. Silent system checks first. Five questions. A full confirmation summary before anything is created. Everything is shown before you commit.
+
+**Clear MCP error handling** means if a required tool is missing, the installer tells you exactly what failed, exactly why, and the exact fix for your OS -- including the precise config file path and what to add to it.
+
+**Automatic file downloads** pull the shared protocol files from GitHub during install. You download one file. The installer handles the rest.
+
+**Two-path project structure** keeps JITCR management files completely separate from your project root. Session logs, skills, and configuration stay private. Your project root stays clean.
+
+---
+
+### Theme I: Ecosystem and Future
+
+**Marketplace and ecosystem readiness** means the skills and templates infrastructure is designed to support a future ecosystem of shared, distributable capabilities. The architecture is already in place.
+
+---
+
+## Token Savings and Real Costs
+
+The savings come from when content loads — not just how much there is.
+
+### Token Math
 
 ```
-WITHOUT JITCR — full block on every message:
-  ~725 tokens × 20 messages = 14,500 tokens
+WITHOUT JITCR -- full block on every message:
+  ~725 tokens x 20 messages = 14,500 tokens
 
-WITH JITCR — only Tier 1 repeats:
-  Tier 1 (~225 tokens) × 20 msgs  =  4,500 tokens  ← every message
-  Tier 2 (~350 tokens) × 1        =    350 tokens  ← once at > start
-  Tier 3 (~150 tokens) × 1        =    150 tokens  ← once at > start
-  Total                           =  5,000 tokens
+WITH JITCR -- only Layer 1 repeats:
+  Layer 1 (~225 tokens) x 20 messages =  4,500 tokens  (every message)
+  Layer 2 (~350 tokens) x 1           =    350 tokens  (once at > start)
+  Layer 3 (~150 tokens) x 1           =    150 tokens  (once at > start)
+  Total                               =  5,000 tokens
 
 SAVED: ~9,500 tokens (~65%) across a 20-message session
 ```
 
-> **Note:** These are rough estimates based on the generic JITCR templates.
-> Actual savings depend on your project's instruction size and session length.
-> Savings grow with session length — the longer the session, the higher the percentage.
+Layers 2 and 3 are paid once at `> start`. Layer 1 is the only repeating cost. Breakeven is typically after 3-5 messages. After that, every message saves tokens.
 
-**Why savings grow over time:**
-Tier 2 and Tier 3 are paid once at `> start`. Tier 1 is the only repeating cost.
-Every additional message widens the gap between the two approaches.
+> **Note:** These figures are estimates based on generic JITCR templates. Actual savings depend on your project instruction size and session length. Savings grow with session length -- every additional message widens the gap.
 
-**Breakeven point:** Typically after 3–5 messages. After that, every additional
-message saves tokens compared to the monolithic approach.
+### Dollar Cost -- Verified June 2026 Rates
+
+Using Claude Sonnet 4.6 at Anthropic's published rate of **$3.00 per million input tokens**:
+
+```
+WITHOUT JITCR:
+  14,500 tokens x $3.00 / 1,000,000 = $0.0435 per session
+
+WITH JITCR:
+  5,000 tokens x $3.00 / 1,000,000  = $0.015 per session
+
+SAVED PER SESSION: ~$0.029 (~65%)
+
+At 10 sessions/week, 50 weeks/year:
+  WITHOUT JITCR: $21.75/year per project
+  WITH JITCR:    $7.50/year per project
+  ANNUAL SAVING: ~$14.25 per project
+
+At 50 sessions/week (active team, multiple projects):
+  WITHOUT JITCR: $108.75/year
+  WITH JITCR:    $37.50/year
+  ANNUAL SAVING: ~$71.25/year
+```
+
+> **Source:** Anthropic API Pricing, June 2026. Claude Sonnet 4.6: $3.00/1M input tokens, $15.00/1M output tokens.
+> Verify current rates at https://platform.claude.com/docs/en/about-claude/pricing
+
+### Why Token Savings Also Mean Better Quality
+
+Keeping Layer 1 under 300 tokens keeps every message well inside the range where models perform at their best. The project detail that would have bloated every message is now loaded once, cleanly, at session start.
+
+Research confirms the quality impact. Chroma (2025) tested 18 frontier models and found every one degrades as context grows -- no exceptions. Liu et al. (Stanford/TACL, 2024) documented 30%+ accuracy drops for information buried in the middle of long contexts -- the volume itself impairs reasoning regardless of total context size.
+
+> **Sources:**
+> - Chroma Research (2025): Context Rot -- 18 frontier models tested, all degrade: https://www.morphllm.com/context-rot
+> - Liu et al. (Stanford / TACL, 2024): Lost in the Middle -- 30%+ accuracy drops on middle-context information
 
 ---
 
-## Feature 2 — Session Continuity
+## Commands
 
-Once JITCR is running, every project session has these commands available:
+### Core Commands
 
 | Command | What It Does |
 |---|---|
-| `> start` | Loads Tier 2 + Tier 3, checks git, loads GitHub config, displays session header |
-| `> journal` | Writes timestamped activity log entry to `{ProjectName}/logs/` |
-| `> handoff` | Creates a structured snapshot of the current session state |
-| `> save` | Runs journal + handoff together — no git involved |
-| `> status` | Shows last handoff, last journal entry, and git status |
-| `> commit` | Commits project files to **local git only** — never pushes to GitHub |
-| `> end` | Runs save + always commits locally + asks about GitHub push if configured |
-| `> ?` | Display all available commands |
+| `> start` | Initialize session: load all layers, check git, display header |
+| `> journal` | Write timestamped activity log to `logs/` |
+| `> handoff` | Create structured session state snapshot in `logs/` |
+| `> save` | Run journal + handoff together |
+| `> status` | Show last handoff, last journal, git status |
+| `> commit` | Commit project files to local git (never pushes automatically) |
+| `> end` | Save + commit locally + optional GitHub push if configured |
+| `> backup` | Zip project root with actual timestamp in filename |
+| `> ?` | Show all available commands |
 
-> Commands accept natural extensions — e.g. `> commit "my message"` or
-> `> ? journal` for details on a specific command.
-
-### How `> commit` and `> end` differ
-
-| | `> commit` | `> end` |
-|---|---|---|
-| Saves journal + handoff | ❌ | ✅ always |
-| Commits to local git | ✅ always | ✅ always |
-| Pushes to GitHub | ❌ never | ✅ asks — only if configured |
-| When to use | Mid-session checkpoint | End of session |
-
-**The rule is simple:**
-- Use `> commit` often during a session to checkpoint your work locally
-- Use `> end` when you are done — it saves everything, commits locally, and
-  asks whether to push to GitHub if your project is configured for it
-- If your project has no GitHub remote configured, `> end` never asks about push —
-  local commit is always the final step
-
-### GitHub push is opt-in — configured at setup
-
-During the JITCR installer, you are asked whether this project will push to GitHub
-and what the remote URL is. This is stored in your Tier 2 guide (`GitHub Remote`
-and `GitHub Push` fields). From then on:
-
-- If `GitHub Push = yes` — `> end` will ask "Push to GitHub now? (yes/no)" every session
-- If `GitHub Push = no` — push is never mentioned, local commit is always final
-
-This means local-only projects are never prompted about GitHub, and GitHub-connected
-projects are always reminded at the right moment — end of session.
-
-All logs and handoffs are saved as plain markdown files on your own machine —
-no cloud, no external service, fully under your control.
-
-**What this enables:**
-
-- **Token limit reached** — start a fresh session, type `> start` — Tier 2 and
-  the latest handoff restore full context instantly, no re-explaining needed
-- **Switching LLMs** — hand the structured handoff to GPT, Gemini, or any other
-  model and continue without losing any context
-- **Returning after days** — the handoff tells you exactly where you left off,
-  what decisions were made, and what comes next
-- **Protecting work** — local git commit at every `> end` means your work is always
-  versioned locally, even if you never push to GitHub
-- **Collaborating** — another person runs `> start` on the same project and
-  gets full context immediately from the same files
-
----
-
-## Skills — Project-Specific Instructions
-
-Skills are reusable instruction sets you create for your specific project — loaded
-on demand, not at every `> start`. They let you teach Claude how to handle
-recurring tasks in your project without burning tokens every session.
-
-**Examples of skills:**
-- A coding style guide Claude follows when writing code for your project
-- A specific workflow for reviewing pull requests
-- Instructions for how to write in your personal writing style
-- A checklist Claude runs before committing changes
-
-**Skills live in your project's skills folder:**
-```
-JITCR_Protocol/{ProjectName}/skills/
-  └── my-skill.md     ← one file per skill
-```
-
-**Skills commands:**
+### Skills Commands
 
 | Command | What It Does |
 |---|---|
 | `> skill list` | Show all skills for this project |
-| `> skill add` | Create a new skill (interactive) |
+| `> skill add` | Create a new skill: interactive, three paths |
 | `> skill use <name>` | Load a skill into the current session |
-| `> skill info <name>` | Show details about a skill |
-| `> skill remove <name>` | Delete a skill |
+| `> skill info <name>` | Show skill details |
+| `> skill enable <name>` | Set skill to auto-load at `> start` |
+| `> skill disable <name>` | Return to manual-load only |
+| `> skill edit <name>` | Edit skill content or metadata |
+| `> skill remove <name>` | Delete a skill (requires confirmation) |
+| `> skill validate` | Check all skills for structural and conceptual compliance |
+| `> skill suggest` | Smart recommendations based on session context |
+| `> ? skill` | Show full skills help |
 
-**How it works:**
-1. Create a skill with `> skill add` — Claude walks you through it interactively
-2. Load it when needed with `> skill use <name>`
-3. Claude follows the skill's instructions for the rest of the session
-4. Skills are never auto-loaded — you choose when to use them
+### `> commit` vs `> end`
 
-The installer automatically downloads `SKILL_TEMPLATE.md` to your project's
-`skills/` folder and `JITCR_Skills_Protocol.md` to your JITCR hub root. See
-`JITCR_Skills_Protocol.md` for the complete skills guide.
+| | `> commit` | `> end` |
+|---|---|---|
+| Saves journal + handoff | No | Yes, always |
+| Commits to local git | Yes, always | Yes, always |
+| Pushes to GitHub | Optional — asks if configured | Optional — asks if configured |
+| When to use | Mid-session checkpoint | End of session |
+
+---
+
+## Platform Compatibility
+
+JITCR works on any AI platform that meets two conditions:
+
+**Condition 1 -- Persistent instructions:** A place to store your project context so the AI knows its role, rules, and configuration across sessions. Claude Desktop Project Instructions, ChatGPT custom instructions, Gemini Gems, Microsoft Copilot notebooks, a system prompt in a locally hosted model, or any equivalent your platform provides.
+
+**Condition 2 -- File access:** The ability to read and write files on your computer or a shared location. This is how JITCR loads Layer 2, writes session logs, manages skills, and restores context at `> start`.
+
+Platforms that meet both conditions today include Claude Desktop, ChatGPT with file tools, Gemini, Microsoft Copilot, locally hosted models via Ollama or Open WebUI, and enterprise AI systems with system prompt and file access support.
+
+**The automated installer is built for Claude Desktop.** It is the reference implementation because Claude Desktop has the most complete file access tooling available today.
+
+**On other platforms,** the protocol, commands, session files, and skills are identical. The setup process differs only in how persistent instructions and file access are configured on that platform. A JITCR project transfers to any compatible platform without changing a single protocol file.
+
+For setup assistance on platforms other than Claude Desktop: https://github.com/intenogent
+
+> See [HOWTO.md -- Platform-Specific Setup](HOWTO.md#10-platform-specific-setup--non-claude-desktop) for step-by-step setup on ChatGPT, Gemini, Copilot, and local models.
 
 ---
 
 ## How to Install
 
-### Pre-requisites
+### What You Need
 
 **1. Claude Desktop**
-Download from [claude.ai/download](https://claude.ai/download) if you don't have it.
+Download from https://claude.ai/download
 
-**2. filesystem MCP — required**
-This allows Claude to read and write files on your machine. Without this,
-JITCR cannot function. Add it to your `claude_desktop_config.json`:
+**2. filesystem MCP (required)**
+Gives Claude Desktop read and write access to your local files. Without this, JITCR cannot function.
+
+Add to your `claude_desktop_config.json`:
 
 ```json
 {
@@ -552,257 +418,74 @@ Config file location:
 
 After editing, fully quit and reopen Claude Desktop.
 
-**3. shell-command MCP — recommended**
-Allows Claude to run terminal commands. Needed for `> commit` and `> end`.
-JITCR works without it but git commands will be unavailable.
+**3. shell-command MCP (recommended)**
+Allows Claude to run terminal commands. Needed for `> commit`, `> end`, and `> backup`. JITCR installs and runs without it, but git commands will not be available.
 
-**4. Git — optional**
+Add to `mcpServers` in your config:
+- Windows : `"shell-command": { "command": "cmd", "args": ["/c"], "type": "stdio" }`
+- macOS   : `"shell-command": { "command": "bash", "args": ["-c"], "type": "stdio" }`
+- Linux   : `"shell-command": { "command": "bash", "args": ["-c"], "type": "stdio" }`
+
+**4. Git (optional)**
 Only needed if you want version control via `> commit` and `> end`.
-Download from [git-scm.com](https://git-scm.com) if needed.
+Download from https://git-scm.com
 
 ---
 
 ### How JITCR Organizes Your Files
 
-#### Where `JITCR_Protocol/` Is Created
+Every JITCR project has two independent paths:
 
-The first thing the installer asks (Q0) is where to create the `JITCR_Protocol/`
-folder — the central hub for all your JITCR-managed projects on this machine.
-**You are in full control of this location.** The installer suggests OS-based defaults:
+**Path A: JITCR management** `JITCR_Protocol/{ProjectName}/`
+Where JITCR stores its operational files: your Layer 2 project guide, session logs, and skills. Private by design. Never committed to git.
 
-| OS | Default location |
-|---|---|
-| Windows | `C:\Users\{YourUsername}\Documents\JITCR_Protocol/` |
-| macOS | `~/Documents/JITCR_Protocol/` |
-| Linux | `~/Documents/JITCR_Protocol/` |
+**Path B: Project root** `{ProjectRoot}` -- anywhere on your machine
+Where your actual work lives. What git tracks. What `> commit` commits and `> end` can push.
 
-Type 1 to accept the default, or type 2 to enter a custom path. This folder is
-created once and shared across all your JITCR projects on this machine.
+```
+JITCR_Protocol/                             <- your local JITCR hub
+|
++-- JITCR_Universal_Commands.md             <- shared command engine
++-- JITCR_Skills_Protocol.md               <- skills guide
+|
++-- {ProjectName}/
+    +-- JITCR_{ProjectName}.md             <- Layer 2 project guide
+    +-- logs/
+    |   +-- journal_YYYY-MM-DD_HHMM.md
+    |   +-- handoff_YYYY-MM-DD_HHMM.md
+    +-- skills/
+        +-- SKILL_TEMPLATE.md
+        +-- {skill-name}/
+            +-- SKILL.md
+            +-- skill-metadata.json
+```
 
-> **Important:** `JITCR_Protocol/` is the JITCR management hub only — it stores
-> Tier 2 guides and session logs. Your actual project files stay wherever they
-> already are. See [Two Paths](#two-paths-jitcr-management-vs-your-project) below.
+The installer creates all folders and downloads all shared files automatically. Your Layer 2 guide is generated locally from your answers during setup.
 
 ---
 
-#### Two Paths: JITCR Management vs. Your Project
+### Installation: 5 Steps
 
-This is the most important concept to understand before installing JITCR.
-Every JITCR project has **two distinct paths** that serve completely different purposes:
+**Step 1: Create a new project in Claude Desktop.**
 
-**Path A — JITCR Management Path**
-`JITCR_Protocol/{ProjectName}/`
-
-This is where JITCR stores its own operational files:
-- `JITCR_{ProjectName}.md` — the Tier 2 guide (project context, paths, GitHub config)
-- `logs/` — all journals and handoffs (session memory)
-- `skills/` — project-specific skill files
-
-These files are **private by design**. They are never committed to git and never
-pushed to GitHub. They exist only to give Claude context across sessions.
-
-**Path B — Project Root**
-`{ProjectRoot}` — anywhere on your machine
-
-This is where your actual work lives — code, writing, presentations, protocol
-files, or any content Claude is helping you build. This is what git tracks.
-This is what gets committed by `> commit` and pushed by `> end`.
-
-**These two paths are intentionally separate** and the installer asks you to
-define them independently at Q2.
+Claude Desktop --> Projects --> New Project. Name it the same as your JITCR project name.
 
 ---
 
-**Three common setups:**
+**Step 2: Paste the installer agent block into Project Instructions.**
 
-```
-SETUP 1 — Separate paths (recommended for most projects)
-
-  JITCR_Protocol/MyApp\                  ← Path A: JITCR management only
-    ├── JITCR_MyApp.md                   ← Tier 2 guide
-    ├── logs/                            ← journals + handoffs (never committed)
-    └── skills/                          ← project skills (never committed)
-
-  C:\Dev\MyApp\                          ← Path B: your actual project
-    ├── src\
-    ├── README.md
-    └── .gitignore                       ← controls what git tracks here
-
-  → JITCR management and project files are cleanly separated.
-    Git only sees C:\Dev\MyApp\ — logs never at risk of being committed.
-
-
-SETUP 2 — Same path (press Enter at Q2 — simplest setup)
-
-  JITCR_Protocol/MyApp\                  ← Path A AND Path B in one folder
-    ├── JITCR_MyApp.md                   ← Tier 2 guide
-    ├── logs/                            ← journals + handoffs
-    ├── skills/                          ← project skills
-    └── [your project files here]        ← also here
-
-  → Works fine, but your .gitignore MUST exclude logs/, skills/, and
-    JITCR_MyApp.md to prevent session memory from being committed to git.
-
-
-SETUP 3 — Linking an existing project (type path at Q2)
-
-  JITCR_Protocol/MyApp\                  ← Path A: JITCR management only
-    ├── JITCR_MyApp.md
-    ├── logs/
-    └── skills/
-
-  C:\Users\Me\Documents\Existing-Work\   ← Path B: pre-existing folder linked at Q2
-    ├── [existing files]
-    └── .gitignore
-
-  → Ideal when your project already exists somewhere else on your machine.
-    Just point JITCR at it — nothing moves, nothing changes in your project folder.
-```
-
-> **Recommendation — Project naming:** Use the same name for your JITCR project
-> (Q1) as your Claude Desktop project name. This keeps `JITCR_Protocol/{ProjectName}/`
-> clearly linked to the right Claude Desktop project, especially when managing multiple projects.
-
----
-
-#### What Gets Committed and Pushed
-
-> ⚠️ **Read this before using git with JITCR.**
-
-`> commit` and `> end` operate on **Path B (Project Root)** only — not on the
-JITCR management path. What gets committed and what gets pushed is controlled
-entirely by the `.gitignore` file in your Project Root.
-
-**Key rules:**
-
-- **JITCR session logs are private** — journals and handoffs in `logs/` should
-  always be excluded from git, whether they live in the same folder as your
-  project or not. Add `logs/` to your `.gitignore` if they share a folder.
-
-- **Public repos need a whitelist** — if your project root is a public GitHub
-  repo, use a whitelist `.gitignore` (like this protocol does) that explicitly
-  names only the files you want published. Everything else is excluded by default.
-
-- **Private/local projects** — git tracks everything not excluded by `.gitignore`.
-  Make sure your `.gitignore` is correct before running `> end` with GitHub push enabled.
-
-- **`> commit` is always local** — it never touches GitHub regardless of your
-  `.gitignore`. Only `> end` can push, and only after you confirm.
-
-- **If in doubt, use Setup 1** — keeping Path A and Path B separate eliminates
-  any risk of accidentally committing JITCR management files.
-
-**Example `.gitignore` for a public repo (whitelist approach):**
-```
-# Exclude everything by default
-*
-
-# Explicitly allow only what should be published
-!.gitignore
-!README.md
-!src/
-!src/**
-```
-
-**Example `.gitignore` for a private project with JITCR in the same folder:**
-```
-# Exclude JITCR management files
-logs/
-skills/
-JITCR_*.md
-```
-
----
-
-**The `JITCR_Protocol/` folder on your machine (created by the installer):**
-
-```
-JITCR_Protocol/                               ← your local JITCR hub (Path A for all projects)
-│
-├── JITCR_Universal_Commands.md               ← shared command engine (downloaded at install time)
-├── JITCR_Skills_Protocol.md                  ← skills guide (downloaded at install time)
-│
-├── {ProjectName-A}\                          ← one subfolder per project
-│   ├── JITCR_{ProjectName-A}.md              ← Tier 2 guide — created locally by installer
-│   ├── logs/                                 ← all session logs for this project
-│   │   ├── journal_YYYY-MM-DD_HHMM.md        ← activity log
-│   │   └── handoff_YYYY-MM-DD_HHMM.md        ← session handoff
-│   └── skills/                               ← project-specific skills
-│       └── SKILL_TEMPLATE.md                 ← downloaded at install time
-│
-├── {ProjectName-B}\
-│   ├── JITCR_{ProjectName-B}.md
-│   ├── logs/
-│   └── skills/
-│
-└── {ProjectName-Z}\
-    ├── JITCR_{ProjectName-Z}.md
-    ├── logs/
-    └── skills/
-```
-
-> **What the installer creates vs. downloads:**
-> - Created locally by the installer: `JITCR_{ProjectName}.md`, all folders
-> - Downloaded from GitHub automatically: `JITCR_Universal_Commands.md`, `JITCR_Skills_Protocol.md`, `SKILL_TEMPLATE.md`
-> - Downloaded manually by you before running the installer: `JITCR_Installer_Prompt.md`
-
-> Each project's JITCR management files live under `JITCR_Protocol/{ProjectName}/`.
-> The actual project files live at `{ProjectRoot}` — wherever you defined it at Q2.
-> The `JITCR_Universal_Commands.md` and `JITCR_Skills_Protocol.md` files are shared
-> — one copy at the hub root, used by all projects.
-
-**What the `logs/` folder contains:**
-Every time you run `> save`, JITCR writes two files into `{ProjectName}/logs/`:
-
-| File | Purpose |
-|---|---|
-| `journal_YYYY-MM-DD_HHMM.md` | Timestamped activity log — what was done, decisions made, files changed |
-| `handoff_YYYY-MM-DD_HHMM.md` | Current state snapshot — project status, open issues, what to do next session |
-
-These files power **Feature 2 — Session Continuity**. When you type `> start` in a
-new session, JITCR reads the latest handoff automatically — restoring full context
-instantly without re-explaining anything. All files are plain markdown, readable by
-any text editor, transferable to any LLM, and fully under your control.
-
-**This is separate from the GitHub repo**, which contains only the published
-protocol files:
-
-```
-jitcr-protocol\                              ← GitHub repo (what you're reading now)
-├── README.md                                ← full documentation
-├── JITCR_Installer_Prompt.md               ← installer — download this manually (Step 3)
-├── JITCR_Universal_Commands.md             ← downloaded automatically by the installer
-├── JITCR_Skills_Protocol.md               ← downloaded automatically by the installer
-├── SKILL_TEMPLATE.md                       ← downloaded automatically by the installer
-├── CONTRIBUTING.md                         ← contribution guidelines
-└── LICENSE                                 ← MIT license
-```
-
----
-
-### Installation — 6 Steps
-
-**Step 1:** Create a new Claude Desktop Project.
-*(Claude Desktop → Projects → New Project)*
-
-> **Recommendation:** Name your Claude Desktop project the same as your JITCR
-> project name (Q1 in the installer). This keeps your `JITCR_Protocol/{ProjectName}/`
-> folder clearly linked to the right Claude Desktop project when managing multiple projects.
-
-**Step 2:** Copy the text below and paste it into **Project → Settings → Project Instructions**:
+Go to Project --> Settings --> Project Instructions. Paste this exactly:
 
 ```
 ## Role
 You are the JITCR Protocol Installer agent for this project.
 
 ## Your Job
-When the user attaches JITCR_Installer_Prompt.md and says "see the attached":
+When the user attaches JITCR_Installer_Prompt.md and says see the attached:
 - Read the file immediately
 - Execute it phase by phase exactly as written
-- Start with Phase 1 silently — no greeting, no questions first
-- Do not summarize the file
-- Do not ask what to do with it
-- Just run it
+- Start with Phase 1 silently -- no greeting, no questions first
+- Do not summarize the file. Do not ask what to do with it. Just run it.
 
 ## MCP Tools
 Load these at the start:
@@ -810,59 +493,69 @@ Load these at the start:
 - tool_search("shell command execute")
 ```
 
-**Step 3:** Download `JITCR_Installer_Prompt.md` from this repo (click the file →
-click Raw → save the page, or right-click → Save As). Start a new chat in your
-project, attach the file, and say:
+---
+
+**Step 3: Download the installer and run it.**
+
+Download `JITCR_Installer_Prompt.md` from this repo. Click the file, click Raw, save the page.
+
+Start a new chat in your project, attach the file, and say:
 
 ```
 see the attached
 ```
 
-The installer agent reads the file and runs automatically — silently checking
-your system first, then walking you through a few questions about your project.
+The installer runs automatically. Silent system check first, then five questions.
 
-**Step 4:** Follow the installer questions:
-- Choose where to store JITCR files (type `1` for default or `2` for custom path)
-- Enter your project name
-- Confirm your project root folder
-- Describe what this project is for (one sentence)
-- Choose whether to use git
+---
 
-When the installer shows the **Ready to Install** summary, review it carefully
-and type `y` to confirm. The installer then:
-- Creates all folders on your computer
-- Downloads `JITCR_Universal_Commands.md`, `JITCR_Skills_Protocol.md`, and
-  `SKILL_TEMPLATE.md` from this GitHub repo to your machine
-- Creates `JITCR_{ProjectName}.md` locally on your computer (this is not downloaded
-  — it is generated by the installer using your answers)
+**Step 4: Follow the five questions.**
 
-**Step 5:** When the installer finishes, it outputs your **Tier 1 Project Instructions**.
-Copy that text and paste it into **Project → Settings → Project Instructions**,
-**replacing** the installer instructions you pasted in Step 2.
+- Where to store JITCR files (default or custom path)
+- Your project name
+- Your project root folder
+- One sentence describing what this project is for
+- Whether to use git (and optionally GitHub)
 
-**Step 6:** Start a new chat in your project and type:
+Review the Ready to Install summary, type `y`. The installer creates all folders, downloads shared files, and generates your Layer 2 project guide. At the end it outputs your permanent Layer 1 Project Instructions.
+
+---
+
+**Step 5: Replace Project Instructions and test.**
+
+Copy the Layer 1 text from the installer output. Go to Project --> Settings --> Project Instructions. Replace the installer block with the new text.
+
+Start a new chat and type:
 
 ```
 > start
 ```
 
-JITCR is running. 🚀
+JITCR is running. For a complete walkthrough of what to do next -- including exactly what the session header looks like and how to checkpoint your first session -- see [HOWTO.md -- Your First Session](HOWTO.md#2-your-first-session).
 
 ---
 
-> **Note on Q2 — Project folder:** The installer asks whether you have an existing
-> folder to link as your Project Root. If this is a new project, type `1` —
-> your project folder defaults to `JITCR_Protocol/{ProjectName}/` (same as the
-> JITCR management path). If your project already exists elsewhere on your machine,
-> type `2` and enter that path. See [Two Paths](#two-paths-jitcr-management-vs-your-project)
-> above for implications of each choice.
+### Git and GitHub
 
-> **Note on Q4 — Git and GitHub:** The installer asks whether you want git
-> initialized and whether you plan to push to GitHub. If you provide a GitHub
-> remote URL, it is stored in your Tier 2 guide and used by `> end` to offer
-> a push at the end of every session. If you choose local-only, GitHub push
-> is never mentioned again for that project. See
-> [What Gets Committed and Pushed](#what-gets-committed-and-pushed) above.
+`> commit` and `> end` operate on your project root only. Keep JITCR session logs out of git -- they are private operational files.
+
+Recommended `.gitignore` for projects where JITCR files share the project folder:
+
+```
+# Whitelist approach for clean public repo
+*
+!.gitignore
+!README.md
+!LICENSE
+!CONTRIBUTING.md
+
+# JITCR operational files -- never commit
+logs/
+skills/
+JITCR_*.md
+```
+
+> See [HOWTO.md -- Git and GitHub Integration](HOWTO.md#8-git-and-github-integration) for the full git workflow guide.
 
 ---
 
@@ -870,40 +563,44 @@ JITCR is running. 🚀
 
 ```
 jitcr-protocol/
-├── README.md                   ← You are here — full documentation
-├── JITCR_Installer_Prompt.md   ← Installer — download this manually (Step 3)
-├── JITCR_Universal_Commands.md ← Downloaded automatically by the installer
-├── JITCR_Skills_Protocol.md    ← Downloaded automatically by the installer
-├── SKILL_TEMPLATE.md           ← Downloaded automatically by the installer
-├── CONTRIBUTING.md             ← Contribution guidelines
-└── LICENSE                     ← MIT license
++-- README.md                   <- You are here
++-- HOWTO.md                    <- Deep reference documentation
++-- JITCR_Installer_Prompt.md   <- Installer -- download manually (Step 3)
++-- JITCR_Universal_Commands.md <- Downloaded automatically by installer
++-- JITCR_Skills_Protocol.md    <- Downloaded automatically by installer
++-- SKILL_TEMPLATE.md           <- Downloaded automatically by installer
++-- CONTRIBUTING.md             <- Contribution guidelines and sign-off process
++-- LICENSE                     <- Apache License 2.0
 ```
+
+Download manually: `JITCR_Installer_Prompt.md` (Step 3 above)
+
+Downloaded automatically by the installer: `JITCR_Universal_Commands.md`, `JITCR_Skills_Protocol.md`, `SKILL_TEMPLATE.md`
+
+Generated locally by the installer (not downloaded): `JITCR_{ProjectName}.md` -- your personal Layer 2 project guide, built from your answers at setup
 
 ---
 
-## Requirements
+## Contributing
 
-- Claude Desktop with Project Instructions support
-- filesystem MCP — required
-- shell-command MCP — recommended
-- Windows, macOS, or Linux
-- Git — optional
+Contributions are open and welcome -- feedback, bug reports, documentation fixes, skills, and pull requests. Under Apache 2.0 there's no separate agreement to sign, just a `Signed-off-by` line on your commits. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full process including how the sign-off works.
 
 ---
 
 ## License
 
-Copyright © 2026 Arshia (intenogent). All Rights Reserved.
+Copyright (c) 2026 Arshia (intenogent).
 
-We are working on something bigger for JITCR Protocol.
-Licensing terms are currently under review — this project is temporarily
-unavailable for public use or contribution.
+JITCR Protocol is published under the **Apache License 2.0** -- free to use, modify, and distribute, for personal and commercial use alike, with no revenue thresholds and no separate enterprise tier.
 
-For more information or to express interest in what's coming,
-contact us directly: https://github.com/intenogent
+See [LICENSE](LICENSE) for full terms.
+
+For questions: https://github.com/intenogent
 
 ---
 
 ## Author
 
 Built by [@intenogent](https://github.com/intenogent)
+
+For setup assistance on platforms other than Claude Desktop, licensing inquiries, or anything else: https://github.com/intenogent

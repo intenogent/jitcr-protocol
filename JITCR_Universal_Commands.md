@@ -12,7 +12,7 @@
 
 ---
 
-## Protocol Guardrails (Non-Negotiable — All Projects)
+## Protocol Guardrails — All Projects
 
 These seven rules apply to every project, every OS, every session:
 
@@ -20,26 +20,26 @@ These seven rules apply to every project, every OS, every session:
 2. Never modify .env files without explicit user permission
 3. Read existing files before overwriting — preserve content
 4. Shell commands: always use forward slashes in paths
-5. On `> start`: **READ TIER 2 FILE FIRST** (non-negotiable startup step)
-6. **NEVER assume date/time — ALWAYS retrieve actual system time**
-7. **NEVER assume project paths — ALWAYS read Tier 2 to get actual paths**
+5. On `> start`: read Tier 2 file first — it contains actual project paths
+6. Never assume date/time — always retrieve actual system time
+7. Never assume project paths — always read Tier 2 to get actual paths
 
 ---
 
-## Tier 2 File Reading (MANDATORY — v2.7+)
+## Tier 2 File Reading (v2.7+)
 
-⚠️ **CRITICAL**: The Tier 2 file (JITCR_[ProjectName].md) contains the ACTUAL project paths.
-   ALWAYS read Tier 2 FIRST before doing anything else.
-   This is how JITCR works across Windows, macOS, and Linux without hardcoded assumptions.
+The Tier 2 file (JITCR_[ProjectName].md) contains the actual project paths for this specific install.
+Read Tier 2 first at session start — this is how JITCR works correctly across Windows, macOS,
+and Linux without hardcoded path assumptions.
 
 See JITCR_Universal_Commands.md v2.7+ section for details.
 
 ---
 
-## System Date/Time Retrieval Protocol (MANDATORY — v2.6+)
+## System Date/Time Retrieval Protocol (v2.6+)
 
-⚠️ **CRITICAL**: NEVER assume or hard-code timestamps. ALWAYS retrieve actual system date/time.
-   This applies to ALL logging commands and file operations.
+Never assume or hard-code timestamps — always retrieve actual system date/time.
+This applies to all logging commands and file operations.
 
 See JITCR_Universal_Commands.md v2.6+ section for details.
 
@@ -48,9 +48,9 @@ See JITCR_Universal_Commands.md v2.6+ section for details.
 ## `> start` — Initialize Session (UPDATED v2.7)
 
 ```
-⚠️ CRITICAL: This sequence must be followed EXACTLY. Do not skip steps.
+Follow this sequence in order — each step depends on the previous one.
 
-STEP 0: Load MCP Tools (CRITICAL)
+STEP 0: Load MCP Tools
         A. tool_search("filesystem read file windows")
         B. tool_search("shell command execute")
         C. Confirm: "MCP tools loaded"
@@ -59,7 +59,7 @@ STEP 1: Read Project Instructions from Claude Desktop
         Extract: {ProjectName}, {ProjectRoot}, {OS}
         Store as session variables
 
-STEP 2: READ TIER 2 FILE FIRST (NON-NEGOTIABLE)
+STEP 2: Read Tier 2 file first — actual project paths live here
         A. Read Tier 2 file
         B. Extract all paths and configuration
         C. Confirm: "Tier 2 loaded"
@@ -375,13 +375,33 @@ Tip: Skills load on-demand. Use > skill list to discover skills.
 
 ---
 
-## `> commit` — Git Commit (Local Only)
+## `> commit` — Git Commit
 
 ```
-1. Retrieve actual system time for commit message
-2. git -C "{ProjectRoot}" add -A
-3. git -C "{ProjectRoot}" commit -m "{message}"
-4. Confirm: "Committed locally → {hash}"
+1. Retrieve actual system time
+
+2. Show what will be committed:
+   git -C "{ProjectRoot}" status --short
+   Show: "Ready to commit the above changes. Proceed? (yes/no)"
+   IF no: "Commit cancelled." STOP.
+
+3. Stage and commit:
+   git -C "{ProjectRoot}" add -A
+   git -C "{ProjectRoot}" commit -m "{user message if provided | 'Checkpoint — YYYY-MM-DD HH:MM'}"
+   Confirm: "Committed locally → {hash}"
+
+4. GitHub push (only if {GitHubPush} = yes):
+   IF {push_enabled}:
+     Show: "Push to GitHub now? (yes/no)"
+     IF yes:
+       Detect branch: git -C "{ProjectRoot}" rev-parse --abbrev-ref HEAD
+       Run: git -C "{ProjectRoot}" push origin {branch}
+       Confirm: "Pushed → {GitHubRemote} ({branch})"
+       IF push fails: "Push failed — check GitHub authentication
+                       (SSH key or HTTPS credentials must be pre-configured)"
+     IF no:
+       Show: "Committed locally only."
+   IF NOT {push_enabled}: Silent (local commit is final step)
 ```
 
 ---
@@ -390,12 +410,27 @@ Tip: Skills load on-demand. Use > skill list to discover skills.
 
 ```
 1. Retrieve ACTUAL system time at session END
+
 2. Run > save using END time
-3. Local commit with actual END timestamp:
+
+3. Local commit:
+   git -C "{ProjectRoot}" add -A
    git -C "{ProjectRoot}" commit -m "Session end — YYYY-MM-DD HH:MM"
+   Confirm: "Committed locally → {hash}"
+
 4. GitHub push (only if {GitHubPush} = yes):
-   IF {push_enabled}: Prompt user, then push
-   IF NOT {push_enabled}: Silent (local commit final step)
+   IF {push_enabled}:
+     Show: "Push to GitHub now? (yes/no)"
+     IF yes:
+       Detect branch: git -C "{ProjectRoot}" rev-parse --abbrev-ref HEAD
+       Run: git -C "{ProjectRoot}" push origin {branch}
+       Confirm: "Pushed → {GitHubRemote} ({branch})"
+       IF push fails: "Push failed — check GitHub authentication
+                       (SSH key or HTTPS credentials must be pre-configured)"
+     IF no:
+       Show: "Skipped — committed locally only."
+   IF NOT {push_enabled}: Silent (local commit is final step)
+
 5. Display session summary with actual END timestamp
 ```
 
@@ -464,8 +499,8 @@ Tip: Use natural extensions:
 - ALL JITCR file operations use filesystem MCP or shell-command MCP only
 - filesystem MCP → native OS paths (backslash on Windows, forward slash on macOS/Linux)
 - shell-command MCP → forward slashes regardless of OS
-- **ALWAYS retrieve actual system time via shell-command before creating ANY log file**
-- **ALWAYS read Tier 2 first to get actual paths (not hardcoded assumptions)**
+- Always retrieve actual system time via shell-command before creating any log file
+- Always read Tier 2 first to get actual paths — never use hardcoded assumptions
 - **Skills folder is auto-created at installation, ready for user skill creation**
 
 ---
@@ -480,8 +515,9 @@ Tip: Use natural extensions:
 | 2.3 | 2026-03-13 | Removed Sessions\ folder, logs now in JITCR_Protocol\{ProjectName}\logs\ |
 | 2.4 | 2026-03-16 | GitHub push guardrail |
 | 2.5 | 2026-06-25 | Added File Access Protocol — OS detection + MCP tool loading |
-| 2.6 | 2026-06-25 | System Date/Time Retrieval Protocol (MANDATORY) |
-| 2.7 | 2026-06-25 | CRITICAL FIX: Tier 2 File Reading (MANDATORY first step) |
-| **2.8** | **2026-06-26** | **SKILLS PROTOCOL v1.0 — Added complete skills command family: > skill list, add, use, info, enable, disable, edit, remove, validate, suggest. Skills load on-demand (not at > start). Full skill lifecycle management included. Updated > start to show skills summary. Updated Installer to create skills\ folder automatically. Comprehensive JITCR_Skills_Protocol.md documentation and SKILL_TEMPLATE.md reference template created.** |
+| 2.6 | 2026-06-25 | System Date/Time Retrieval Protocol |
+| 2.7 | 2026-06-25 | Tier 2 File Reading (mandatory first step) |
+| 2.8 | 2026-06-26 | Skills Protocol v1.0 — complete skills command family |
+| **2.9** | **2026-06-30** | **Fixed > commit and > end git flows: added git add -A to > end commit step (was missing); added human-in-the-loop confirmation + git status preview before committing in > commit; added optional GitHub push to > commit (was local-only); made > end push flow explicit with real git commands, branch detection, and auth failure guidance. Both commands now show git status before committing and ask before pushing.** |
 
 ---

@@ -509,9 +509,10 @@ STEP 5 — Write JITCR_{ProjectName}.md (Tier 2):
 
 ---
 # JITCR_{ProjectName}
-**Protocol Version:** 2.0
+**Protocol Version:** 2.9 (Enhanced: OS-aware file access + MCP tool loading + System Time Retrieval + Tier 2 First + Skills Protocol + Git Flow Fix)
 **Project:** {ProjectName}
 **Created:** {today's date YYYY-MM-DD}
+**Last Updated:** {today's date YYYY-MM-DD}
 **Purpose:** Tier 2 project guide. Loaded once per session via > start.
 
 > Edit this file as your project evolves. Do not delete it.
@@ -523,13 +524,22 @@ STEP 5 — Write JITCR_{ProjectName}.md (Tier 2):
 | Field | Value |
 |---|---|
 | Project Name | {ProjectName} |
-| OS | {OS} |
+| **OS** | **{OS}** |
 | Project Root | {ProjectRoot} |
 | Session Logs | {HubRoot}/{ProjectName}/logs/ |
 | Universal Commands | {HubRoot}/JITCR_Universal_Commands.md |
+| Protocol Version | 2.9 (Multi-OS enhanced + System Time Retrieval + Tier 2 First + Skills + Git Flow Fix) |
 | Git | {active / not initialized} |
 | GitHub Remote | {GitHubRemote} |
 | GitHub Push | {GitHubPush} |
+
+> **Tier 2 Note (v2.7):** When > start runs, Claude agents MUST read this file FIRST to get actual project paths. This ensures agents don't use hardcoded path assumptions that fail on different systems or projects.
+>
+> **OS Note:** This project is configured for {OS}. When > start runs:
+> - If runtime OS matches {OS} → normal operation
+> - If runtime OS differs → protocol will warn, but file access will still work via filesystem MCPs
+>
+> **System Time Note (v2.6+):** All timestamps in filenames and log content are ACTUAL system time, retrieved via shell-command. Never assumed or hard-coded.
 
 ## Project Purpose
 {RoleDescription}
@@ -701,7 +711,7 @@ PHASE 5 — AGENT STARTUP PROCEDURE (FOR CLAUDE AGENTS ONLY)
 ⚠️ THIS SECTION IS FOR CLAUDE AGENTS, NOT USERS.
 
 When a new agent starts a session in a JITCR project, it MUST follow the
-procedure outlined in JITCR_Universal_Commands.md v2.8+ section "> start".
+procedure outlined in JITCR_Universal_Commands.md v2.9+ section "> start".
 
 Key startup sequence (abbreviated):
 

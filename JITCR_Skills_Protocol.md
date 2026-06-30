@@ -334,6 +334,358 @@ Result: ✓ PASS
 Status: Ready for use
 ```
 
+---
+
+## Skill Validation — Complete Reference
+
+JITCR skill validation operates at two independent levels. Both run automatically
+during `> skill add` and on demand via `> skill validate`. Understanding both levels
+is essential for agents assisting users with skill creation.
+
+---
+
+### Level 1 — Structural Validation
+
+Checks that the skill's files and folders meet the required physical structure.
+These checks are deterministic — pass or fail, no judgment required.
+
+| Check | Pass Condition | Fail Action |
+|---|---|---|
+| Folder exists | `skills/{skill-name}/` folder present | Create it or report missing |
+| SKILL.md present | File exists and is non-empty | Report missing, block skill |
+| skill-metadata.json present | File exists and is valid JSON | Regenerate via `> skill edit` |
+| Required metadata fields | name, description, scope, created, enabled, auto_load, version | Report missing fields |
+| Size within limits | SKILL.md under 10,000 tokens | Warn at 5,000+, block at 10,000+ |
+
+Structural validation runs first, always. If it fails, conceptual validation does
+not run — fix the structure first.
+
+---
+
+### Level 2 — Conceptual Validation
+
+Checks that the skill's *content* is appropriate, coherent, and protocol-compliant.
+This is a reasoning check, not a structural one. An agent applies these rules against
+the actual text of SKILL.md and returns a specific failure report if any rule is violated.
+
+#### The Conceptual Disqualifier Rules
+
+A skill FAILS conceptual validation if ANY of the following rules are triggered.
+Each rule includes a test the agent applies and a suggested fix for the user.
+
+---
+
+**Rule 1 — Conflicts with Level 1 Protocol Guardrails**
+
+Triggers if: The skill instructs the AI to perform an action that a protocol-level
+guardrail explicitly prohibits — for example, deleting files without user permission,
+modifying .env files, assuming timestamps, or bypassing the Tier 2 read at session start.
+
+Why: Protocol guardrails are non-negotiable. A skill cannot override them regardless
+of the stated justification.
+
+Fix: Rephrase the conflicting instruction to work within guardrail constraints.
+Example: "delete the old version before saving" → "ask user to confirm deletion before saving."
+
+---
+
+**Rule 2 — Attempts to Redefine Core Protocol Behavior**
+
+Triggers if: The skill redefines what a core JITCR command does (`> start`, `> end`,
+`> journal`, `> handoff`, `> save`, `> commit`, `> backup`) rather than extending it
+with project-specific behavior.
+
+Why: Skills extend the protocol. They do not replace it. A skill that rewrites `> start`
+from scratch would conflict with the Universal Commands spec and break session continuity.
+
+Fix: Narrow the skill to the specific additional behavior needed. Add a project-level
+step, not a replacement for the whole command.
+
+---
+
+**Rule 3 — Scope Too Broad**
+
+Triggers if: The skill attempts to cover the entire project's purpose rather than one
+cohesive, reusable capability. Signal phrases: "handles all aspects of," "complete guide
+to," "everything related to," or a skill that would only ever make sense as the single
+skill in a project.
+
+Why: A skill that is too broad cannot be loaded selectively. It defeats just-in-time
+loading and is hard to maintain as the project evolves.
+
+Fix: Split into focused sub-skills, each covering one capability. Name them clearly.
+
+---
+
+**Rule 4 — Session-Specific, Not Reusable**
+
+Triggers if: The skill encodes context that is specific to one session or one moment
+in time — for example, "the file we are currently refactoring," "the bug we found
+today," or a hardcoded reference to a specific piece of work that will not recur.
+
+Why: Skills are reusable across sessions. If the content only makes sense today,
+it belongs in a journal or handoff entry, not a skill.
+
+Fix: Generalize the skill to the repeatable pattern (e.g., "how to refactor any
+function in this codebase" rather than "how to refactor utils.py today").
+
+---
+
+**Rule 5 — Contains Harmful or Safety-Bypassing Instructions**
+
+Triggers if: The skill instructs the AI to ignore confirmation prompts for
+destructive operations, bypass guardrails under specific conditions, suppress
+warnings, proceed without user approval on high-stakes actions, or take any
+action that removes human oversight.
+
+Why: No stated justification makes safety-bypassing acceptable. This is a hard
+disqualifier, not a matter of degree.
+
+Fix: Remove the bypass instruction entirely. If speed is the concern, design the
+workflow to minimize confirmation steps rather than eliminate them.
+
+---
+
+**Rule 6 — Duplicates an Existing Skill**
+
+Triggers if: The proposed skill's purpose substantially overlaps with an existing
+skill in the project's skills registry. "Substantially overlaps" means a user
+invoking either skill for the same task would get equivalent results.
+
+Why: Duplicate skills waste tokens, cause confusion about which to load, and
+diverge over time as one is maintained and the other is not.
+
+Fix: Edit the existing skill to incorporate the new capability, or differentiate
+the scopes so both are clearly needed for different situations.
+
+---
+
+**Rule 7 — Instruction Quality Too Low to Be Useful**
+
+Triggers if: The skill content is so vague, incomplete, or contradictory that
+an agent loading it would not know what to do differently than without it.
+Examples: a skill that says only "be helpful with code reviews" with no criteria,
+checklist, format, or process defined; or a skill whose instructions contradict
+each other.
+
+Why: A skill that does not meaningfully change agent behavior wastes tokens every
+time it loads and creates false confidence that a capability is defined when it is not.
+
+Fix: Revise to include specific, actionable instructions — criteria, steps, formats,
+or rules that unambiguously change how the agent responds when the skill is active.
+
+---
+
+#### Reporting Conceptual Validation Results
+
+When a conceptual validation check fails, the agent returns a structured failure report:
+
+```
+Conceptual Validation — FAILED
+
+Skill: {skill-name}
+Rule violated: Rule {N} — {Rule Name}
+
+What triggered it:
+  "{exact quote or paraphrase of the violating content from SKILL.md}"
+
+Why it fails:
+  {explanation of how the content conflicts with the rule}
+
+Suggested fix:
+  {specific, actionable guidance for how to revise the skill}
+
+Next step: Run > skill edit {skill-name} to revise, then re-validate.
+```
+
+If multiple rules are violated, list each one separately. Do not combine into a
+single generic failure — the user needs to know exactly which rules were triggered
+and in what order to fix them.
+
+---
+
+### Configurable Multi-Mode Validation
+
+Any skill can implement any combination of validation behaviors beyond the two
+default levels above. This is configured in SKILL.md using a `## Validation
+Configuration` section.
+
+#### The Four Modes
+
+**Mode 1 — Protocol-Governed (default)**
+The standard two-level check: structural + conceptual disqualifiers.
+This mode runs automatically on all skills. No configuration required.
+
+**Mode 2 — No-Validation**
+Structural and conceptual checks are bypassed entirely.
+Use for rapid iteration, exploratory skills, or content already verified externally.
+
+```markdown
+## Validation Configuration
+Mode: no-validation
+Reason: [optional — explain why validation is bypassed]
+```
+
+**Mode 3 — User-Defined Rule-Based**
+You write domain-specific validation rules. The agent validates inputs against
+them and returns a structured failure report identifying exactly which rule was
+violated, what the violating content is, and what would need to change to pass.
+
+```markdown
+## Validation Configuration
+Mode: user-defined
+
+Rules:
+1. [Rule statement — specific, binary, scoped]
+2. [Rule statement]
+3. [Rule statement]
+
+On failure:
+- Return structured failure report
+- List each violated rule by number
+- Quote the specific violating content
+- Do not auto-correct — present for human review
+```
+
+**Mode 4 — Agent-Assisted Intelligent**
+AI reasoning is applied to your rules, catching violations that pattern matching
+would miss: logical inconsistencies, implicit contradictions, contextual violations.
+
+Combine with Mode 3 for the most powerful validation available:
+
+```markdown
+## Validation Configuration
+Mode: user-defined + agent-assisted
+
+Rules:
+1. [Rule statement]
+2. [Rule statement]
+
+On failure:
+- Return structured failure report
+- Reason about meaning, not just text matching
+- Flag implicit violations (e.g., a conclusion claim not supported by the body)
+- Do not auto-correct — present for human review
+```
+
+#### Mode Selection Guide
+
+Use this table to decide which mode to recommend when helping a user configure validation:
+
+| Skill Type | Recommended Mode | Why |
+|---|---|---|
+| Knowledge / reference skill | Mode 1 (default) | Standard quality check is sufficient |
+| Exploratory / draft skill | Mode 2 (no-validation) | User is still figuring out the shape |
+| Process / workflow skill | Mode 1 + Mode 3 | Add domain rules for the specific process |
+| Output template skill | Mode 3 + Mode 4 | Reasoning catches format violations text matching misses |
+| Compliance / legal / regulated content | Mode 3 + Mode 4 | High stakes — intelligent validation justified |
+| Skills for other people's use | Mode 3 + Mode 4 | External users need consistent, reliable behavior |
+| Utility / helper skill | Mode 1 (default) | Low complexity, standard check sufficient |
+
+When in doubt, start with Mode 1. Suggest adding Mode 3 rules once the user has
+used the skill enough to know what kinds of failures actually occur in practice.
+
+---
+
+### Validation-Integrated Creation Flow
+
+Validation should not be a separate afterthought step — it happens during skill
+creation, as the agent builds the skill alongside the user.
+
+**Path 1 — Content Provided (validate on receipt)**
+
+```
+Step 1: Receive content
+Step 2: Run structural pre-check (can the folder/file structure be created?)
+Step 3: Run Level 1 structural validation on the pasted content
+Step 4: Run Level 2 conceptual validation against all 7 disqualifier rules
+Step 5: IF any rule violated → return failure report, ask user to revise before creating
+Step 6: IF all rules pass → confirm: "Validation passed. Ready to create {skill-name}?"
+Step 7: User confirms → create files, update Tier 2
+Step 8: Confirm creation, suggest mode configuration if skill type warrants it
+```
+
+The agent does NOT create the skill first and validate later. Validate before creating.
+
+**Path 2 — Description Only (validate the draft)**
+
+```
+Step 1: Gather: skill name, description, what it should do (detailed)
+Step 2: Generate SKILL.md draft
+Step 3: Run Level 2 conceptual validation on the generated draft internally
+         (before showing to user — fix disqualifier issues in generation, not after)
+Step 4: Show draft to user with plain-language summary:
+         "Here's what I've drafted. Validation: passed / [issue found]."
+Step 5: User reviews and either:
+         (a) Approves → go to Step 6
+         (b) Requests changes → revise, re-validate internally, show updated draft
+Step 6: Confirm: "Ready to create {skill-name}?"
+Step 7: User confirms → create files, update Tier 2
+Step 8: Ask: "Do you want to add custom validation rules for this skill? (y/n)"
+         IF yes → walk through Mode 3 / Mode 3+4 configuration
+         IF no → done
+```
+
+The agent self-validates the draft before showing it to the user.
+
+**Path 3 — Exploring (validate the concept first)**
+
+```
+Step 1: Listen to the problem description
+Step 2: Apply disqualifier rules as a concept-level check:
+         - Would this be Rule 3 (too broad)?
+         - Would this be Rule 4 (session-specific, not reusable)?
+         - Is this a repeatable process, or a one-time thing?
+Step 3: Decision:
+         IF skill-appropriate → "This is a good fit for a skill. Here's why: [reason].
+                                  Want me to draft it? (y/n)"
+         IF not skill-appropriate → "This isn't quite a skill because [specific reason].
+                                      What might work better is [alternative]."
+Step 4: IF proceeding → switch to Path 2 flow from Step 1
+```
+
+The agent's judgment on "is this a skill?" is grounded in the disqualifier rules,
+not a vague sense of appropriateness. Always name the rule and explain why.
+
+---
+
+### Agent Quick-Reference — Validation in Practice
+
+```
+BEFORE creating any skill:
+  ✓ Run structural pre-check
+  ✓ Run conceptual check against all 7 disqualifier rules
+  ✓ Only create after both pass
+
+WHEN validation fails:
+  ✓ Return structured failure report (rule number, quote, why, fix)
+  ✓ Never silently proceed past a failed rule
+  ✓ Never auto-correct without showing the user what changed
+
+DURING > skill add Path 1 (content provided):
+  ✓ Validate before creating, not after
+
+DURING > skill add Path 2 (description → draft):
+  ✓ Self-validate the draft before showing it to the user
+  ✓ After approval, ask about custom validation mode configuration
+
+DURING > skill add Path 3 (exploring):
+  ✓ Ground the judgment in specific disqualifier rules
+  ✓ Name the rule that would be triggered if not a skill
+
+FOR mode selection:
+  ✓ Default: Mode 1 (structural + conceptual)
+  ✓ Rapid iteration / exploratory: Mode 2
+  ✓ Process / output / compliance: Mode 3 + Mode 4
+  ✓ Suggest upgrading to Mode 3 once user knows what failures occur in practice
+
+ALWAYS:
+  ✓ A validation failure is a fix request, not a rejection.
+    Guide toward the fix, not away from the skill.
+```
+
+---
+
 ### Suggestion Command
 
 #### `> skill suggest`
@@ -616,5 +968,6 @@ Content:
 | Version | Date | Changes |
 |---|---|---|
 | 1.0 | 2026-06-26 | Initial JITCR Skills Protocol — complete spec |
+| 1.1 | 2026-06-30 | Added: Skill Validation Complete Reference — Level 1 structural validation table, Level 2 conceptual validation with 7 disqualifier rules + structured failure report format, Configurable Multi-Mode Validation (4 modes + mode-selection guide), Validation-Integrated Creation Flow (Paths 1/2/3), Agent Quick-Reference card |
 
 ---
