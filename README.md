@@ -19,6 +19,7 @@ JITCR remembers -- because you told it to.
 ```
   > end      (Tuesday, 5:42 PM)
              Saves journal + handoff. Commits locally.
+             Asks to push to GitHub if configured.
 
              ...three days pass...
 
