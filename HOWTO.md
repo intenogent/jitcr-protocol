@@ -1,6 +1,6 @@
 # HOWTO -- JITCR Protocol Deep Reference
 
-**Protocol Version:** 2.7
+**Protocol Version:** 2.9
 **Companion to:** [README.md](README.md)
 **Purpose:** Complete operational reference for building, configuring, and running JITCR Protocol projects.
 
@@ -773,7 +773,7 @@ The handoff is the most important file. Write it carefully at the end of every s
 | Quick save before a risky operation | `> save` | Writes journal + handoff |
 | End of session | `> end` | Writes journal + handoff + commits + optional push |
 | Check where things stand | `> status` | Shows last handoff status, last journal, git status |
-| Version control checkpoint | `> commit` | Commits to local git -- no save, no push |
+| Version control checkpoint | `> commit` | Commits to local git, with optional GitHub push |
 
 **Use `> save` frequently.** Token limits hit without warning. A recent `> save` means the next session starts from a current handoff, not a stale one from two hours ago.
 
@@ -837,7 +837,7 @@ They enter with full context from your latest handoff. They can continue indepen
 
 JITCR's git integration is intentionally conservative. The AI never pushes automatically. It never commits without being asked. It asks before pushing to GitHub every time.
 
-**`> commit`** -- commits your project root to local git. Does not touch the JITCR Hub. Does not push. Use it as a mid-session checkpoint.
+**`> commit`** -- commits your project root to local git, with optional GitHub push. Does not touch the JITCR Hub. Use it as a mid-session checkpoint.
 
 **`> end`** -- runs `> save` first (journal + handoff), then commits to local git, then -- and only if GitHub push is configured and you type yes -- pushes to the remote.
 
@@ -962,26 +962,26 @@ The shared protocol files (`JITCR_Universal_Commands.md`, `JITCR_Skills_Protocol
 Run the installer again in a new Claude Desktop project:
 
 1. Claude Desktop --> Projects --> New Project
-2. Paste the installer agent block into Project Instructions:
+2. Download `JITCR_Installer_Prompt.md` from the repo. On GitHub, click the file name, then click the Download button in the top right of the file view.
+3. Open a new chat in the project, attach the file, and paste this into the chat box — then submit:
 
 ```
-## Role
-You are the JITCR Protocol Installer agent for this project.
+I want to install JITCR Protocol on my computer.
+The installer file JITCR_Installer_Prompt.md is attached.
 
-## Your Job
-When the user attaches JITCR_Installer_Prompt.md and says see the attached:
-- Read the file immediately
-- Execute it phase by phase exactly as written
-- Start with Phase 1 silently -- no greeting, no questions first
-- Do not summarize the file. Do not ask what to do with it. Just run it.
+Please read it and run the installation exactly as written.
+I explicitly authorize you to:
+- Run silent system checks (OS, MCP tools, git)
+- Ask me questions to gather my project details
+- Create folders and files on my computer at paths I confirm
+- Download the required JITCR files from GitHub
 
-## MCP Tools
-Load these at the start:
+Load these MCP tools first:
 - tool_search("filesystem read file windows")
 - tool_search("shell command execute")
-```
 
-3. Attach `JITCR_Installer_Prompt.md` and say `see the attached`
+Then begin Phase 1 system checks now.
+```
 4. At Question 0, choose the same Hub root you used before
 5. At Question 1, give the new project a different name
 6. The installer creates the new project subfolder without touching existing projects
