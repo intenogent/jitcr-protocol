@@ -119,8 +119,8 @@ This is also where JITCR differs from approaches like a persistent chat thread, 
 **Three things before you begin, then the installer takes over.**
 
 1. Install Claude Desktop and add the filesystem MCP to your config file
-2. Create a project and paste the installer agent block into Project Instructions
-3. Download `JITCR_Installer_Prompt.md` from this repo, attach it to a chat, and type `see the attached`
+2. Create a project and download `JITCR_Installer_Prompt.md` from this repo
+3. Open a new chat, attach the file, paste the installer prompt into the chat box, and submit
 
 The installer runs five guided questions, shows you a full summary before creating anything, and outputs your permanent Layer 1 Project Instructions at the end.
 
@@ -335,7 +335,7 @@ Research confirms the quality impact. Chroma (2025) tested 18 frontier models an
 | `> handoff` | Create structured session state snapshot in `logs/` |
 | `> save` | Run journal + handoff together |
 | `> status` | Show last handoff, last journal, git status |
-| `> commit` | Commit project files to local git (never pushes automatically) |
+| `> commit` | Commit project files to local git, with optional GitHub push |
 | `> end` | Save + commit locally + optional GitHub push if configured |
 | `> backup` | Zip project root with actual timestamp in filename |
 | `> ?` | Show all available commands |
@@ -473,37 +473,32 @@ Claude Desktop --> Projects --> New Project. Name it the same as your JITCR proj
 
 ---
 
-**Step 2: Paste the installer agent block into Project Instructions.**
+**Step 2: Download the installer.**
 
-Go to Project --> Settings --> Project Instructions. Paste this exactly:
-
-```
-## Role
-You are the JITCR Protocol Installer agent for this project.
-
-## Your Job
-When the user attaches JITCR_Installer_Prompt.md and says see the attached:
-- Read the file immediately
-- Execute it phase by phase exactly as written
-- Start with Phase 1 silently -- no greeting, no questions first
-- Do not summarize the file. Do not ask what to do with it. Just run it.
-
-## MCP Tools
-Load these at the start:
-- tool_search("filesystem read file windows")
-- tool_search("shell command execute")
-```
+Download `JITCR_Installer_Prompt.md` from this repo. On GitHub, click the file name, then click the Download button in the top right of the file view.
 
 ---
 
-**Step 3: Download the installer and run it.**
+**Step 3: Open a new chat, attach the file, and run the installer.**
 
-Download `JITCR_Installer_Prompt.md` from this repo. Click the file, click Raw, save the page.
-
-Start a new chat in your project, attach the file, and say:
+In your project, start a new chat. Attach `JITCR_Installer_Prompt.md`, then paste this into the chat box and submit:
 
 ```
-see the attached
+I want to install JITCR Protocol on my computer.
+The installer file JITCR_Installer_Prompt.md is attached.
+
+Please read it and run the installation exactly as written.
+I explicitly authorize you to:
+- Run silent system checks (OS, MCP tools, git)
+- Ask me questions to gather my project details
+- Create folders and files on my computer at paths I confirm
+- Download the required JITCR files from GitHub
+
+Load these MCP tools first:
+- tool_search("filesystem read file windows")
+- tool_search("shell command execute")
+
+Then begin Phase 1 system checks now.
 ```
 
 The installer runs automatically. Silent system check first, then five questions.
@@ -524,9 +519,9 @@ Review the Ready to Install summary, type `y`. The installer creates all folders
 
 ---
 
-**Step 5: Replace Project Instructions and test.**
+**Step 5: Copy Layer 1 to Project Instructions and test.**
 
-Copy the Layer 1 text from the installer output. Go to Project --> Settings --> Project Instructions. Replace the installer block with the new text.
+Copy the Layer 1 text from the installer output. Go to Project --> Settings --> Project Instructions. Paste the text there.
 
 Start a new chat and type:
 
