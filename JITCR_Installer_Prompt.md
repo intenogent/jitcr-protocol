@@ -572,7 +572,7 @@ See: JITCR_Skills_Protocol.md (in {HubRoot}) for complete guide.
 | > handoff | Create handoff snapshot |
 | > save | journal + handoff |
 | > status | Show last handoff, journal, git status |
-| > commit | Commit project files to local git |
+| > commit | Commit project files to local git, with optional GitHub push |
 | > end | save + commit locally + optional GitHub push |
 | > backup | Zip project root |
 | > skill | Manage project skills (see Skills section above) |
@@ -655,7 +655,7 @@ One final step — copy the text below and paste it into your Claude Desktop
 Project Instructions for this project:
 
   Go to: Project → Settings → Project Instructions
-  Replace everything there with this text:
+  Paste this text there:
 
 ════════════════════════════════════════════════════
 ## CRITICAL: Before anything else
