@@ -228,7 +228,7 @@ What this looks like in practice: if the AI is about to overwrite a file, it rea
 
 ### Theme F: Version Control and Backup
 
-**Local git version control** via `> commit` -- always local, never pushes automatically. Use it as a mid-session checkpoint or end-of-session save.
+**Local git version control** via `> commit` — commits to local git with optional GitHub push. Use it as a mid-session checkpoint or end-of-session save.
 
 **GitHub push** is opt-in, configured once at install. The AI asks before pushing at `> end`. Every session. No exceptions.
 
