@@ -704,27 +704,4 @@ After pasting, start a new chat in this project and type:
 
 That's it — JITCR is running! 🚀"
 
-────────────────────────────────────────────────────────────────────────────
-PHASE 5 — AGENT STARTUP PROCEDURE (FOR CLAUDE AGENTS ONLY)
-────────────────────────────────────────────────────────────────────────────
 
-⚠️ THIS SECTION IS FOR CLAUDE AGENTS, NOT USERS.
-
-When a new agent starts a session in a JITCR project, it MUST follow the
-procedure outlined in JITCR_Universal_Commands.md v2.9+ section "> start".
-
-Key startup sequence (abbreviated):
-
-STEP 0:  Load MCP Tools
-STEP 1:  Read Project Instructions
-STEP 2:  READ TIER 2 FILE FIRST (non-negotiable)
-STEP 3:  Verify paths work
-STEP 4:  Retrieve actual system time
-STEP 5:  OS detection
-STEP 6:  Git status check
-STEP 7:  Load Tier 3 (latest handoff + journals)
-STEP 8:  Skills summary
-STEP 9:  Display session header
-STEP 10: Begin session
-
-See JITCR_Universal_Commands.md for complete details.

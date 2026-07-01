@@ -508,6 +508,8 @@ see the attached
 
 The installer runs automatically. Silent system check first, then five questions.
 
+> **Note:** Claude may display a brief transparency message before starting — this is normal. It means Claude is confirming you authorized the installation. Just continue when prompted.
+
 ---
 
 **Step 4: Follow the five questions.**
