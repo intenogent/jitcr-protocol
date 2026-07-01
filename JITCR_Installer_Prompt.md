@@ -3,7 +3,7 @@ JITCR Protocol Installer
 ────────────────────────────────────────────────────────────────────────────
 
 This file contains the JITCR Protocol installation instructions.
-Run each phase in order, starting with Phase 1 now.
+Phases run in order: Phase 1 (system checks), Phase 2 (project setup), Phase 3 (installation), Phase 4 (handoff).
 
 ────────────────────────────────────────────────────────────────────────────
 WHAT IS JITCR?
@@ -15,11 +15,8 @@ only loads what it needs, when it needs it — reducing token usage
 significantly across a session.
 
 ────────────────────────────────────────────────────────────────────────────
-PHASE 1 — SILENT DETECTION (Run before saying anything to the user)
+PHASE 1 — SYSTEM DETECTION
 ────────────────────────────────────────────────────────────────────────────
-
-Run all checks silently. Do not greet the user. Do not explain what you are
-doing. Just run the checks and then show the results block below.
 
 CHECK 1 — Detect OS:
   Run: echo %OS%  (Windows returns "Windows_NT")
@@ -110,8 +107,7 @@ IF filesystem MCP FAILED:
   After updating the config:
   1. Save the file
   2. Fully quit and reopen Claude Desktop
-  3. Start a new chat and attach this installer file again
-  4. Say: see the attached
+  3. Start a new chat, attach this installer file, and submit the installer prompt
 
   Installation cancelled."
 
@@ -392,7 +388,7 @@ STEP 1 — Create folder structure:
     2. Update allowed_directories to include the required path
     3. Save the file
     4. Fully quit and reopen Claude Desktop
-    5. Start a new chat, attach this installer file, and say: see the attached
+    5. Start a new chat, attach this installer file, and submit the installer prompt
 
     Installation cancelled."
 
@@ -438,7 +434,7 @@ STEP 2 — Download JITCR_Universal_Commands.md:
     1. Open the config file
     2. Add {HubRoot} to allowed_directories
     3. Save and fully restart Claude Desktop
-    4. Attach this installer file again and say: see the attached
+    4. Attach this installer file again and submit the installer prompt
 
     Installation cancelled."
 
