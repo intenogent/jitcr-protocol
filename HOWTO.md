@@ -1,6 +1,6 @@
 # HOWTO -- JITCR Protocol Deep Reference
 
-**Protocol Version:** 2.9
+**Protocol Version:** 3.0
 **Companion to:** [README.md](README.md)
 **Purpose:** Complete operational reference for building, configuring, and running JITCR Protocol projects.
 
@@ -12,45 +12,45 @@ This document is for users who are already running JITCR and want to go deeper. 
 
 1. [Architecture Deep Dive](#1-architecture-deep-dive)
 2. [Your First Session](#2-your-first-session)
-3. [Skills System -- Complete Guide](#3-skills-system--complete-guide)
-4. [Custom Templates -- Complete Guide](#4-custom-templates--complete-guide)
-5. [Configurable Multi-Mode Validation -- Reference](#5-configurable-multi-mode-validation--reference)
-6. [Guardrails -- Configuration Guide](#6-guardrails--configuration-guide)
-7. [Session Continuity -- Workflow Guide](#7-session-continuity--workflow-guide)
+3. [Skills System: Complete Guide](#3-skills-system-complete-guide)
+4. [Custom Templates: Complete Guide](#4-custom-templates-complete-guide)
+5. [Configurable Multi-Mode Validation: Reference](#5-configurable-multi-mode-validation-reference)
+6. [Guardrails: Configuration Guide](#6-guardrails-configuration-guide)
+7. [Session Continuity: Workflow Guide](#7-session-continuity-workflow-guide)
 8. [Git and GitHub Integration](#8-git-and-github-integration)
 9. [Multi-Project Setup](#9-multi-project-setup)
-10. [Platform-Specific Setup -- Non-Claude Desktop](#10-platform-specific-setup--non-claude-desktop)
+10. [Platform-Specific Setup: Non-Claude Desktop](#10-platform-specific-setup-non-claude-desktop)
 11. [Troubleshooting](#11-troubleshooting)
 
 ---
 
 ## 1. Architecture Deep Dive
 
-### The Three Layers
+### The Three Tiers
 
 JITCR's architecture answers one question: what does the AI actually need right now, and what can stay on disk until it is needed?
 
-The answer is three layers, each with a different load time.
+The answer is three tiers, each with a different load time.
 
-**Layer 1 -- Project Instructions (every message)**
+**Tier 1 -- Project Instructions (every message)**
 
-This is the always-on layer. It lives in your AI platform's persistent instructions -- Claude Desktop Project Instructions, ChatGPT custom instructions, Gemini Gems, or any equivalent. It loads on every single message.
+This is the always-on tier. It lives in your AI platform's persistent instructions -- Claude Desktop Project Instructions, ChatGPT custom instructions, Gemini Gems, or any equivalent. It loads on every single message.
 
 Because it loads every message, it must be minimal. Target: under 300 tokens. What belongs here: the AI's role, the project name, the root path, the seven protocol guardrails, and the `> start` trigger that tells the AI how to initialize.
 
-Nothing that changes session to session belongs in Layer 1. That is what Layers 2 and 3 are for.
+Nothing that changes session to session belongs in Tier 1. That is what Tiers 2 and 3 are for.
 
-**Layer 2 -- JITCR_{ProjectName}.md (once per session)**
+**Tier 2 -- JITCR_{ProjectName}.md (once per session)**
 
-This is the project configuration layer. It lives at `JITCR_Protocol/{ProjectName}/JITCR_{ProjectName}.md` on your machine. It loads once at `> start` via the filesystem MCP.
+This is the project configuration tier. It lives at `JITCR_Protocol/{ProjectName}/JITCR_{ProjectName}.md` on your machine. It loads once at `> start` via the filesystem MCP.
 
 What belongs here: project purpose, all key file paths, GitHub configuration, project-level custom guardrails, the skills registry, and the command reference. Everything that is stable across sessions but specific to this project.
 
 The AI reads this file once at session start and holds it in context for the rest of the session. It does not reload on every message.
 
-**Layer 3 -- Session logs (conditionally, at session start)**
+**Tier 3 -- Session logs (conditionally, at session start)**
 
-This is the continuity layer. It lives in `JITCR_Protocol/{ProjectName}/logs/` on your machine. At `> start`, the AI reads the latest handoff file automatically. If the handoff status is BLOCKED, it also reads the last few journals for additional context.
+This is the continuity tier. It lives in `JITCR_Protocol/{ProjectName}/logs/` on your machine. At `> start`, the AI reads the latest handoff file automatically, checks it against actual git history for drift, and flags its age if it's more than 3 days old. If the handoff's Status line says BLOCKED, the AI also reads the 3 journals immediately prior to it for background. Separately, if any journals exist dated after the latest handoff -- meaning `> journal` ran without a matching `> handoff` -- the AI reads those too, so nothing written gets silently skipped.
 
 What belongs here: what was completed last session, what is in progress, what decisions were made, what comes next. The AI enters every session already knowing where you left off.
 
@@ -60,13 +60,13 @@ What belongs here: what was completed last session, what is in progress, what de
 
 Every JITCR project has two independent paths that must never be confused.
 
-**JITCR Hub** -- `JITCR_Protocol/` (private, never committed)
+**JITCR management folder** -- `JITCR_Protocol/` (private, never committed)
 
-This is where JITCR stores everything it manages: your Layer 2 project guides, session logs, skills, and the shared protocol files (Universal Commands, Skills Protocol). This path is private by design. It never goes into git.
+This is where JITCR stores everything it manages: your Tier 2 project guides, session logs, skills, and the shared protocol files (Universal Commands, Skills Protocol). This path is private by design. It never goes into git.
 
 **Project Root** -- `{ProjectRoot}` (your work, version-controlled)
 
-This is where your actual project files live. What git tracks. What `> commit` commits and `> end` can push. This path is entirely separate from the JITCR Hub.
+This is where your actual project files live. What git tracks. What `> commit` commits and `> end` can push. This path is entirely separate from the JITCR management folder.
 
 The separation matters because your session logs, skill definitions, and project configuration contain operational detail that does not belong in a public repository. Keep them separate.
 
@@ -79,11 +79,11 @@ When you type `> start`, the AI executes this sequence:
 **Step 0 -- Load MCP tools**
 The AI loads the filesystem and shell-command MCPs. Without these, no file access or shell commands are possible.
 
-**Step 1 -- Read Layer 1**
-The AI already has Layer 1 -- it was in the persistent instructions. It extracts your project name, OS, root path, and the path to your Tier 2 file.
+**Step 1 -- Read Tier 1**
+The AI already has Tier 1 -- it was in the persistent instructions. It extracts your project name, OS, root path, and the path to your Tier 2 file.
 
 **Step 2 -- Read Tier 2 file (non-negotiable)**
-The AI reads `JITCR_{ProjectName}.md` from your JITCR Hub. This is the most important step. Everything else -- paths, guardrails, skills, GitHub config -- comes from this file. The AI never assumes paths. It always reads Tier 2 first.
+The AI reads `JITCR_{ProjectName}.md` from your JITCR management folder. This is the most important step. Everything else -- paths, guardrails, skills, GitHub config -- comes from this file. The AI never assumes paths. It always reads Tier 2 first.
 
 **Step 3 -- Verify paths**
 The AI attempts to list your logs directory to confirm paths are working. If the path fails, it stops and asks you to confirm before proceeding.
@@ -101,8 +101,8 @@ The AI detects whether it is running on Windows, macOS, or Linux and adjusts fil
 **Step 6 -- Git status check**
 The AI runs `git status` on your project root. If git is active, git commands are enabled for the session. If no remote is configured, local commits only. If git is not initialized, the AI notes this silently.
 
-**Step 7 -- Load session context (Layer 3)**
-The AI reads the latest handoff from your logs folder. If the handoff status is BLOCKED, it also reads the last few journals. If git is active, it may also run `git log -5 --oneline` for recent commit history.
+**Step 7 -- Load session context (Tier 3) and verify it**
+The AI reads the latest handoff from your logs folder. If git is active, it checks the handoff's claims against `git log -5 --oneline` and `git status --short` and flags any mismatch rather than trusting the file blindly. It also checks the handoff's age against the current time and flags it if more than 3 days old. If the handoff's Status line says BLOCKED, the AI also reads the 3 journals immediately before it for background. Separately -- regardless of Status -- if any journals exist dated after the latest handoff, the AI reads those too, since `> journal` can still run without a matching `> handoff`. Both checks are summarized in one line in the session header (Step 9).
 
 **Step 8 -- Skills summary**
 The AI checks the skills registry in your Tier 2 file and notes any available skills for the session.
@@ -117,6 +117,7 @@ The AI checks the skills registry in your Tier 2 file and notes any available sk
 | Git      : {active | inactive}       |
 | GitHub   : {push enabled | local}    |
 | Loaded   : Tier 2 + Tier 3          |
+| Handoff  : {match|DRIFT} · {age}     |
 | Skills   : {skill count or none}     |
 | Commands : > journal, save, end...   |
 +--------------------------------------+
@@ -133,7 +134,7 @@ This section walks through a complete first session from the moment the installe
 
 ### The Scenario
 
-You just finished the installer for a project called `BlogRewrite`. Your Layer 1 Project Instructions have been replaced with the permanent version. You start a new chat.
+You just finished the installer for a project called `BlogRewrite`. Your Tier 1 Project Instructions have been replaced with the permanent version. You start a new chat.
 
 ---
 
@@ -227,7 +228,7 @@ New chat, same project.
 > start
 ```
 
-This time, Layer 3 has something to read:
+This time, Tier 3 has something to read:
 
 ```
 +--------------------------------------+
@@ -239,6 +240,7 @@ This time, Layer 3 has something to read:
 | Git      : active                    |
 | GitHub   : local only                |
 | Loaded   : Tier 2 + Tier 3          |
+| Handoff  : match · 3 days old        |
 | Skills   : none                      |
 | Commands : > journal, save, end...   |
 +--------------------------------------+
@@ -279,7 +281,7 @@ Everything above assumes the handoff is accurate. Occasionally it will not be --
 
 ---
 
-## 3. Skills System -- Complete Guide
+## 3. Skills System: Complete Guide
 
 ### What a Skill Is
 
@@ -409,13 +411,13 @@ Run it when: you sense you are doing something repetitive, when output formats a
 
 ---
 
-### Automatic Layer 2 Updates
+### Automatic Tier 2 Updates
 
 When you create, edit, enable, disable, or remove a skill, JITCR automatically updates the skills registry in your Tier 2 file (`JITCR_{ProjectName}.md`). The registry stays accurate without manual maintenance. The next `> start` reflects the current state of your skills.
 
 ---
 
-## 4. Custom Templates -- Complete Guide
+## 4. Custom Templates: Complete Guide
 
 ### What Templates Are
 
@@ -553,7 +555,7 @@ A good signal that a template is worth building: you have caught yourself typing
 
 ---
 
-## 5. Configurable Multi-Mode Validation -- Reference
+## 5. Configurable Multi-Mode Validation: Reference
 
 ### What It Is
 
@@ -601,7 +603,7 @@ Combine with Mode 3 for the most powerful validation available: your rules, reas
 
 ### How to Configure Validation in Your Project
 
-Validation mode is configured per-feature in your Layer 2 project guide or in a skill's SKILL.md. You specify which modes apply and in what order.
+Validation mode is configured per-feature in your Tier 2 project guide or in a skill's SKILL.md. You specify which modes apply and in what order.
 
 Example: a skill that validates client deliverables against your firm's style guide
 
@@ -643,15 +645,15 @@ Rules work best when they are:
 
 ---
 
-## 6. Guardrails -- Configuration Guide
+## 6. Guardrails: Configuration Guide
 
-### The Three Levels
+### The Three Guardrail Layers
 
-JITCR implements guardrails at three independent levels. Each level operates regardless of whether the others are present. Together they give you defense-in-depth safety without any single point of failure.
+JITCR implements guardrails as three independent layers. Each layer operates regardless of whether the others are present. Together they give you defense-in-depth safety without any single point of failure.
 
 ---
 
-### Level 1 -- Protocol Guardrails (Non-Negotiable)
+### Protocol-Level Guardrails (Non-Negotiable)
 
 Seven universal rules built into JITCR. They apply to every project, every session, every platform. They cannot be disabled by any project configuration, any skill, or any user instruction.
 
@@ -669,9 +671,9 @@ These are the baseline safety floor. Every JITCR project gets them automatically
 
 ---
 
-### Level 2 -- Project Guardrails (Per-Project, Fully Customizable)
+### Project-Level Guardrails (Per-Project, Fully Customizable)
 
-Defined in your Layer 2 file (`JITCR_{ProjectName}.md`) under a `## Project Guardrails` section. Loaded at `> start`. Active for the entire session.
+Defined in your Tier 2 file (`JITCR_{ProjectName}.md`) under a `## Project Guardrails` section. Loaded at `> start`. Active for the entire session.
 
 This is where you encode your project's specific rules.
 
@@ -700,7 +702,7 @@ The AI reads these at `> start` and applies them for the entire session. Edit th
 
 ---
 
-### Level 3 -- Skill Guardrails (On-Demand, Scoped)
+### Skill-Level Guardrails (On-Demand, Scoped)
 
 Behavioral rules embedded directly in a skill's SKILL.md. They activate only when that skill is loaded and unload automatically when the session ends.
 
@@ -724,9 +726,9 @@ These rules are tightly scoped to the specific capability. They do not pollute t
 
 ### Defense-in-Depth -- How the Layers Work Together
 
-All three levels are active simultaneously. No level depends on another.
+All three layers are active simultaneously. No layer depends on another.
 
-If a Level 2 project guardrail is absent, Level 1 still runs. If a skill with Level 3 guardrails is not loaded, the session still has Levels 1 and 2. If someone bypasses a skill, the project-level rules still apply.
+If a project-level guardrail is absent, protocol-level guardrails still run. If a skill with skill-level guardrails is not loaded, the session still has protocol-level and project-level guardrails. If someone bypasses a skill, the project-level rules still apply.
 
 The layers are additive. More layers active means more specific protection, not more dependency.
 
@@ -741,13 +743,13 @@ Beyond the guardrail layers, JITCR builds explicit approval gates into high-stak
 | `> end` -- GitHub push | AI asks before every push, even if GitHub is configured |
 | `> skill remove` | AI requires explicit confirmation before deleting a skill |
 | Git initialization | Your choice at install time -- AI never initializes without being asked |
-| File overwrites | Level 1 guardrail: AI reads existing file before overwriting |
+| File overwrites | Protocol-level guardrail: AI reads existing file before overwriting |
 
 These gates are built into the command logic. They do not depend on project or skill guardrails being configured.
 
 ---
 
-## 7. Session Continuity -- Workflow Guide
+## 7. Session Continuity: Workflow Guide
 
 ### The Two Session Files
 
@@ -755,11 +757,11 @@ Every JITCR session writes two files to your local machine under `JITCR_Protocol
 
 **Journal** -- `journal_YYYY-MM-DD_HHMM.md`
 
-What happened this session. Work log, decisions made, files created or modified, issues encountered, approaches tried. Written with `> journal` or `> save`. Provides the detailed record for future sessions to reference.
+What happened this session. Work log, decisions made, files created or modified, issues encountered, approaches tried -- including a required Failed Approaches note (what was tried and abandoned, so a future session doesn't repeat it; "None this session" if nothing applies). Written with `> journal` or `> save`. Provides the detailed record for future sessions to reference. Journal is the only place session detail lives -- handoff never repeats it.
 
 **Handoff** -- `handoff_YYYY-MM-DD_HHMM.md`
 
-Current state snapshot. Status, open issues, what comes next, blockers, and any critical context the next session needs immediately. Written with `> handoff` or `> save`. This is what `> start` reads automatically.
+Current state snapshot only -- a required Status line, open issues, what comes next, blockers, and any critical context the next session needs immediately. Written with `> handoff` or `> save`. This is what `> start` reads automatically -- and now verifies automatically too: `> start` checks the handoff against real git history for drift and flags its age if stale, rather than trusting it blindly.
 
 The handoff is the most important file. Write it carefully at the end of every session. A good handoff means the next session -- or the next model -- picks up without re-explaining anything.
 
@@ -770,6 +772,7 @@ The handoff is the most important file. Write it carefully at the end of every s
 | Situation | Command | What It Does |
 |---|---|---|
 | Mid-session checkpoint | `> journal` | Writes current activity log only |
+| Snapshot current project state | `> handoff` | Writes structured state snapshot only |
 | Quick save before a risky operation | `> save` | Writes journal + handoff |
 | End of session | `> end` | Writes journal + handoff + commits + optional push |
 | Check where things stand | `> status` | Shows last handoff status, last journal, git status |
@@ -799,11 +802,11 @@ JITCR session files are plain text markdown. Any model that can read files can u
 To hand off to a different model:
 
 1. End the current session with `> end` (or at minimum `> save`)
-2. Set up the new model with JITCR Layer 1 instructions for this project
-3. Ensure the new model has filesystem access to your JITCR Hub
+2. Set up the new model with JITCR Tier 1 instructions for this project
+3. Ensure the new model has filesystem access to your JITCR management folder
 4. Start a new session and type `> start`
 
-The new model reads the same handoff, the same Layer 2 guide, and the same session logs. It enters the session with full context. No re-explaining required.
+The new model reads the same handoff, the same Tier 2 guide, and the same session logs. It enters the session with full context. No re-explaining required.
 
 ---
 
@@ -813,7 +816,7 @@ Session files are plain markdown files on your machine. To continue work on a di
 
 1. Copy your `JITCR_Protocol/` folder to the new machine (or sync via a tool of your choice)
 2. Ensure JITCR is configured on the new machine (MCP tools, project instructions)
-3. Type `> start` -- the AI reads the handoff and Layer 2 from the new location
+3. Type `> start` -- the AI reads the handoff and Tier 2 from the new location
 
 The session continues from where you left off.
 
@@ -837,7 +840,7 @@ They enter with full context from your latest handoff. They can continue indepen
 
 JITCR's git integration is intentionally conservative. The AI never pushes automatically. It never commits without being asked. It asks before pushing to GitHub every time.
 
-**`> commit`** -- commits your project root to local git, with optional GitHub push. Does not touch the JITCR Hub. Use it as a mid-session checkpoint.
+**`> commit`** -- commits your project root to local git, with optional GitHub push. Does not touch the JITCR management folder. Use it as a mid-session checkpoint.
 
 **`> end`** -- runs `> save` first (journal + handoff), then commits to local git, then -- and only if GitHub push is configured and you type yes -- pushes to the remote.
 
@@ -847,11 +850,11 @@ The commit message can be customized: `> commit your message here`.
 
 ### What Gets Committed
 
-`> commit` and `> end` operate on your **project root** (`{ProjectRoot}`), not on the JITCR Hub. What gets included in the commit is controlled by the `.gitignore` in your project root.
+`> commit` and `> end` operate on your **project root** (`{ProjectRoot}`), not on the JITCR management folder. What gets included in the commit is controlled by the `.gitignore` in your project root.
 
-JITCR Hub files (session logs, skills, Tier 2 guide) should never be committed. They are private operational files.
+JITCR management folder files (session logs, skills, Tier 2 guide) should never be committed. They are private operational files.
 
-If your JITCR Hub is inside your project root (not recommended but supported), your `.gitignore` must explicitly exclude JITCR files:
+If your JITCR management folder is inside your project root (not recommended but supported), your `.gitignore` must explicitly exclude JITCR files:
 
 ```
 # Exclude JITCR operational files
@@ -861,7 +864,7 @@ logs/
 skills/
 ```
 
-If your project root and JITCR Hub are fully separate paths (recommended), no `.gitignore` entry is needed for JITCR files -- they are not in the git tree at all.
+If your project root and JITCR management folder are fully separate paths (recommended), no `.gitignore` entry is needed for JITCR files -- they are not in the git tree at all.
 
 ---
 
@@ -877,7 +880,6 @@ For projects where you want fine control over what goes public, use a whitelist 
 !.gitignore
 !README.md
 !LICENSE
-!CLA.md
 !CONTRIBUTING.md
 !HOWTO.md
 !JITCR_Installer_Prompt.md
@@ -911,7 +913,7 @@ At the next `> end`, the AI will ask whether to push.
 
 ### `> backup` -- Local Project Backup
 
-`> backup` creates a timestamped zip of your entire project root on your local machine. It does not touch the JITCR Hub. It does not push anywhere.
+`> backup` creates a timestamped zip of your entire project root on your local machine. It does not touch the JITCR management folder. It does not push anywhere.
 
 Filename format: `{ProjectName}_backup_YYYY-MM-DD_HHMM.zip`
 
@@ -927,9 +929,9 @@ JITCR's git integration assumes basic familiarity with git concepts (commits, re
 
 ## 9. Multi-Project Setup
 
-### How Multiple Projects Share One Hub
+### How Multiple Projects Share One JITCR Management Folder
 
-Your JITCR Hub (`JITCR_Protocol/`) holds all your projects. Each project gets its own subfolder:
+Your JITCR management folder (`JITCR_Protocol/`) holds all your projects. Each project gets its own subfolder:
 
 ```
 JITCR_Protocol/
@@ -982,11 +984,11 @@ Load these MCP tools first:
 
 Then begin Phase 1 system checks now.
 ```
-4. At Question 0, choose the same Hub root you used before
+4. At Question 0, choose the same JITCR management root you used before
 5. At Question 1, give the new project a different name
 6. The installer creates the new project subfolder without touching existing projects
 
-Each project gets its own Layer 2 guide, its own logs folder, and its own skills folder. They share the protocol files.
+Each project gets its own Tier 2 guide, its own logs folder, and its own skills folder. They share the protocol files.
 
 ---
 
@@ -999,7 +1001,7 @@ If you want to reuse a skill across projects, copy the skill folder manually:
 1. Locate the skill at `JITCR_Protocol/ProjectAlpha/skills/{skill-name}/`
 2. Copy the entire folder to `JITCR_Protocol/ProjectBeta/skills/{skill-name}/`
 3. Run `> skill validate` in the new project to confirm the skill is valid
-4. JITCR will detect the new skill and update the Layer 2 skills registry automatically
+4. JITCR will detect the new skill and update the Tier 2 skills registry automatically
 
 ---
 
@@ -1015,29 +1017,31 @@ Examples: `ClientABC-Web`, `InternalTools`, `ResearchQ3`, `PersonalSite`
 
 ---
 
-## 10. Platform-Specific Setup -- Non-Claude Desktop
+## 10. Platform-Specific Setup: Non-Claude Desktop
 
 JITCR's protocol, commands, session files, and skills are identical across all platforms. What changes is how you configure persistent instructions and file access on each platform.
 
 The automated installer is built for Claude Desktop. On other platforms, follow the manual setup below.
 
+**A note on these steps:** the guidance below is best-effort, based on each platform's general capabilities -- it has not been verified through hands-on use of ChatGPT, Gemini, Copilot, or local model tooling. If you have direct experience with any of these platforms and can confirm, correct, or improve these steps, a pull request is very welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ---
 
 ### ChatGPT (with file tools)
 
-**Persistent instructions:** ChatGPT custom instructions (Settings --> Personalization --> Custom Instructions). Paste your Layer 1 JITCR Project Instructions there.
+**Persistent instructions:** ChatGPT custom instructions (Settings --> Personalization --> Custom Instructions). Paste your Tier 1 JITCR Project Instructions there.
 
 **File access:** ChatGPT's file upload and code interpreter tools provide file access. For full JITCR functionality, you need a GPT or workflow that can read and write files on your machine. The web interface's file upload is read-only and session-scoped -- not sufficient for full JITCR session continuity. A ChatGPT Desktop integration with local file access (where available) or a custom GPT with file tool access is required.
 
-**Manual Layer 2 loading:** Without filesystem MCP equivalents, you may need to manually paste your `JITCR_{ProjectName}.md` content at the start of each session rather than having the AI read it from disk.
+**Manual Tier 2 loading:** Without filesystem MCP equivalents, you may need to manually paste your `JITCR_{ProjectName}.md` content at the start of each session rather than having the AI read it from disk.
 
 ---
 
 ### Gemini (Gems)
 
-**Persistent instructions:** Create a Gem (Gemini Advanced --> Gems --> New Gem). Paste your Layer 1 Project Instructions as the Gem's instructions.
+**Persistent instructions:** Create a Gem (Gemini Advanced --> Gems --> New Gem). Paste your Tier 1 Project Instructions as the Gem's instructions.
 
-**File access:** Gemini's file access capabilities vary by interface. Gemini Advanced with Google Drive integration can read Drive files. For full JITCR functionality, your session logs and Layer 2 guide need to be accessible via Drive or another file mechanism the Gem can reach.
+**File access:** Gemini's file access capabilities vary by interface. Gemini Advanced with Google Drive integration can read Drive files. For full JITCR functionality, your session logs and Tier 2 guide need to be accessible via Drive or another file mechanism the Gem can reach.
 
 **Recommended approach:** Store your `JITCR_{ProjectName}.md` and session logs in a Google Drive folder. Configure the Gem to read from that folder at session start.
 
@@ -1045,19 +1049,19 @@ The automated installer is built for Claude Desktop. On other platforms, follow 
 
 ### Microsoft Copilot (Notebooks)
 
-**Persistent instructions:** Copilot Notebooks provide persistent context. Paste your Layer 1 Project Instructions into the notebook context.
+**Persistent instructions:** Copilot Notebooks provide persistent context. Paste your Tier 1 Project Instructions into the notebook context.
 
-**File access:** Microsoft Copilot with SharePoint or OneDrive integration can access files. Store your JITCR Hub in OneDrive and configure Copilot to read from it.
+**File access:** Microsoft Copilot with SharePoint or OneDrive integration can access files. Store your JITCR management folder in OneDrive and configure Copilot to read from it.
 
 ---
 
 ### Local Models (Ollama, Open WebUI, LM Studio)
 
-**Persistent instructions:** Most local model interfaces support a system prompt. Paste your Layer 1 Project Instructions as the system prompt for your session.
+**Persistent instructions:** Most local model interfaces support a system prompt. Paste your Tier 1 Project Instructions as the system prompt for your session.
 
-**File access:** Local models typically require a tool layer (LangChain, LlamaIndex, a custom script, or Open WebUI's document feature) to provide file read/write access. Configure your tool layer to allow reading from your JITCR Hub path and writing to your logs folder.
+**File access:** Local models typically require a tool layer (LangChain, LlamaIndex, a custom script, or Open WebUI's document feature) to provide file read/write access. Configure your tool layer to allow reading from your JITCR management folder path and writing to your logs folder.
 
-**Session continuity:** With file access configured, `> start` can read your Layer 2 guide and session logs exactly as it does on Claude Desktop. Without file access, you need to manually provide the handoff content at session start.
+**Session continuity:** With file access configured, `> start` can read your Tier 2 guide and session logs exactly as it does on Claude Desktop. Without file access, you need to manually provide the handoff content at session start.
 
 ---
 
@@ -1078,9 +1082,9 @@ For setup assistance on any platform: https://github.com/intenogent
 
 ### filesystem MCP not loading
 
-**Symptom:** `> start` fails to read Layer 2. AI reports it cannot access files.
+**Symptom:** `> start` fails to read Tier 2. AI reports it cannot access files.
 
-**Cause:** The filesystem MCP is not configured, not active, or does not have permission to access your JITCR Hub path.
+**Cause:** The filesystem MCP is not configured, not active, or does not have permission to access your JITCR management folder path.
 
 **Fix:**
 
@@ -1089,7 +1093,7 @@ For setup assistance on any platform: https://github.com/intenogent
    - macOS   : `~/Library/Application Support/Claude/claude_desktop_config.json`
    - Linux   : `~/.config/Claude/claude_desktop_config.json`
 
-2. Confirm the filesystem MCP entry is present and the `args` path includes your Documents folder (or wherever your JITCR Hub lives).
+2. Confirm the filesystem MCP entry is present and the `args` path includes your Documents folder (or wherever your JITCR management folder lives).
 
 3. Fully quit Claude Desktop (not just close the window -- quit from the menu or system tray) and reopen it.
 
@@ -1123,17 +1127,17 @@ JITCR runs without shell-command MCP -- you just lose `> commit`, `> end` git op
 
 ### Paths failing on a different machine
 
-**Symptom:** `> start` cannot find Layer 2 or logs. AI reports path not found.
+**Symptom:** `> start` cannot find Tier 2 or logs. AI reports path not found.
 
-**Cause:** The paths in Layer 1 Project Instructions or in the Tier 2 file point to a location that does not exist on this machine.
+**Cause:** The paths in Tier 1 Project Instructions or in the Tier 2 file point to a location that does not exist on this machine.
 
 **Fix:**
 
-1. Confirm the JITCR Hub exists on this machine at the expected path.
-2. If the Hub is in a different location, update the Tier 2 path in Layer 1 Project Instructions to point to the correct location on this machine.
-3. Alternatively, copy the JITCR Hub to the same path as the original machine.
+1. Confirm the JITCR management folder exists on this machine at the expected path.
+2. If the JITCR management folder is in a different location, update the Tier 2 path in Tier 1 Project Instructions to point to the correct location on this machine.
+3. Alternatively, copy the JITCR management folder to the same path as the original machine.
 
-If you are moving between machines regularly, consider storing your JITCR Hub in a location that syncs (cloud storage, network drive) and ensure the sync path is consistent across machines.
+If you are moving between machines regularly, consider storing your JITCR management folder in a location that syncs (cloud storage, network drive) and ensure the sync path is consistent across machines.
 
 ---
 
@@ -1159,7 +1163,7 @@ If you are moving between machines regularly, consider storing your JITCR Hub in
 
 **Fix:**
 
-1. Run `> status` to compare the latest handoff against current git history -- this often surfaces the mismatch directly (e.g., commits exist that the handoff does not mention).
+1. Run `> status` to compare the latest handoff against current git history -- this often surfaces the mismatch directly (e.g., commits exist that the handoff does not mention). Note: as of the drift/staleness check built into `> start`, many of these mismatches now surface automatically in the session header the moment you start a session, without needing to run `> status` separately.
 2. If the handoff looks incomplete or wrong, tell the AI directly what actually happened. The AI treats your live correction as more authoritative than a stale file, and will reflect that correction in the next `> save` or `> end`.
 3. If you suspect the most recent handoff is missing context that an earlier one had, ask the AI to also read the prior handoff and the journals between them -- `> start` only reads the single latest file by default, not the full history, unless you ask for more.
 
@@ -1184,7 +1188,7 @@ See [Section 2 -- When the Handoff Itself Goes Wrong](#when-the-handoff-itself-g
 
 Conceptual failures mean the AI found that the skill content conflicts with protocol rules. The failure report will identify the specific issue. Common causes, each with a concrete example of what triggers it:
 
-- **Skill contains instructions that conflict with Level 1 protocol guardrails.** Example: a skill that says "always delete the previous version of this file before saving the new one" conflicts directly with the protocol guardrail requiring explicit permission before any deletion. Fix: rephrase the skill to ask for confirmation instead of auto-deleting.
+- **Skill contains instructions that conflict with protocol-level guardrails.** Example: a skill that says "always delete the previous version of this file before saving the new one" conflicts directly with the protocol guardrail requiring explicit permission before any deletion. Fix: rephrase the skill to ask for confirmation instead of auto-deleting.
 
 - **Skill scope is too broad -- it attempts to replace the entire protocol rather than extend it.** Example: a skill titled "New Session Workflow" that redefines what `> start` does from scratch, rather than adding project-specific behavior on top of the existing protocol. Fix: narrow the skill to the specific behavior you actually want to add (a new command, a new check, a new output format) instead of re-specifying core protocol mechanics.
 
@@ -1204,7 +1208,7 @@ Review the failure report, revise the SKILL.md content to address the specific i
 
 1. Confirm `> start` was run at the beginning of the session. Guardrails load at `> start` -- they are not available before it runs.
 2. Open your `JITCR_{ProjectName}.md` file and confirm there is a `## Project Guardrails` section with your rules listed.
-3. If the section exists but guardrails are still being ignored, type `> start` again to reload Layer 2 in the current session.
+3. If the section exists but guardrails are still being ignored, type `> start` again to reload Tier 2 in the current session.
 
 ---
 
@@ -1217,7 +1221,7 @@ Review the failure report, revise the SKILL.md content to address the specific i
 **Fix:**
 
 1. Confirm the logs folder exists at `JITCR_Protocol/{ProjectName}/logs/`.
-2. Confirm the filesystem MCP `args` path in your Claude Desktop config includes the parent of your JITCR Hub.
+2. Confirm the filesystem MCP `args` path in your Claude Desktop config includes the parent of your JITCR management folder.
 3. If the folder is missing, create it manually, or run the installer again to recreate the folder structure.
 
 ---

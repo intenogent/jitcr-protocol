@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Any%20AI%20Assistant-green)](#platform-compatibility)
-[![Protocol](https://img.shields.io/badge/Protocol-v2.9-orange)](JITCR_Universal_Commands.md)
+[![Protocol](https://img.shields.io/badge/Protocol-v3.0-orange)](JITCR_Universal_Commands.md)
 
 **Just-In-Time Context Retrieval -- AI session management for any platform.**
 
@@ -28,9 +28,9 @@ JITCR remembers -- because you told it to.
              No re-explaining. No "let me catch you up."
 ```
 
-The AI reads exactly what you left behind -- what was done, what was decided, what's still open, what comes next -- and picks up mid-thought. If one handoff isn't enough, `> start` reaches further back through your journals automatically. You decide how much history matters. JITCR makes sure it gets read.
+The AI reads exactly what you left behind -- what was done, what was decided, what's still open, what comes next -- and picks up mid-thought. By default, `> start` reads only the latest handoff -- and if that handoff was left in a blocked state, it automatically pulls the last 3 journals too. That's JITCR's just-in-time principle in action: nothing loads until it's needed. But the depth is entirely yours to control. Need last week? Last month? A specific date? Just ask -- the AI has direct access to every journal and handoff you've ever written, and will read back as far as you tell it to. Nothing is preloaded. Nothing is capped. You decide how much history matters. JITCR makes sure it gets read.
 
-That same principle runs through everything else in JITCR. This is not a fixed tool with a fixed feature set -- it is a customizable framework. You bring your own knowledge, your own skills, your own validation rules, your own guardrails. A skill is not a built-in feature. It is domain expertise, a repeated process, an industry-specific rule, an output format your team requires -- whatever *you* define -- sitting on your machine, invisible, costing nothing until the moment you call it.
+That same principle runs through everything else in JITCR. This is not a fixed tool with a fixed feature set -- it is a customizable framework. You bring your own knowledge, your own skills, your own validation rules, your own guardrails. A skill is not a built-in feature. It is domain expertise, a repeated process, an industry-specific rule, an output format your team requires -- whatever *you* define. It lives as a file on your machine, unread by the AI and costing zero tokens, until the moment you call it.
 
 Nothing is hard-coded except the protocol itself. The protocol is the chassis. You build the agent.
 
@@ -38,34 +38,34 @@ Nothing is hard-coded except the protocol itself. The protocol is the chassis. Y
 
 ## The Problem
 
-AI assistants forget everything between sessions, degrade as context grows, and lock your work to a single model and platform. Research confirms it: every frontier model tested shows accuracy drops as context length increases -- up to 85% degradation, no exceptions. Meanwhile, your project instructions reload on every single message whether the AI needs them or not.
-
-JITCR solves the full range: token waste, context degradation, lost session state, no reusable knowledge, no portable continuity, no domain validation, no real safety controls, no version discipline, and no path toward a shared ecosystem of AI capabilities.
+AI assistants come with three structural problems. They lose their memory between sessions, and lock what little context exists to a single model and platform. They get measurably worse as a single conversation grows -- research confirms it: every frontier model tested shows accuracy drops as context length increases, up to 85% degradation, no exceptions. And they waste tokens by design -- your project instructions reload on every single message, whether that message needs them or not.
 
 ---
 
-## What You Get
+## The Solution
 
-| Theme | Capabilities |
+| The Problem | JITCR Gives You |
 |---|---|
-| **Context Retrieval** | Just-in-time loading, multi-layer architecture, OS-aware operation |
-| **Session Continuity** | Cross-session persistence, cross-model portability, actual timestamps, automatic path discovery |
-| **Skills and Knowledge** | On-demand skills, fully user-defined and extensible, project-local RAG, custom input/output/interaction templates -- bring any knowledge, any rules, any workflow |
-| **Validation** | Structural checks, conceptual validation, configurable multi-mode validation |
-| **Guardrails** | Protocol-level rules, project-level custom rules, skill-level scoped rules, defense-in-depth safety |
-| **Version Control** | Local git, optional GitHub push, timestamped project backup |
-| **Commands** | 9 core commands, 10 skill-family commands, extensible framework |
-| **Installer** | Automated setup, MCP error handling, automatic file downloads |
-| **Ecosystem** | Marketplace-ready architecture, shared skills ecosystem |
+| Token waste, context degradation | **Context Retrieval** — just-in-time loading, multi-tier architecture, OS-aware operation |
+| Lost session state, no portable continuity | **Session Continuity** — cross-session persistence, cross-model portability, actual timestamps, automatic path discovery |
+| No reusable knowledge | **Skills and Knowledge** — on-demand skills, fully user-defined and extensible, project-local RAG, custom input/output/interaction templates -- bring any knowledge, any rules, any workflow |
+| No domain validation | **Validation** — structural checks, conceptual validation, configurable multi-mode validation |
+| No real safety controls | **Guardrails** — protocol-level rules, project-level custom rules, skill-level scoped rules, defense-in-depth safety |
+| No version discipline | **Version Control** — local git, optional GitHub push, timestamped project backup |
+| — | **Commands** — 9 core commands, 11 skill-family commands, extensible framework |
+| — | **Installer** — automated setup, MCP error handling, automatic file downloads |
+| No path toward a shared ecosystem | **Ecosystem** — marketplace-ready architecture, shared skills ecosystem |
+
+*Commands and Installer aren't fixes to a problem above -- they're how you actually operate JITCR day to day. Everything, including commands themselves, lives as plain text you can read and edit directly. No programming background required.*
 
 ---
 
 ## How It Works
 
-JITCR organizes project context across layers. Each layer loads at the right time -- not all at once.
+JITCR organizes project context across tiers. Each tier loads at the right time -- not all at once.
 
 ```
-LAYER 1 -- Project Instructions (~200-300 tokens, every message)
+TIER 1 -- Project Instructions (~200-300 tokens, every message)
   Lives in : AI platform persistent instructions
              (Claude Desktop Project Instructions, ChatGPT custom
               instructions, Gemini Gems, Copilot notebooks, or any
@@ -73,19 +73,19 @@ LAYER 1 -- Project Instructions (~200-300 tokens, every message)
   Loads    : Every message
   Contains : Role, project name, root path, guardrails, > start trigger
 
-LAYER 2 -- JITCR_{ProjectName}.md (~350 tokens, once per session)
+TIER 2 -- JITCR_{ProjectName}.md (~350 tokens, once per session)
   Lives in : JITCR_Protocol/{ProjectName}/ on your machine
   Loads    : Once at > start via file access tools
   Contains : Project purpose, key paths, GitHub config,
              project guardrails, skills registry, commands
 
-LAYER 3 -- Session logs (~150 tokens, once per session)
+TIER 3 -- Session logs (~150 tokens, once per session)
   Lives in : JITCR_Protocol/{ProjectName}/logs/
   Loads    : Latest handoff always + recent journals if needed
   Contains : What was done, decisions made, open issues, next steps
 ```
 
-Type `> start` and the AI reads all three layers automatically, checks git, detects your OS, retrieves real system time, and enters the session already knowing your project. Here is what that actually looks like on screen:
+Type `> start` and the AI reads all three tiers automatically, checks git, detects your OS, retrieves real system time, and enters the session already knowing your project. Here is what that actually looks like on screen:
 
 ```
 +--------------------------------------+
@@ -108,7 +108,7 @@ the introduction. Ready to continue, or something else?
 
 No screen-sharing. No re-explaining. The AI already knows.
 
-This is also where JITCR differs from approaches like a persistent chat thread, a synced notes app, or a folder of saved prompts: those keep a record, but they still rely on you to re-read it and re-explain what matters. JITCR's layers are read by the AI itself, every session, automatically — the record becomes context, not homework.
+This is also where JITCR differs from approaches like a persistent chat thread, a synced notes app, or a folder of saved prompts: those keep a record, but they still rely on you to re-read it and re-explain what matters. JITCR's tiers are read by the AI itself, every session, automatically — the record becomes context, not homework.
 
 > See [HOWTO.md](HOWTO.md) for the full architecture deep dive, the complete first-session walkthrough, and step-by-step `> start` explanation.
 
@@ -118,11 +118,11 @@ This is also where JITCR differs from approaches like a persistent chat thread, 
 
 **Three things before you begin, then the installer takes over.**
 
-1. Install Claude Desktop and add the filesystem MCP to your config file
-2. Create a project and download `JITCR_Installer_Prompt.md` from this repo
-3. Open a new chat, attach the file, paste the installer prompt into the chat box, and submit
+1. Install Claude Desktop and add the filesystem MCP to your config file -- see [What You Need](#what-you-need) for the exact config.
+2. Create a project and download [`JITCR_Installer_Prompt.md`](JITCR_Installer_Prompt.md) from this repo.
+3. Open a new chat, attach the file, then [paste the installer prompt](#installation-5-steps) into the chat box and submit.
 
-The installer runs five guided questions, shows you a full summary before creating anything, and outputs your permanent Layer 1 Project Instructions at the end.
+The installer runs five guided questions, shows you a full summary before creating anything, and outputs your permanent Tier 1 Project Instructions at the end.
 
 > Full installation guide with all config details, MCP setup, and step-by-step walkthrough: [How to Install](#how-to-install)
 
@@ -130,17 +130,19 @@ The installer runs five guided questions, shows you a full summary before creati
 
 ## Features
 
-### Theme A: Context Retrieval Architecture
+Each row in The Solution table above is expanded below -- same nine areas, in the same order, with the full capability list and links to detailed guides.
+
+### Context Retrieval Architecture
 
 **Just-In-Time Context Retrieval** is the core philosophy. Context is not preloaded. It is retrieved on demand -- at the exact moment the session needs it, in the exact amount the session needs. Nothing loads that is not needed. Nothing that is not loaded costs tokens.
 
-**Multi-layer selective context loading** organizes AI instructions across any number of priority layers. Only the minimum loads on every message. The rest loads once at session start -- or on demand when you call it.
+**Multi-tier selective context loading** organizes AI instructions across any number of priority tiers. Only the minimum loads on every message. The rest loads once at session start -- or on demand when you call it.
 
 **OS-aware, platform-agnostic operation** means JITCR detects your operating system at session start and adjusts its behavior accordingly. Windows, macOS, Linux -- the protocol adapts to the environment. You do not adapt to the protocol.
 
 ---
 
-### Theme B: Session Continuity
+### Session Continuity
 
 **Cross-session context persistence** means no more re-explaining. Every session writes a structured handoff and journal to your local machine. Start a new session after a token limit, a model switch, or a week away -- type `> start` and full context is restored from your own files. Instantly.
 
@@ -150,11 +152,11 @@ The installer runs five guided questions, shows you a full summary before creati
 
 **Automatic path discovery** means JITCR always reads your project configuration first to get real paths. No hard-coded assumptions. No failures when paths differ across machines or team members.
 
-> See [HOWTO.md -- Session Continuity Workflow](HOWTO.md#7-session-continuity--workflow-guide) for the full workflow and model-switching guide.
+> See [HOWTO.md -- Session Continuity Workflow](HOWTO.md#7-session-continuity-workflow-guide) for the full workflow and model-switching guide.
 
 ---
 
-### Theme C: Skills and Knowledge
+### Skills and Knowledge
 
 **On-demand skills** are reusable instruction sets that live in your project and load only when you call them. Zero tokens until invoked. Automatic unload when the session ends.
 
@@ -172,14 +174,14 @@ The installer runs five guided questions, shows you a full summary before creati
 
 **Smart skill suggestions** analyze the current session context and suggest skills that would help -- based on what you are actually doing, not a static menu.
 
-**Automatic Layer 2 updates** keep your project configuration current whenever you add, modify, or remove a skill. The skills registry stays accurate without manual maintenance.
+**Automatic Tier 2 updates** keep your project configuration current whenever you add, modify, or remove a skill. The skills registry stays accurate without manual maintenance.
 
-> See [HOWTO.md -- Skills System](HOWTO.md#3-skills-system--complete-guide) for the full skills guide, folder structure, and creation walkthrough.
-> See [HOWTO.md -- Custom Templates](HOWTO.md#4-custom-templates--complete-guide) for input, output, and interaction template walkthroughs.
+> See [HOWTO.md -- Skills System](HOWTO.md#3-skills-system-complete-guide) for the full skills guide, folder structure, and creation walkthrough.
+> See [HOWTO.md -- Custom Templates](HOWTO.md#4-custom-templates-complete-guide) for input, output, and interaction template walkthroughs.
 
 ---
 
-### Theme D: Validation
+### Validation
 
 **Structural skill validation** checks every skill for the required folder structure, SKILL.md presence, metadata file, and size constraints before the skill is admitted to the project.
 
@@ -194,11 +196,11 @@ The installer runs five guided questions, shows you a full summary before creati
 
 Any combination. Any configuration. No equivalent exists in any AI protocol or tool as of this writing.
 
-> See [HOWTO.md -- Configurable Multi-Mode Validation](HOWTO.md#5-configurable-multi-mode-validation--reference) for full configuration reference and examples.
+> See [HOWTO.md -- Configurable Multi-Mode Validation](HOWTO.md#5-configurable-multi-mode-validation-reference) for full configuration reference and examples.
 
 ---
 
-### Theme E: Guardrails and Safety
+### Guardrails and Safety
 
 **Protocol-level guardrails** are seven universal rules built into JITCR. They apply to every project, every session, every platform. They cannot be disabled:
 
@@ -212,7 +214,7 @@ Any combination. Any configuration. No equivalent exists in any AI protocol or t
 
 What this looks like in practice: if the AI is about to overwrite a file, it reads the existing content first and tells you what's there before making any change -- it never silently replaces something it hasn't looked at. If you ask it to delete a file, it states what it's about to delete and waits for your explicit "yes," every time, no exceptions.
 
-**Project-level custom guardrails** are defined in your Layer 2 project guide and loaded at `> start`. Active for the entire session. Encode compliance requirements, approval workflows, access controls, domain-specific safety rules -- whatever your project needs.
+**Project-level custom guardrails** are defined in your Tier 2 project guide and loaded at `> start`. Active for the entire session. Encode compliance requirements, approval workflows, access controls, domain-specific safety rules -- whatever your project needs.
 
 **Skill-level guardrails** are embedded inside individual skills. They activate only when that skill loads and unload automatically when the session ends. Rules that cost nothing until they are needed.
 
@@ -222,11 +224,11 @@ What this looks like in practice: if the AI is about to overwrite a file, it rea
 
 **Full transparency and observability** means you always know what is loaded, what happened, and what is coming next. Session header at `> start`. Handoffs track all decisions and open issues. All logs are plain markdown on your local machine. No hidden state. No cloud.
 
-> See [HOWTO.md -- Guardrails Configuration](HOWTO.md#6-guardrails--configuration-guide) for the full configuration guide across all three levels.
+> See [HOWTO.md -- Guardrails Configuration](HOWTO.md#6-guardrails-configuration-guide) for the full configuration guide across all three levels.
 
 ---
 
-### Theme F: Version Control and Backup
+### Version Control and Backup
 
 **Local git version control** via `> commit` — commits to local git with optional GitHub push. Use it as a mid-session checkpoint or end-of-session save.
 
@@ -236,15 +238,15 @@ What this looks like in practice: if the AI is about to overwrite a file, it rea
 
 ---
 
-### Theme G: Extensibility and Commands
+### Extensibility and Commands
 
 **An extensible self-configuring command framework** means new capabilities automatically generate their own command interfaces. As JITCR grows, new commands appear without manual registration.
 
-**A full session command set** covers everything from session initialization to git operations to skill management. Nine core commands. Ten skill-family commands. All extensible.
+**A full session command set** covers everything from session initialization to git operations to skill management. Nine core commands. Eleven skill-family commands. All extensible.
 
 ---
 
-### Theme H: Installer and Setup
+### Installer and Setup
 
 **Automated installation** via a single attached file. Silent system checks first. Five questions. A full confirmation summary before anything is created. Everything is shown before you commit.
 
@@ -256,7 +258,7 @@ What this looks like in practice: if the AI is about to overwrite a file, it rea
 
 ---
 
-### Theme I: Ecosystem and Future
+### Ecosystem and Future
 
 **Marketplace and ecosystem readiness** means the skills and templates infrastructure is designed to support a future ecosystem of shared, distributable capabilities. The architecture is already in place.
 
@@ -272,16 +274,16 @@ The savings come from when content loads — not just how much there is.
 WITHOUT JITCR -- full block on every message:
   ~725 tokens x 20 messages = 14,500 tokens
 
-WITH JITCR -- only Layer 1 repeats:
-  Layer 1 (~225 tokens) x 20 messages =  4,500 tokens  (every message)
-  Layer 2 (~350 tokens) x 1           =    350 tokens  (once at > start)
-  Layer 3 (~150 tokens) x 1           =    150 tokens  (once at > start)
+WITH JITCR -- only Tier 1 repeats:
+  Tier 1 (~225 tokens) x 20 messages  =  4,500 tokens  (every message)
+  Tier 2 (~350 tokens) x 1            =    350 tokens  (once at > start)
+  Tier 3 (~150 tokens) x 1            =    150 tokens  (once at > start)
   Total                               =  5,000 tokens
 
 SAVED: ~9,500 tokens (~65%) across a 20-message session
 ```
 
-Layers 2 and 3 are paid once at `> start`. Layer 1 is the only repeating cost. Breakeven is typically after 3-5 messages. After that, every message saves tokens.
+Tiers 2 and 3 are paid once at `> start`. Tier 1 is the only repeating cost. Breakeven is typically after 3-5 messages. After that, every message saves tokens.
 
 > **Note:** These figures are estimates based on generic JITCR templates. Actual savings depend on your project instruction size and session length. Savings grow with session length -- every additional message widens the gap.
 
@@ -314,7 +316,7 @@ At 50 sessions/week (active team, multiple projects):
 
 ### Why Token Savings Also Mean Better Quality
 
-Keeping Layer 1 under 300 tokens keeps every message well inside the range where models perform at their best. The project detail that would have bloated every message is now loaded once, cleanly, at session start.
+Keeping Tier 1 under 300 tokens keeps every message well inside the range where models perform at their best. The project detail that would have bloated every message is now loaded once, cleanly, at session start.
 
 Research confirms the quality impact. Chroma (2025) tested 18 frontier models and found every one degrades as context grows -- no exceptions. Liu et al. (Stanford/TACL, 2024) documented 30%+ accuracy drops for information buried in the middle of long contexts -- the volume itself impairs reasoning regardless of total context size.
 
@@ -330,7 +332,7 @@ Research confirms the quality impact. Chroma (2025) tested 18 frontier models an
 
 | Command | What It Does |
 |---|---|
-| `> start` | Initialize session: load all layers, check git, display header |
+| `> start` | Initialize session: load all tiers, check git, display header |
 | `> journal` | Write timestamped activity log to `logs/` |
 | `> handoff` | Create structured session state snapshot in `logs/` |
 | `> save` | Run journal + handoff together |
@@ -373,17 +375,15 @@ JITCR works on any AI platform that meets two conditions:
 
 **Condition 1 -- Persistent instructions:** A place to store your project context so the AI knows its role, rules, and configuration across sessions. Claude Desktop Project Instructions, ChatGPT custom instructions, Gemini Gems, Microsoft Copilot notebooks, a system prompt in a locally hosted model, or any equivalent your platform provides.
 
-**Condition 2 -- File access:** The ability to read and write files on your computer or a shared location. This is how JITCR loads Layer 2, writes session logs, manages skills, and restores context at `> start`.
+**Condition 2 -- File access:** The ability to read and write files on your computer or a shared location. This is how JITCR loads Tier 2, writes session logs, manages skills, and restores context at `> start`.
 
 Platforms that meet both conditions today include Claude Desktop, ChatGPT with file tools, Gemini, Microsoft Copilot, locally hosted models via Ollama or Open WebUI, and enterprise AI systems with system prompt and file access support.
 
 **The automated installer is built for Claude Desktop.** It is the reference implementation because Claude Desktop has the most complete file access tooling available today.
 
-**On other platforms,** the protocol, commands, session files, and skills are identical. The setup process differs only in how persistent instructions and file access are configured on that platform. A JITCR project transfers to any compatible platform without changing a single protocol file.
+**On other platforms,** the protocol, commands, session files, and skills are identical. The setup process differs only in how persistent instructions and file access are configured on that platform. A JITCR project transfers to any compatible platform without changing a single protocol file. These steps are best-effort and not yet verified hands-on -- see [HOWTO.md -- Platform-Specific Setup](HOWTO.md#10-platform-specific-setup-non-claude-desktop) for details and how to contribute a fix.
 
 For setup assistance on platforms other than Claude Desktop: https://github.com/intenogent
-
-> See [HOWTO.md -- Platform-Specific Setup](HOWTO.md#10-platform-specific-setup--non-claude-desktop) for step-by-step setup on ChatGPT, Gemini, Copilot, and local models.
 
 ---
 
@@ -438,7 +438,7 @@ Download from https://git-scm.com
 Every JITCR project has two independent paths:
 
 **Path A: JITCR management** `JITCR_Protocol/{ProjectName}/`
-Where JITCR stores its operational files: your Layer 2 project guide, session logs, and skills. Private by design. Never committed to git.
+Where JITCR stores its operational files: your Tier 2 project guide, session logs, and skills. Private by design. Never committed to git.
 
 **Path B: Project root** `{ProjectRoot}` -- anywhere on your machine
 Where your actual work lives. What git tracks. What `> commit` commits and `> end` can push.
@@ -450,7 +450,7 @@ JITCR_Protocol/                             <- your local JITCR hub
 +-- JITCR_Skills_Protocol.md               <- skills guide
 |
 +-- {ProjectName}/
-    +-- JITCR_{ProjectName}.md             <- Layer 2 project guide
+    +-- JITCR_{ProjectName}.md             <- Tier 2 project guide
     +-- logs/
     |   +-- journal_YYYY-MM-DD_HHMM.md
     |   +-- handoff_YYYY-MM-DD_HHMM.md
@@ -461,7 +461,7 @@ JITCR_Protocol/                             <- your local JITCR hub
             +-- skill-metadata.json
 ```
 
-The installer creates all folders and downloads all shared files automatically. Your Layer 2 guide is generated locally from your answers during setup.
+The installer creates all folders and downloads all shared files automatically. Your Tier 2 guide is generated locally from your answers during setup.
 
 ---
 
@@ -515,13 +515,13 @@ The installer runs automatically. Silent system check first, then five questions
 - One sentence describing what this project is for
 - Whether to use git (and optionally GitHub)
 
-Review the Ready to Install summary, type `y`. The installer creates all folders, downloads shared files, and generates your Layer 2 project guide. At the end it outputs your permanent Layer 1 Project Instructions.
+Review the Ready to Install summary, type `y`. The installer creates all folders, downloads shared files, and generates your Tier 2 project guide. At the end it outputs your permanent Tier 1 Project Instructions.
 
 ---
 
-**Step 5: Copy Layer 1 to Project Instructions and test.**
+**Step 5: Copy Tier 1 to Project Instructions and test.**
 
-Copy the Layer 1 text from the installer output. Go to Project --> Settings --> Project Instructions. Paste the text there.
+Copy the Tier 1 text from the installer output. Go to Project --> Settings --> Project Instructions. Paste the text there.
 
 Start a new chat and type:
 
@@ -535,25 +535,13 @@ JITCR is running. For a complete walkthrough of what to do next -- including exa
 
 ### Git and GitHub
 
-`> commit` and `> end` operate on your project root only. Keep JITCR session logs out of git -- they are private operational files.
+`> commit` and `> end` are JITCR's only git-related commands. Both operate on your project root only. If your JITCR management files (logs, skills, Tier 2 guide) live in a separate folder from your project -- the recommended setup -- they're structurally outside that scope and JITCR never sees them for git purposes. If you've chosen to keep them in the same folder as your project, you're responsible for excluding them yourself via `.gitignore`.
 
-Recommended `.gitignore` for projects where JITCR files share the project folder:
+`> commit` commits locally, always. `> end` does the same, then asks before pushing to GitHub -- only if you configured a remote at install, and only with your explicit yes, every time. JITCR never pushes on its own.
 
-```
-# Whitelist approach for clean public repo
-*
-!.gitignore
-!README.md
-!LICENSE
-!CONTRIBUTING.md
+Beyond that, JITCR doesn't manage git for you. For branches, merges, `.gitignore` syntax, or anything else git-related, the [official Git documentation](https://git-scm.com/doc) and [GitHub Docs](https://docs.github.com) cover it well.
 
-# JITCR operational files -- never commit
-logs/
-skills/
-JITCR_*.md
-```
-
-> See [HOWTO.md -- Git and GitHub Integration](HOWTO.md#8-git-and-github-integration) for the full git workflow guide.
+> See [HOWTO.md -- Git and GitHub Integration](HOWTO.md#8-git-and-github-integration) for the full command reference and workflow guide.
 
 ---
 
@@ -575,7 +563,7 @@ Download manually: `JITCR_Installer_Prompt.md` (Step 3 above)
 
 Downloaded automatically by the installer: `JITCR_Universal_Commands.md`, `JITCR_Skills_Protocol.md`, `SKILL_TEMPLATE.md`
 
-Generated locally by the installer (not downloaded): `JITCR_{ProjectName}.md` -- your personal Layer 2 project guide, built from your answers at setup
+Generated locally by the installer (not downloaded): `JITCR_{ProjectName}.md` -- your personal Tier 2 project guide, built from your answers at setup
 
 ---
 

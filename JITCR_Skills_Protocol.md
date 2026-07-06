@@ -1,6 +1,6 @@
 # JITCR Skills Protocol
-**Protocol Version:** 1.0
-**Author:** LaserWhiz
+**Protocol Version:** 1.1
+**Author:** Arshia (intenogent)
 **Created:** 2026-06-26
 **Purpose:** Comprehensive guide for project-scoped skills in JITCR Protocol.
            Defines skill architecture, creation, loading, and management.
@@ -338,13 +338,13 @@ Status: Ready for use
 
 ## Skill Validation — Complete Reference
 
-JITCR skill validation operates at two independent levels. Both run automatically
-during `> skill add` and on demand via `> skill validate`. Understanding both levels
+JITCR skill validation runs two independent checks. Both run automatically
+during `> skill add` and on demand via `> skill validate`. Understanding both checks
 is essential for agents assisting users with skill creation.
 
 ---
 
-### Level 1 — Structural Validation
+### Structural Validation
 
 Checks that the skill's files and folders meet the required physical structure.
 These checks are deterministic — pass or fail, no judgment required.
@@ -362,7 +362,7 @@ not run — fix the structure first.
 
 ---
 
-### Level 2 — Conceptual Validation
+### Conceptual Validation
 
 Checks that the skill's *content* is appropriate, coherent, and protocol-compliant.
 This is a reasoning check, not a structural one. An agent applies these rules against
@@ -375,7 +375,7 @@ Each rule includes a test the agent applies and a suggested fix for the user.
 
 ---
 
-**Rule 1 — Conflicts with Level 1 Protocol Guardrails**
+**Rule 1 — Conflicts with Protocol-Level Guardrails**
 
 Triggers if: The skill instructs the AI to perform an action that a protocol-level
 guardrail explicitly prohibits — for example, deleting files without user permission,
@@ -513,7 +513,7 @@ Configuration` section.
 #### The Four Modes
 
 **Mode 1 — Protocol-Governed (default)**
-The standard two-level check: structural + conceptual disqualifiers.
+The standard two-part check: structural + conceptual disqualifiers.
 This mode runs automatically on all skills. No configuration required.
 
 **Mode 2 — No-Validation**
@@ -597,8 +597,8 @@ creation, as the agent builds the skill alongside the user.
 ```
 Step 1: Receive content
 Step 2: Run structural pre-check (can the folder/file structure be created?)
-Step 3: Run Level 1 structural validation on the pasted content
-Step 4: Run Level 2 conceptual validation against all 7 disqualifier rules
+Step 3: Run structural validation on the pasted content
+Step 4: Run conceptual validation against all 7 disqualifier rules
 Step 5: IF any rule violated → return failure report, ask user to revise before creating
 Step 6: IF all rules pass → confirm: "Validation passed. Ready to create {skill-name}?"
 Step 7: User confirms → create files, update Tier 2
@@ -612,7 +612,7 @@ The agent does NOT create the skill first and validate later. Validate before cr
 ```
 Step 1: Gather: skill name, description, what it should do (detailed)
 Step 2: Generate SKILL.md draft
-Step 3: Run Level 2 conceptual validation on the generated draft internally
+Step 3: Run conceptual validation on the generated draft internally
          (before showing to user — fix disqualifier issues in generation, not after)
 Step 4: Show draft to user with plain-language summary:
          "Here's what I've drafted. Validation: passed / [issue found]."

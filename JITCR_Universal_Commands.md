@@ -1,8 +1,8 @@
 # JITCR Universal Commands
-**Protocol Version:** 2.8
-**Author:** LaserWhiz
+**Protocol Version:** 3.0
+**Author:** Arshia (intenogent)
 **Created:** 2026-03-06
-**Last Enhanced:** 2026-06-26
+**Last Enhanced:** 2026-07-06
 **Purpose:** Shared command engine for all JITCR Protocol implementations.
            This file is referenced by every project's JITCR_[ProjectName].md.
 
@@ -81,9 +81,23 @@ STEP 6: Git Status Check
         Check if repo is active
         Enable/prompt for git as needed
 
-STEP 7: Load Tier 3 (Conditional)
-        Load latest handoff + journals if BLOCKED status
-        Load recent git log if active
+STEP 7: Load Tier 3 (Conditional) + Verify Handoff
+        A. Load latest handoff (by filename timestamp)
+        B. Drift check (if git active): compare handoff's Status/Open Issues
+           against `git log -5 --oneline` and `git status --short`. Flag any
+           mismatch plainly rather than silently trusting the handoff.
+        C. Staleness check: compare handoff's filename timestamp against
+           {session_time} (from STEP 4). If more than 3 days old, flag plainly.
+        D. Load additional journals in two independent cases:
+           - If Status line indicates BLOCKED: also load the 3 journals
+             immediately prior to this handoff, for background on why work
+             is stuck.
+           - Regardless of Status: load any journals dated AFTER this
+             handoff's timestamp (orphaned journals — can happen since
+             > journal/> handoff may still run independently today).
+        E. Carry forward one verification line for STEP 9 — never written back
+           into the handoff file itself: "Verified: {match | drift detected}.
+           Handoff is {age}."
 
 STEP 8: Skills Summary (NEW v2.8)
         Check if skills folder exists
@@ -98,8 +112,9 @@ STEP 9: Display Session Header
         │ Started  : {session_time}          │
         │ Git      : {active | inactive}     │
         │ GitHub   : {push enabled | local}  │
-        │ Skills   : {X enabled | ready}     │
         │ Loaded   : Tier 2 + Tier 3         │
+        │ Handoff  : {match|DRIFT} · {age}   │
+        │ Skills   : {X enabled | ready}     │
         │ Commands : > journal, save, end... │
         └────────────────────────────────────┘
 
@@ -329,12 +344,26 @@ Tip: Skills load on-demand. Use > skill list to discover skills.
 
 ## `> journal` — Write Session Journal Entry
 
+**Role:** The detailed record of what happened this session — for future sessions
+to learn from. Journal is the only place session detail lives; handoff must never
+repeat it.
+
+**Content should cover, when applicable:** work completed and decisions made with
+the reasoning behind them; files created or modified; issues encountered;
+approaches tried — including ones that did NOT work.
+
+**Failed Approaches (required section):** what was tried and abandoned or
+reverted this session, and why it didn't work, so a future session doesn't
+repeat it. If nothing failed this session, write "None this session" — do not
+omit the section.
+
 ```
 1. Retrieve ACTUAL system time
 2. Create filename: journal_YYYY-MM-DD_HHMM.md (using actual time)
    Location: {HubRoot}/{ProjectName}/logs/
 3. Create header: ## YYYY-MM-DD HH:MM | Session: [title]
-4. Append entry content with actual timestamps
+4. Append entry content per the Role above, including a Failed Approaches
+   section (write "None this session" if nothing applies)
 5. Confirm: "Journal updated → journal_YYYY-MM-DD_HHMM.md"
 ```
 
@@ -342,12 +371,23 @@ Tip: Skills load on-demand. Use > skill list to discover skills.
 
 ## `> handoff` — Create Session Handoff
 
+**Role:** A compressed current-state snapshot only — status, open issues, next
+steps, blockers, and any critical context the next session needs immediately.
+Handoff is read automatically by `> start` and must never repeat journal's
+narrative detail — if it's a decision, a reason, or something that was tried,
+it belongs in journal, not here. A pointer to the relevant journal entry is
+fine; restating its content is not.
+
+**Content must include:** a Status line (free-text, e.g. "BLOCKED — waiting on
+X" or "OPEN"); open issues; what's next; blockers, if any; any critical context
+needed immediately.
+
 ```
 1. Retrieve ACTUAL system time
 2. Create filename: handoff_YYYY-MM-DD_HHMM.md (using actual time)
    Location: {HubRoot}/{ProjectName}/logs/
 3. Create header: # Session Handoff — YYYY-MM-DD HH:MM
-4. Write handoff content with actual timestamps
+4. Write handoff content per the Role above — state snapshot only, no narrative
 5. Confirm: "Handoff saved → handoff_YYYY-MM-DD_HHMM.md"
 ```
 
@@ -518,6 +558,6 @@ Tip: Use natural extensions:
 | 2.6 | 2026-06-25 | System Date/Time Retrieval Protocol |
 | 2.7 | 2026-06-25 | Tier 2 File Reading (mandatory first step) |
 | 2.8 | 2026-06-26 | Skills Protocol v1.0 — complete skills command family |
-| **2.9** | **2026-06-30** | **Fixed > commit and > end git flows: added git add -A to > end commit step (was missing); added human-in-the-loop confirmation + git status preview before committing in > commit; added optional GitHub push to > commit (was local-only); made > end push flow explicit with real git commands, branch detection, and auth failure guidance. Both commands now show git status before committing and ask before pushing.** |
+| **3.0** | **2026-07-06** | **Journal/handoff redesign: formal Role definitions for `> journal`/`> handoff` moved into this spec (previously only in HOWTO prose); required Failed Approaches journal section; `> start` STEP 7 now runs a drift check (git log/status) and staleness check (3-day threshold), summarized as a new Handoff verification line in the session header; orphaned-journal fallback loads journals dated after the latest handoff regardless of Status.** |
 
 ---
