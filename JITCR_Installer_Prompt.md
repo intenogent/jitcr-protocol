@@ -2,6 +2,15 @@
 JITCR Protocol Installer
 ────────────────────────────────────────────────────────────────────────────
 
+**Protocol Version:** 3.0
+**Author:** Arshia (intenogent)
+**Last Enhanced:** 2026-07-06
+
+> This file must be kept in lockstep with JITCR Core (README.md, HOWTO.md,
+> JITCR_Universal_Commands.md). Bump this version header every time Core's
+> version bumps, and update the embedded Tier 2 template below (Phase 2,
+> Step 5) to match.
+
 This file contains the JITCR Protocol installation instructions.
 Phases run in order: Phase 1 (system checks), Phase 2 (project setup), Phase 3 (installation), Phase 4 (handoff).
 
@@ -505,7 +514,7 @@ STEP 5 — Write JITCR_{ProjectName}.md (Tier 2):
 
 ---
 # JITCR_{ProjectName}
-**Protocol Version:** 2.9 (Enhanced: OS-aware file access + MCP tool loading + System Time Retrieval + Tier 2 First + Skills Protocol + Git Flow Fix)
+**Protocol Version:** 3.0 (Enhanced: OS-aware file access + MCP tool loading + System Time Retrieval + Tier 2 First + Skills Protocol + Git Flow Fix + Journal/Handoff Redesign)
 **Project:** {ProjectName}
 **Created:** {today's date YYYY-MM-DD}
 **Last Updated:** {today's date YYYY-MM-DD}
@@ -524,7 +533,7 @@ STEP 5 — Write JITCR_{ProjectName}.md (Tier 2):
 | Project Root | {ProjectRoot} |
 | Session Logs | {HubRoot}/{ProjectName}/logs/ |
 | Universal Commands | {HubRoot}/JITCR_Universal_Commands.md |
-| Protocol Version | 2.9 (Multi-OS enhanced + System Time Retrieval + Tier 2 First + Skills + Git Flow Fix) |
+| Protocol Version | 3.0 (Multi-OS enhanced + System Time Retrieval + Tier 2 First + Skills + Git Flow Fix + Journal/Handoff Redesign) |
 | Git | {active / not initialized} |
 | GitHub Remote | {GitHubRemote} |
 | GitHub Push | {GitHubPush} |
