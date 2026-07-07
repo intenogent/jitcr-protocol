@@ -331,9 +331,9 @@ After all questions answered, show this confirmation screen:
      • {HubRoot}/{ProjectName}/skills/
 
   📥 Files to download from GitHub:
-     • JITCR_Universal_Commands.md  (if not already on your computer)
-     • JITCR_Skills_Protocol.md     (if not already on your computer)
-     • SKILL_TEMPLATE.md            (if not already on your computer)
+     • JITCR_Universal_Commands.md         (if not already on your computer)
+     • JITCR_Universal_Skills_Protocol.md  (if not already on your computer)
+     • SKILL_TEMPLATE.md                   (if not already on your computer)
      Source: https://github.com/intenogent/jitcr-protocol
 
   📄 Files to create on your computer:
@@ -455,18 +455,18 @@ STEP 2 — Download JITCR_Universal_Commands.md:
 
 ────────────────────────────────────────────────────────────────────────────
 
-STEP 3 — Download JITCR_Skills_Protocol.md:
+STEP 3 — Download JITCR_Universal_Skills_Protocol.md:
 
   Show progress:
   ┌────────────────────────────────────────────────────┐
   │  Installing... (3/7)                               │
   └────────────────────────────────────────────────────┘
 
-  Check if {HubRoot}/JITCR_Skills_Protocol.md exists.
+  Check if {HubRoot}/JITCR_Universal_Skills_Protocol.md exists.
   IF exists → skip, show "✓ Skills Protocol already present"
   IF missing → download from:
-    https://raw.githubusercontent.com/intenogent/jitcr-protocol/main/JITCR_Skills_Protocol.md
-    Save to: {HubRoot}/JITCR_Skills_Protocol.md
+    https://raw.githubusercontent.com/intenogent/jitcr-protocol/main/JITCR_Universal_Skills_Protocol.md
+    Save to: {HubRoot}/JITCR_Universal_Skills_Protocol.md
 
   IF DOWNLOAD OR WRITE FAILS:
     Show same error pattern as STEP 2 with updated filename.
@@ -571,7 +571,7 @@ No skills created yet. Use `> skill add` to create project-specific skills.
 - `> skill use <name>` — Load skill into session
 - `> skill remove <name>` — Delete skill
 
-See: JITCR_Skills_Protocol.md (in {HubRoot}) for complete guide.
+See: JITCR_Universal_Skills_Protocol.md (in {HubRoot}) for complete guide.
 
 ## Commands
 | Command | Action |
@@ -647,7 +647,7 @@ STEP 7 — Final summary:
     ✓ {HubRoot}/{ProjectName}/skills/
     ✓ JITCR_{ProjectName}.md
     ✓ JITCR_Universal_Commands.md
-    ✓ JITCR_Skills_Protocol.md
+    ✓ JITCR_Universal_Skills_Protocol.md
     ✓ skills/SKILL_TEMPLATE.md
     ✓ Git: {GitChoice}
     ✓ GitHub: {GitHubPush}

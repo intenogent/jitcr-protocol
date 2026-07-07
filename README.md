@@ -444,10 +444,10 @@ Where JITCR stores its operational files: your Tier 2 project guide, session log
 Where your actual work lives. What git tracks. What `> commit` commits and `> end` can push.
 
 ```
-JITCR_Protocol/                             <- your local JITCR hub
+JITCR_Protocol/                                    <- your local JITCR hub
 |
-+-- JITCR_Universal_Commands.md             <- shared command engine
-+-- JITCR_Skills_Protocol.md               <- skills guide
++-- JITCR_Universal_Commands.md                    <- shared command engine
++-- JITCR_Universal_Skills_Protocol.md             <- skills guide
 |
 +-- {ProjectName}/
     +-- JITCR_{ProjectName}.md             <- Tier 2 project guide
@@ -552,8 +552,8 @@ jitcr-protocol/
 +-- README.md                   <- You are here
 +-- HOWTO.md                    <- Deep reference documentation
 +-- JITCR_Installer_Prompt.md   <- Installer -- download manually (Step 3)
-+-- JITCR_Universal_Commands.md <- Downloaded automatically by installer
-+-- JITCR_Skills_Protocol.md    <- Downloaded automatically by installer
++-- JITCR_Universal_Commands.md        <- Downloaded automatically by installer
++-- JITCR_Universal_Skills_Protocol.md <- Downloaded automatically by installer
 +-- SKILL_TEMPLATE.md           <- Downloaded automatically by installer
 +-- CONTRIBUTING.md             <- Contribution guidelines and sign-off process
 +-- LICENSE                     <- Apache License 2.0
@@ -561,7 +561,7 @@ jitcr-protocol/
 
 Download manually: `JITCR_Installer_Prompt.md` (Step 3 above)
 
-Downloaded automatically by the installer: `JITCR_Universal_Commands.md`, `JITCR_Skills_Protocol.md`, `SKILL_TEMPLATE.md`
+Downloaded automatically by the installer: `JITCR_Universal_Commands.md`, `JITCR_Universal_Skills_Protocol.md`, `SKILL_TEMPLATE.md`
 
 Generated locally by the installer (not downloaded): `JITCR_{ProjectName}.md` -- your personal Tier 2 project guide, built from your answers at setup
 

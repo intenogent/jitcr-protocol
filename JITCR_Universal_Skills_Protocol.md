@@ -1,5 +1,5 @@
-# JITCR Skills Protocol
-**Protocol Version:** 1.1
+# JITCR Universal Skills Protocol
+**Protocol Version:** 1.2
 **Author:** Arshia (intenogent)
 **Created:** 2026-06-26
 **Purpose:** Comprehensive guide for project-scoped skills in JITCR Protocol.
@@ -838,7 +838,7 @@ Every project's Tier 2 file (JITCR_{ProjectName}.md) includes a "Project Skills"
 - `> skill add` — Create new skill
 - `> skill remove <name>` — Delete skill
 
-See JITCR_Skills_Protocol.md for complete guide.
+See JITCR_Universal_Skills_Protocol.md for complete guide.
 ```
 
 Tier 2 is automatically updated when skills are added/removed/enabled/disabled.
@@ -969,5 +969,6 @@ Content:
 |---|---|---|
 | 1.0 | 2026-06-26 | Initial JITCR Skills Protocol — complete spec |
 | 1.1 | 2026-06-30 | Added: Skill Validation Complete Reference — Level 1 structural validation table, Level 2 conceptual validation with 7 disqualifier rules + structured failure report format, Configurable Multi-Mode Validation (4 modes + mode-selection guide), Validation-Integrated Creation Flow (Paths 1/2/3), Agent Quick-Reference card |
+| 1.2 | 2026-07-06 | Renamed file: JITCR_Skills_Protocol.md -> JITCR_Universal_Skills_Protocol.md, to match the JITCR_Universal_Commands.md naming convention. No content changes beyond title/filename. Corrected placement: this file belongs at true HubRoot (Documents\JITCR_Protocol\), shared across all projects -- a prior installation had mistakenly placed a copy only inside one project's subfolder instead of HubRoot. |
 
 ---

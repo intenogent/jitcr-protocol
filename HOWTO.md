@@ -884,7 +884,7 @@ For projects where you want fine control over what goes public, use a whitelist 
 !HOWTO.md
 !JITCR_Installer_Prompt.md
 !JITCR_Universal_Commands.md
-!JITCR_Skills_Protocol.md
+!JITCR_Universal_Skills_Protocol.md
 !SKILL_TEMPLATE.md
 !.github/
 !.github/**
@@ -936,8 +936,8 @@ Your JITCR management folder (`JITCR_Protocol/`) holds all your projects. Each p
 ```
 JITCR_Protocol/
 |
-+-- JITCR_Universal_Commands.md    <- shared across all projects
-+-- JITCR_Skills_Protocol.md       <- shared across all projects
++-- JITCR_Universal_Commands.md            <- shared across all projects
++-- JITCR_Universal_Skills_Protocol.md     <- shared across all projects
 |
 +-- ProjectAlpha/
 |   +-- JITCR_ProjectAlpha.md
@@ -955,7 +955,7 @@ JITCR_Protocol/
     +-- skills/
 ```
 
-The shared protocol files (`JITCR_Universal_Commands.md`, `JITCR_Skills_Protocol.md`) are downloaded once at first install and shared across all projects. You do not need multiple copies.
+The shared protocol files (`JITCR_Universal_Commands.md`, `JITCR_Universal_Skills_Protocol.md`) are downloaded once at first install and shared across all projects. You do not need multiple copies.
 
 ---
 
