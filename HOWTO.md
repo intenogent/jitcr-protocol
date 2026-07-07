@@ -1,6 +1,6 @@
 # HOWTO -- JITCR Protocol Deep Reference
 
-**Protocol Version:** 3.0
+**Protocol Version:** 3.2
 **Companion to:** [README.md](README.md)
 **Purpose:** Complete operational reference for building, configuring, and running JITCR Protocol projects.
 
@@ -50,7 +50,7 @@ The AI reads this file once at session start and holds it in context for the res
 
 **Tier 3 -- Session logs (conditionally, at session start)**
 
-This is the continuity tier. It lives in `JITCR_Protocol/{ProjectName}/logs/` on your machine. At `> start`, the AI reads the latest handoff file automatically, checks it against actual git history for drift, and flags its age if it's more than 3 days old. If the handoff's Status line says BLOCKED, the AI also reads the 3 journals immediately prior to it for background. Separately, if any journals exist dated after the latest handoff -- meaning `> journal` ran without a matching `> handoff` -- the AI reads those too, so nothing written gets silently skipped.
+This is the continuity tier. It lives in `JITCR_Protocol/{ProjectName}/logs/` on your machine. At `> start`, the AI reads the latest handoff file automatically, checks it against actual git history for drift, and flags its age if it's more than 3 days old. If the handoff's Status line says BLOCKED, the AI also reads the 3 journals immediately prior to it for background. Separately, if any journals exist dated after the latest handoff -- which can happen if a session ended abruptly before `> save`/`> end` completed, or from logs created before the v3.2 command consolidation -- the AI reads those too, so nothing written gets silently skipped.
 
 What belongs here: what was completed last session, what is in progress, what decisions were made, what comes next. The AI enters every session already knowing where you left off.
 
@@ -102,7 +102,7 @@ The AI detects whether it is running on Windows, macOS, or Linux and adjusts fil
 The AI runs `git status` on your project root. If git is active, git commands are enabled for the session. If no remote is configured, local commits only. If git is not initialized, the AI notes this silently.
 
 **Step 7 -- Load session context (Tier 3) and verify it**
-The AI reads the latest handoff from your logs folder. If git is active, it checks the handoff's claims against `git log -5 --oneline` and `git status --short` and flags any mismatch rather than trusting the file blindly. It also checks the handoff's age against the current time and flags it if more than 3 days old. If the handoff's Status line says BLOCKED, the AI also reads the 3 journals immediately before it for background. Separately -- regardless of Status -- if any journals exist dated after the latest handoff, the AI reads those too, since `> journal` can still run without a matching `> handoff`. Both checks are summarized in one line in the session header (Step 9).
+The AI reads the latest handoff from your logs folder. If git is active, it checks the handoff's claims against `git log -5 --oneline` and `git status --short` and flags any mismatch rather than trusting the file blindly. It also checks the handoff's age against the current time and flags it if more than 3 days old. If the handoff's Status line says BLOCKED, the AI also reads the 3 journals immediately before it for background. Separately -- regardless of Status -- if any journals exist dated after the latest handoff, the AI reads those too -- this can happen if a session ended abruptly before `> save`/`> end` completed, or from logs created before the v3.2 command consolidation. Both checks are summarized in one line in the session header (Step 9).
 
 **Step 8 -- Skills summary**
 The AI checks the skills registry in your Tier 2 file and notes any available skills for the session.
@@ -119,7 +119,7 @@ The AI checks the skills registry in your Tier 2 file and notes any available sk
 | Loaded   : Tier 2 + Tier 3          |
 | Handoff  : {match|DRIFT} · {age}     |
 | Skills   : {skill count or none}     |
-| Commands : > journal, save, end...   |
+| Commands : > save, end, status...    |
 +--------------------------------------+
 ```
 
@@ -160,7 +160,7 @@ You will see something close to this:
 | Loaded   : Tier 2 (no Tier 3 yet --  |
 |            first session)            |
 | Skills   : none                      |
-| Commands : > journal, save, end...   |
+| Commands : > save, end, status...    |
 +--------------------------------------+
 
 This is your first session for BlogRewrite. No prior
@@ -242,7 +242,7 @@ This time, Tier 3 has something to read:
 | Loaded   : Tier 2 + Tier 3          |
 | Handoff  : match · 3 days old        |
 | Skills   : none                      |
-| Commands : > journal, save, end...   |
+| Commands : > save, end, status...    |
 +--------------------------------------+
 
 Picking up from handoff 2026-06-29_1742. Last session
@@ -255,15 +255,14 @@ That is the entire point of the protocol, demonstrated end to end: one `> start`
 
 ---
 
-### Choosing Between `> journal`, `> save`, and `> end`
+### Choosing Between `> save` and `> end`
 
 | When | Use |
 |---|---|
-| You want a record of what just happened, but you're continuing the session | `> journal` |
-| You want a safety checkpoint before something risky, or before a long break | `> save` |
+| You want a safety checkpoint mid-session -- before something risky, before a long break, or just to record progress -- while continuing to work | `> save` |
 | You are done for the day | `> end` |
 
-A simple rule: if you are not sure, `> save` is always safe to run. It costs you nothing and protects you from losing progress to a token limit, a crash, or simply forgetting to run `> end` before closing the tab.
+`> save` always writes a matched journal + handoff pair together, sharing one timestamp; there is no way to write just one without the other, which is what keeps the two files from ever drifting out of sync with each other. A simple rule: if you are not sure, `> save` is always safe to run. It costs you nothing and protects you from losing progress to a token limit, a crash, or simply forgetting to run `> end` before closing the tab.
 
 ---
 
@@ -759,11 +758,13 @@ Every JITCR session writes two files to your local machine under `JITCR_Protocol
 
 **Journal** -- `journal_YYYY-MM-DD_HHMM.md`
 
-What happened this session. Work log, decisions made, files created or modified, issues encountered, approaches tried -- including a required Failed Approaches note (what was tried and abandoned, so a future session doesn't repeat it; "None this session" if nothing applies). Written with `> journal` or `> save`. Provides the detailed record for future sessions to reference. Journal is the only place session detail lives -- handoff never repeats it.
+What happened this session. Work log, decisions made, files created or modified, issues encountered, approaches tried -- including a required Failed Approaches note (what was tried and abandoned, so a future session doesn't repeat it; "None this session" if nothing applies). Written by `> save` (or `> end`, which calls `> save`). Provides the detailed record for future sessions to reference. Journal is the only place session detail lives -- handoff never repeats it.
 
 **Handoff** -- `handoff_YYYY-MM-DD_HHMM.md`
 
-Current state snapshot only -- a required Status line, open issues, what comes next, blockers, and any critical context the next session needs immediately. Written with `> handoff` or `> save`. This is what `> start` reads automatically -- and now verifies automatically too: `> start` checks the handoff against real git history for drift and flags its age if stale, rather than trusting it blindly.
+Current state snapshot only -- a required Status line, open issues, what comes next, blockers, and any critical context the next session needs immediately. Written by `> save` (or `> end`, which calls `> save`). This is what `> start` reads automatically -- and now verifies automatically too: `> start` checks the handoff against real git history for drift and flags its age if stale, rather than trusting it blindly.
+
+As of v3.2, `> journal` and `> handoff` are no longer separately invokable commands -- the two files are always written together as a matched pair, sharing one timestamp, which is what prevents them from drifting out of sync with each other.
 
 The handoff is the most important file. Write it carefully at the end of every session. A good handoff means the next session -- or the next model -- picks up without re-explaining anything.
 
@@ -773,9 +774,7 @@ The handoff is the most important file. Write it carefully at the end of every s
 
 | Situation | Command | What It Does |
 |---|---|---|
-| Mid-session checkpoint | `> journal` | Writes current activity log only |
-| Snapshot current project state | `> handoff` | Writes structured state snapshot only |
-| Quick save before a risky operation | `> save` | Writes journal + handoff |
+| Mid-session checkpoint, or quick save before a risky operation | `> save` | Writes journal + handoff together, one shared timestamp |
 | End of session | `> end` | Writes journal + handoff + commits + optional push |
 | Check where things stand | `> status` | Shows last handoff status, last journal, git status |
 | Version control checkpoint | `> commit` | Commits to local git, with optional GitHub push |
@@ -1216,7 +1215,7 @@ Review the failure report, revise the SKILL.md content to address the specific i
 
 ### Write failures -- AI cannot write log files
 
-**Symptom:** `> journal`, `> handoff`, or `> save` fails. AI reports it cannot write the file.
+**Symptom:** `> save` (or `> end`) fails to write the journal or handoff file. AI reports it cannot write the file.
 
 **Cause:** The filesystem MCP does not have write permission to the logs path, or the logs folder does not exist.
 

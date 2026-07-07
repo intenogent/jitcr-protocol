@@ -1,5 +1,5 @@
 # JITCR Universal Skills Protocol
-**Protocol Version:** 1.3
+**Protocol Version:** 1.4
 **Author:** Arshia (intenogent)
 **Created:** 2026-06-26
 **Purpose:** Comprehensive guide for project-scoped skills in JITCR Protocol.
@@ -392,7 +392,7 @@ Example: "delete the old version before saving" → "ask user to confirm deletio
 **Rule 2 — Attempts to Redefine Core Protocol Behavior**
 
 Triggers if: The skill redefines what a core JITCR command does (`> start`, `> end`,
-`> journal`, `> handoff`, `> save`, `> commit`, `> backup`) rather than extending it
+`> save`, `> status`, `> commit`, `> backup`) rather than extending it
 with project-specific behavior.
 
 Why: Skills extend the protocol. They do not replace it. A skill that rewrites `> start`
@@ -971,5 +971,6 @@ Content:
 | 1.1 | 2026-06-30 | Added: Skill Validation Complete Reference — Level 1 structural validation table, Level 2 conceptual validation with 7 disqualifier rules + structured failure report format, Configurable Multi-Mode Validation (4 modes + mode-selection guide), Validation-Integrated Creation Flow (Paths 1/2/3), Agent Quick-Reference card |
 | 1.2 | 2026-07-06 | Renamed file: JITCR_Skills_Protocol.md -> JITCR_Universal_Skills_Protocol.md, to match the JITCR_Universal_Commands.md naming convention. No content changes beyond title/filename. Corrected placement: this file belongs at true HubRoot (Documents\JITCR_Protocol\), shared across all projects -- a prior installation had mistakenly placed a copy only inside one project's subfolder instead of HubRoot. |
 | 1.3 | 2026-07-07 | Path-separator fix: folder structure diagram and all `skills/...` path examples (Path, Result, Delete-folder) converted from backslash to forward slash. See JITCR_Universal_Commands.md v3.1 changelog for full root-cause explanation. |
+| 1.4 | 2026-07-07 | Rule 2's core-command list updated to match JITCR_Universal_Commands.md v3.2: removed `> journal`/`> handoff` (no longer standalone commands, folded into `> save`), added `> status` (previously missing from this list). No other content changes. |
 
 ---

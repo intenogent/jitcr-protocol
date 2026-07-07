@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Any%20AI%20Assistant-green)](#platform-compatibility)
-[![Protocol](https://img.shields.io/badge/Protocol-v3.0-orange)](JITCR_Universal_Commands.md)
+[![Protocol](https://img.shields.io/badge/Protocol-v3.2-orange)](JITCR_Universal_Commands.md)
 
 **Just-In-Time Context Retrieval -- AI session management for any platform.**
 
@@ -52,7 +52,7 @@ AI assistants come with three structural problems. They lose their memory betwee
 | No domain validation | **Validation** — structural checks, conceptual validation, configurable multi-mode validation |
 | No real safety controls | **Guardrails** — protocol-level rules, project-level custom rules, skill-level scoped rules, defense-in-depth safety |
 | No version discipline | **Version Control** — local git, optional GitHub push, timestamped project backup |
-| — | **Commands** — 9 core commands, 11 skill-family commands, extensible framework |
+| — | **Commands** — 8 core commands, 11 skill-family commands, extensible framework |
 | — | **Installer** — automated setup, MCP error handling, automatic file downloads |
 | No path toward a shared ecosystem | **Ecosystem** — marketplace-ready architecture, shared skills ecosystem |
 
@@ -98,7 +98,7 @@ Type `> start` and the AI reads all three tiers automatically, checks git, detec
 | GitHub   : local only                |
 | Loaded   : Tier 2 + Tier 3          |
 | Skills   : none                      |
-| Commands : > journal, save, end...   |
+| Commands : > save, end, status...    |
 +--------------------------------------+
 
 Picking up from handoff 2026-06-29_1742. Last session
@@ -244,7 +244,7 @@ What this looks like in practice: if the AI is about to overwrite a file, it rea
 
 **An extensible self-configuring command framework** means new capabilities automatically generate their own command interfaces. As JITCR grows, new commands appear without manual registration.
 
-**A full session command set** covers everything from session initialization to git operations to skill management. Nine core commands. Eleven skill-family commands. All extensible.
+**A full session command set** covers everything from session initialization to git operations to skill management. Eight core commands. Eleven skill-family commands. All extensible.
 
 ---
 
@@ -335,9 +335,7 @@ Research confirms the quality impact. Chroma (2025) tested 18 frontier models an
 | Command | What It Does |
 |---|---|
 | `> start` | Initialize session: load all tiers, check git, display header |
-| `> journal` | Write timestamped activity log to `logs/` |
-| `> handoff` | Create structured session state snapshot in `logs/` |
-| `> save` | Run journal + handoff together |
+| `> save` | Write journal + handoff together to `logs/`, one shared timestamp |
 | `> status` | Show last handoff, last journal, git status |
 | `> commit` | Commit project files to local git, with optional GitHub push |
 | `> end` | Save + commit locally + optional GitHub push if configured |

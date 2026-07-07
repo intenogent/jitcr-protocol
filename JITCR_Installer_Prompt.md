@@ -2,9 +2,9 @@
 JITCR Protocol Installer
 ────────────────────────────────────────────────────────────────────────────
 
-**Protocol Version:** 3.1
+**Protocol Version:** 3.2
 **Author:** Arshia (intenogent)
-**Last Enhanced:** 2026-07-07 (Bumped to 3.1 to match Core; embedded Tier 2 template now stamps new installs at 3.1 and documents the forward-slash mandate instead of leaving new projects a version behind on day one)
+**Last Enhanced:** 2026-07-07 (Bumped to 3.2 to match Core; embedded Tier 2 template now stamps new installs at 3.2 and removes `> journal`/`> handoff` as standalone commands — only `> save`/`> end` write session files, closing the journal/handoff sync-drift risk by construction)
 
 > This file must be kept in lockstep with JITCR Core (README.md, HOWTO.md,
 > JITCR_Universal_Commands.md). Bump this version header every time Core's
@@ -524,7 +524,7 @@ STEP 5 — Write JITCR_{ProjectName}.md (Tier 2):
 
 ---
 # JITCR_{ProjectName}
-**Protocol Version:** 3.1 (Enhanced: OS-aware file access + MCP tool loading + System Time Retrieval + Tier 2 First + Skills Protocol + Git Flow Fix + Journal/Handoff Redesign + Forward-Slash Mandate)
+**Protocol Version:** 3.2 (Enhanced: OS-aware file access + MCP tool loading + System Time Retrieval + Tier 2 First + Skills Protocol + Git Flow Fix + Journal/Handoff Redesign + Forward-Slash Mandate + Journal/Handoff Standalone-Command Removal)
 **Project:** {ProjectName}
 **Created:** {today's date YYYY-MM-DD}
 **Last Updated:** {today's date YYYY-MM-DD}
@@ -543,7 +543,7 @@ STEP 5 — Write JITCR_{ProjectName}.md (Tier 2):
 | Project Root | {ProjectRoot} |
 | Session Logs | {HubRoot}/{ProjectName}/logs/ |
 | Universal Commands | {HubRoot}/JITCR_Universal_Commands.md |
-| Protocol Version | 3.1 (Multi-OS enhanced + System Time Retrieval + Tier 2 First + Skills + Git Flow Fix + Journal/Handoff Redesign + Forward-Slash Mandate) |
+| Protocol Version | 3.2 (Multi-OS enhanced + System Time Retrieval + Tier 2 First + Skills + Git Flow Fix + Journal/Handoff Redesign + Forward-Slash Mandate + Journal/Handoff Standalone-Command Removal) |
 | Git | {active / not initialized} |
 | GitHub Remote | {GitHubRemote} |
 | GitHub Push | {GitHubPush} |
@@ -587,9 +587,7 @@ See: JITCR_Universal_Skills_Protocol.md (in {HubRoot}) for complete guide.
 | Command | Action |
 |---|---|
 | > start | Initialize session — load context, check git |
-| > journal | Write journal entry |
-| > handoff | Create handoff snapshot |
-| > save | journal + handoff |
+| > save | Write journal + handoff together, one shared timestamp |
 | > status | Show last handoff, journal, git status |
 | > commit | Commit project files to local git, with optional GitHub push |
 | > end | save + commit locally + optional GitHub push |

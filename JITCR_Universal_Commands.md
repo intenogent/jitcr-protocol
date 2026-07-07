@@ -1,5 +1,5 @@
 # JITCR Universal Commands
-**Protocol Version:** 3.1
+**Protocol Version:** 3.2
 **Author:** Arshia (intenogent)
 **Created:** 2026-03-06
 **Last Enhanced:** 2026-07-07
@@ -93,8 +93,10 @@ STEP 7: Load Tier 3 (Conditional) + Verify Handoff
              immediately prior to this handoff, for background on why work
              is stuck.
            - Regardless of Status: load any journals dated AFTER this
-             handoff's timestamp (orphaned journals — can happen since
-             > journal/> handoff may still run independently today).
+             handoff's timestamp (orphaned journals — can happen if a session
+             ended abruptly before > save/> end completed, or from logs
+             created before v3.2, when > journal/> handoff could still run
+             independently).
         E. Carry forward one verification line for STEP 9 — never written back
            into the handoff file itself: "Verified: {match | drift detected}.
            Handoff is {age}."
@@ -115,7 +117,7 @@ STEP 9: Display Session Header
         │ Loaded   : Tier 2 + Tier 3         │
         │ Handoff  : {match|DRIFT} · {age}   │
         │ Skills   : {X enabled | ready}     │
-        │ Commands : > journal, save, end... │
+        │ Commands : > save, end, status...  │
         └────────────────────────────────────┘
 
 STEP 10: Begin Session
@@ -342,65 +344,55 @@ Tip: Skills load on-demand. Use > skill list to discover skills.
 
 ---
 
-## `> journal` — Write Session Journal Entry
+## `> save` — Quick Save (writes both Journal and Handoff)
 
-**Role:** The detailed record of what happened this session — for future sessions
-to learn from. Journal is the only place session detail lives; handoff must never
-repeat it.
+**Journal Role:** The detailed record of what happened this session — for future
+sessions to learn from. Journal is the only place session detail lives; handoff
+must never repeat it.
 
-**Content should cover, when applicable:** work completed and decisions made with
-the reasoning behind them; files created or modified; issues encountered;
-approaches tried — including ones that did NOT work.
+**Journal content should cover, when applicable:** work completed and decisions
+made with the reasoning behind them; files created or modified; issues
+encountered; approaches tried — including ones that did NOT work.
 
 **Failed Approaches (required section):** what was tried and abandoned or
 reverted this session, and why it didn't work, so a future session doesn't
 repeat it. If nothing failed this session, write "None this session" — do not
 omit the section.
 
-```
-1. Retrieve ACTUAL system time
-2. Create filename: journal_YYYY-MM-DD_HHMM.md (using actual time)
-   Location: {HubRoot}/{ProjectName}/logs/
-3. Create header: ## YYYY-MM-DD HH:MM | Session: [title]
-4. Append entry content per the Role above, including a Failed Approaches
-   section (write "None this session" if nothing applies)
-5. Confirm: "Journal updated → journal_YYYY-MM-DD_HHMM.md"
-```
+**Handoff Role:** A compressed current-state snapshot only — status, open
+issues, next steps, blockers, and any critical context the next session needs
+immediately. Handoff is read automatically by `> start` and must never repeat
+journal's narrative detail — if it's a decision, a reason, or something that
+was tried, it belongs in journal, not here. A pointer to the relevant journal
+entry is fine; restating its content is not.
 
----
-
-## `> handoff` — Create Session Handoff
-
-**Role:** A compressed current-state snapshot only — status, open issues, next
-steps, blockers, and any critical context the next session needs immediately.
-Handoff is read automatically by `> start` and must never repeat journal's
-narrative detail — if it's a decision, a reason, or something that was tried,
-it belongs in journal, not here. A pointer to the relevant journal entry is
-fine; restating its content is not.
-
-**Content must include:** a Status line (free-text, e.g. "BLOCKED — waiting on
-X" or "OPEN"); open issues; what's next; blockers, if any; any critical context
-needed immediately.
-
-```
-1. Retrieve ACTUAL system time
-2. Create filename: handoff_YYYY-MM-DD_HHMM.md (using actual time)
-   Location: {HubRoot}/{ProjectName}/logs/
-3. Create header: # Session Handoff — YYYY-MM-DD HH:MM
-4. Write handoff content per the Role above — state snapshot only, no narrative
-5. Confirm: "Handoff saved → handoff_YYYY-MM-DD_HHMM.md"
-```
-
----
-
-## `> save` — Quick Save
+**Handoff content must include:** a Status line (free-text, e.g. "BLOCKED —
+waiting on X" or "OPEN"); open issues; what's next; blockers, if any; any
+critical context needed immediately.
 
 ```
 1. Retrieve ACTUAL system time ONCE
-2. Run > journal using retrieved time
-3. Run > handoff using same retrieved time
-4. Confirm: "Session saved (YYYY-MM-DD HH:MM)"
+2. Write Journal:
+   a. Create filename: journal_YYYY-MM-DD_HHMM.md (using retrieved time)
+      Location: {HubRoot}/{ProjectName}/logs/
+   b. Header: ## YYYY-MM-DD HH:MM | Session: [title]
+   c. Content per Journal Role above, including Failed Approaches section
+      (write "None this session" if nothing applies)
+3. Write Handoff:
+   a. Create filename: handoff_YYYY-MM-DD_HHMM.md (same retrieved time)
+      Location: {HubRoot}/{ProjectName}/logs/
+   b. Header: # Session Handoff — YYYY-MM-DD HH:MM
+   c. Content per Handoff Role above — state snapshot only, no narrative
+4. Confirm: "Session saved (YYYY-MM-DD HH:MM) → journal_YYYY-MM-DD_HHMM.md,
+   handoff_YYYY-MM-DD_HHMM.md"
 ```
+
+**Note (v3.2+):** `> journal` and `> handoff` are no longer standalone,
+individually-invokable commands. Both files are always written together as a
+matched pair by `> save` (or `> end`, which calls `> save`), sharing a single
+retrieved timestamp. This closes the sync/desync risk by construction — there
+is no longer any path where the two files can be written independently and
+fall out of alignment with each other.
 
 ---
 
@@ -497,9 +489,7 @@ Display all available commands:
 │  JITCR Commands — {ProjectName}       │
 ├──────────────────────────────────────┤
 │  > start    Initialize session        │
-│  > journal  Write timestamped entry   │
-│  > handoff  Create session snapshot   │
-│  > save     journal + handoff         │
+│  > save     Write journal + handoff   │
 │  > status   Last handoff, journal,... │
 │  > commit   Commit to local git       │
 │  > end      save + commit + push      │
@@ -510,11 +500,11 @@ Display all available commands:
 
 Sub-help available:
   > ? skill     Show all skills commands
-  > ? journal   Show journal details
+  > ? save      Show journal/handoff details
   > ? commit    Show commit options
 
 Tip: Use natural extensions:
-  > journal "topic"    Journal with title
+  > save "topic"       Save with a session title
   > commit "message"   Commit with message
   > end yes            End + auto-push
 ```
@@ -581,5 +571,6 @@ in JITCR; nothing needs runtime conversion.
 | 2.8 | 2026-06-26 | Skills Protocol v1.0 — complete skills command family |
 | **3.0** | **2026-07-06** | **Journal/handoff redesign: formal Role definitions for `> journal`/`> handoff` moved into this spec (previously only in HOWTO prose); required Failed Approaches journal section; `> start` STEP 7 now runs a drift check (git log/status) and staleness check (3-day threshold), summarized as a new Handoff verification line in the session header; orphaned-journal fallback loads journals dated after the latest handoff regardless of Status.** |
 | **3.1** | **2026-07-07** | **Path-separator fix: all `{ProjectName}/skills/...` path examples converted from backslash to forward slash (skill Path/Result/Delete-folder examples). Added new "Why Forward Slash, Always" section explaining the shell-command backslash-stripping bug and why forward slash is mandatory, not stylistic. Root cause traced to `JITCR_Installer_Prompt.md` Phase 2 Q0/Q2, which is fixed in this same release to normalize any user-provided path to forward-slash at capture time.** |
+| **3.2** | **2026-07-07** | **Removed `> journal` and `> handoff` as standalone, individually-invokable commands (originally decided 2026-07-02, never implemented until now). Both files are now only ever written together as a matched pair by `> save` (or `> end`, which calls `> save`), sharing one retrieved timestamp — closes the journal/handoff sync-drift risk by construction rather than by convention. Role definitions for Journal and Handoff content are unchanged and unaffected. Updated `> start` STEP 7D's orphaned-journal note, the STEP 9 session header mockup, and the `> ?` help table/sub-help/tips to match.** |
 
 ---
