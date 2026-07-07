@@ -2,9 +2,9 @@
 JITCR Protocol Installer
 ────────────────────────────────────────────────────────────────────────────
 
-**Protocol Version:** 3.0
+**Protocol Version:** 3.1
 **Author:** Arshia (intenogent)
-**Last Enhanced:** 2026-07-06 (Tier 1 template reworded — fixes false-positive injection suspicion in fresh sessions)
+**Last Enhanced:** 2026-07-07 (Bumped to 3.1 to match Core; embedded Tier 2 template now stamps new installs at 3.1 and documents the forward-slash mandate instead of leaving new projects a version behind on day one)
 
 > This file must be kept in lockstep with JITCR Core (README.md, HOWTO.md,
 > JITCR_Universal_Commands.md). Bump this version header every time Core's
@@ -524,7 +524,7 @@ STEP 5 — Write JITCR_{ProjectName}.md (Tier 2):
 
 ---
 # JITCR_{ProjectName}
-**Protocol Version:** 3.0 (Enhanced: OS-aware file access + MCP tool loading + System Time Retrieval + Tier 2 First + Skills Protocol + Git Flow Fix + Journal/Handoff Redesign)
+**Protocol Version:** 3.1 (Enhanced: OS-aware file access + MCP tool loading + System Time Retrieval + Tier 2 First + Skills Protocol + Git Flow Fix + Journal/Handoff Redesign + Forward-Slash Mandate)
 **Project:** {ProjectName}
 **Created:** {today's date YYYY-MM-DD}
 **Last Updated:** {today's date YYYY-MM-DD}
@@ -543,7 +543,7 @@ STEP 5 — Write JITCR_{ProjectName}.md (Tier 2):
 | Project Root | {ProjectRoot} |
 | Session Logs | {HubRoot}/{ProjectName}/logs/ |
 | Universal Commands | {HubRoot}/JITCR_Universal_Commands.md |
-| Protocol Version | 3.0 (Multi-OS enhanced + System Time Retrieval + Tier 2 First + Skills + Git Flow Fix + Journal/Handoff Redesign) |
+| Protocol Version | 3.1 (Multi-OS enhanced + System Time Retrieval + Tier 2 First + Skills + Git Flow Fix + Journal/Handoff Redesign + Forward-Slash Mandate) |
 | Git | {active / not initialized} |
 | GitHub Remote | {GitHubRemote} |
 | GitHub Push | {GitHubPush} |
