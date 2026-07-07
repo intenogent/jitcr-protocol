@@ -1,5 +1,5 @@
 # JITCR Universal Skills Protocol
-**Protocol Version:** 1.2
+**Protocol Version:** 1.3
 **Author:** Arshia (intenogent)
 **Created:** 2026-06-26
 **Purpose:** Comprehensive guide for project-scoped skills in JITCR Protocol.
@@ -35,20 +35,20 @@ A skill:
 ### Folder Structure
 
 ```
-{ProjectName}\
+{ProjectName}/
 ├── JITCR_{ProjectName}.md                (Tier 2 guide)
-├── logs\                                  (Session logs)
-└── skills\                                (NEW: Project skills)
+├── logs/                                  (Session logs)
+└── skills/                                (NEW: Project skills)
     ├── SKILL_TEMPLATE.md                  (Reference template)
-    ├── skill-name-1\                      (User-created skill)
+    ├── skill-name-1/                      (User-created skill)
     │   ├── SKILL.md                       (Skill definition)
     │   ├── skill-metadata.json            (Auto-managed metadata)
     │   └── [supporting files - optional]
-    ├── skill-name-2\
+    ├── skill-name-2/
     │   ├── SKILL.md
     │   ├── skill-metadata.json
     │   └── [supporting files - optional]
-    └── skill-name-3\
+    └── skill-name-3/
         ├── SKILL.md
         ├── skill-metadata.json
         └── [supporting files - optional]
@@ -147,7 +147,7 @@ Auto-load:     Yes
 Created:       2026-06-20
 Last modified: 2026-06-25
 Size:          ~2,500 tokens
-Path:          skills\github-automation\SKILL.md
+Path:          skills/github-automation/SKILL.md
 
 Usage: > skill use github-automation
        (loads into this session only)
@@ -203,7 +203,7 @@ PATH 3 — Exploring:
     → Explains why (context, code, process, etc.)
     → Suggests alternative
 
-Result: Skill created in {ProjectName}\skills\{skill-name}\
+Result: Skill created in {ProjectName}/skills/{skill-name}/
 ```
 
 #### Auto-loading Question
@@ -280,7 +280,7 @@ Skill status: disabled (manual load only via > skill use)
 Delete skill "github-automation"? (yes/no)
 
 This will:
-  ✓ Delete folder: skills\github-automation\
+  ✓ Delete folder: skills/github-automation/
   ✓ Remove from Tier 2
   ✓ Cannot be undone (but skill file can be recovered from git if committed)
 
@@ -970,5 +970,6 @@ Content:
 | 1.0 | 2026-06-26 | Initial JITCR Skills Protocol — complete spec |
 | 1.1 | 2026-06-30 | Added: Skill Validation Complete Reference — Level 1 structural validation table, Level 2 conceptual validation with 7 disqualifier rules + structured failure report format, Configurable Multi-Mode Validation (4 modes + mode-selection guide), Validation-Integrated Creation Flow (Paths 1/2/3), Agent Quick-Reference card |
 | 1.2 | 2026-07-06 | Renamed file: JITCR_Skills_Protocol.md -> JITCR_Universal_Skills_Protocol.md, to match the JITCR_Universal_Commands.md naming convention. No content changes beyond title/filename. Corrected placement: this file belongs at true HubRoot (Documents\JITCR_Protocol\), shared across all projects -- a prior installation had mistakenly placed a copy only inside one project's subfolder instead of HubRoot. |
+| 1.3 | 2026-07-07 | Path-separator fix: folder structure diagram and all `skills/...` path examples (Path, Result, Delete-folder) converted from backslash to forward slash. See JITCR_Universal_Commands.md v3.1 changelog for full root-cause explanation. |
 
 ---

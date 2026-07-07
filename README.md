@@ -91,7 +91,7 @@ Type `> start` and the AI reads all three tiers automatically, checks git, detec
 +--------------------------------------+
 | Project  : BlogRewrite               |
 | OS       : Windows                   |
-| Root     : C:\Users\You\Documents\   |
+| Root     : C:/Users/You/Documents/   |
 |            BlogRewrite               |
 | Started  : 2026-07-02 08:30          |
 | Git      : active                    |
@@ -211,6 +211,8 @@ Any combination. Any configuration. No equivalent exists in any AI protocol or t
 5. Always read the project guide first at session start
 6. Never assume or hard-code timestamps -- always retrieve actual time
 7. Never assume project paths -- always read from the project guide
+
+**A note on guardrail #4:** JITCR paths are forward-slash (`/`) everywhere, including on Windows -- this isn't stylistic. The `shell-command` layer some platforms use can silently corrupt backslash paths during its own parsing, before a command ever runs, turning `C:\Users\You\Project` into a broken, concatenated filename instead of erroring visibly. Forward slash avoids that failure mode entirely and works identically across Windows, macOS, and Linux. See [HOWTO.md -- Guardrails Configuration](HOWTO.md#6-guardrails-configuration-guide) for the full explanation.
 
 What this looks like in practice: if the AI is about to overwrite a file, it reads the existing content first and tells you what's there before making any change -- it never silently replaces something it hasn't looked at. If you ask it to delete a file, it states what it's about to delete and waits for your explicit "yes," every time, no exceptions.
 
@@ -411,6 +413,8 @@ Add to your `claude_desktop_config.json`:
   }
 }
 ```
+
+> Note: this one config value is pasted into your own `claude_desktop_config.json` by hand -- it's not a path JITCR generates or passes through `shell-command`, so the usual forward-slash rule doesn't apply here; either `\\` (JSON-escaped) or `/` works fine in this file.
 
 Config file location:
 - Windows : `%APPDATA%\Claude\claude_desktop_config.json`

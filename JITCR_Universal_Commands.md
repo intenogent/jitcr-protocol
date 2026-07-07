@@ -1,8 +1,8 @@
 # JITCR Universal Commands
-**Protocol Version:** 3.0
+**Protocol Version:** 3.1
 **Author:** Arshia (intenogent)
 **Created:** 2026-03-06
-**Last Enhanced:** 2026-07-06
+**Last Enhanced:** 2026-07-07
 **Purpose:** Shared command engine for all JITCR Protocol implementations.
            This file is referenced by every project's JITCR_[ProjectName].md.
 
@@ -157,7 +157,7 @@ Description:  One-line description
 Scope:        Single-task / Multi-step / Utility
 Status:       Enabled / Disabled
 Created:      YYYY-MM-DD
-Path:         {ProjectName}\skills\skill-name\SKILL.md
+Path:         {ProjectName}/skills/skill-name/SKILL.md
 
 To use: > skill use skill-name
 To edit: > skill edit skill-name
@@ -194,7 +194,7 @@ Detects user intent:
 Final Q: Load automatically on > start? (yes/no)
          Default: yes (can change with > skill disable)
 
-Result: Skill created in {ProjectName}\skills\{skill-name}\
+Result: Skill created in {ProjectName}/skills/{skill-name}/
         SKILL.md + skill-metadata.json created
         Tier 2 updated automatically
 ```
@@ -250,7 +250,7 @@ Result: Skill created in {ProjectName}\skills\{skill-name}\
 Delete skill "skill-name"? (yes/no)
 
 This will:
-  • Delete folder: {ProjectName}\skills\skill-name\
+  • Delete folder: {ProjectName}/skills/skill-name/
   • Remove from Tier 2
   • Cannot be undone (but recoverable from git if committed)
 
@@ -545,6 +545,27 @@ Tip: Use natural extensions:
 
 ---
 
+## Why Forward Slash, Always
+
+JITCR uses forward slash (/) for every path, in both filesystem and shell-command
+calls, on every OS including Windows. This is not a style preference — it's required:
+
+- filesystem MCP accepts both \ and / on Windows.
+- shell-command MCP does NOT reliably accept \ — it strips single backslashes
+  during its own command parsing, before the text reaches PowerShell/cmd. A path
+  like C:\Users\Name\Project becomes C:UsersNameProject and silently creates a
+  wrongly-named file or folder in the current directory instead of erroring.
+- Forward slash is accepted correctly by both tools, on Windows, with no
+  exceptions found in testing (git, python, dir, powershell, filesystem
+  reads/writes all confirmed working).
+
+Because of this, {HubRoot} and {ProjectRoot} are stored in forward-slash form
+from the moment they're created (at install, and any time a user provides a
+custom path) — never backslash. There's only one path format in use anywhere
+in JITCR; nothing needs runtime conversion.
+
+---
+
 ## Version History
 
 | Version | Date | Changes |
@@ -559,5 +580,6 @@ Tip: Use natural extensions:
 | 2.7 | 2026-06-25 | Tier 2 File Reading (mandatory first step) |
 | 2.8 | 2026-06-26 | Skills Protocol v1.0 — complete skills command family |
 | **3.0** | **2026-07-06** | **Journal/handoff redesign: formal Role definitions for `> journal`/`> handoff` moved into this spec (previously only in HOWTO prose); required Failed Approaches journal section; `> start` STEP 7 now runs a drift check (git log/status) and staleness check (3-day threshold), summarized as a new Handoff verification line in the session header; orphaned-journal fallback loads journals dated after the latest handoff regardless of Status.** |
+| **3.1** | **2026-07-07** | **Path-separator fix: all `{ProjectName}/skills/...` path examples converted from backslash to forward slash (skill Path/Result/Delete-folder examples). Added new "Why Forward Slash, Always" section explaining the shell-command backslash-stripping bug and why forward slash is mandatory, not stylistic. Root cause traced to `JITCR_Installer_Prompt.md` Phase 2 Q0/Q2, which is fixed in this same release to normalize any user-provided path to forward-slash at capture time.** |
 
 ---

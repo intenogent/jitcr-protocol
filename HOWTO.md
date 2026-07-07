@@ -152,7 +152,7 @@ You will see something close to this:
 +--------------------------------------+
 | Project  : BlogRewrite               |
 | OS       : Windows                   |
-| Root     : C:\Users\You\Documents\   |
+| Root     : C:/Users/You/Documents/   |
 |            BlogRewrite               |
 | Started  : 2026-06-29 09:15          |
 | Git      : active                    |
@@ -234,7 +234,7 @@ This time, Tier 3 has something to read:
 +--------------------------------------+
 | Project  : BlogRewrite               |
 | OS       : Windows                   |
-| Root     : C:\Users\You\Documents\   |
+| Root     : C:/Users/You/Documents/   |
 |            BlogRewrite               |
 | Started  : 2026-07-02 08:30          |
 | Git      : active                    |
@@ -668,6 +668,8 @@ Seven universal rules built into JITCR. They apply to every project, every sessi
 | Never assume project paths -- always read from the project guide | Path failures across machines, users, or OS environments |
 
 These are the baseline safety floor. Every JITCR project gets them automatically.
+
+**Why the forward-slash guardrail matters:** on Windows, the `filesystem` tool accepts both `\` and `/`, but the `shell-command` tool does not reliably accept `\` -- some implementations strip single backslashes during their own internal parsing, before the path ever reaches PowerShell or cmd. A path like `C:\Users\You\Project` can silently become `C:UsersYouProject` and get written to the wrong location with a mangled name, instead of raising an error. Forward slash works correctly in both tools, on every OS, with no exceptions found in testing. This is why JITCR stores and uses `{ProjectRoot}` and `{HubRoot}` as forward-slash from the moment they're captured (at install, or whenever you provide a custom path) -- not as a style choice, but because it's the one format both tools can be trusted with.
 
 ---
 

@@ -10,7 +10,7 @@ This is a reference template showing the structure and format that JITCR skills 
 
 When you run `> skill add`, Claude will:
 1. Ask you for skill details (name, description, content)
-2. Create a folder: `skills\{skill-name}\`
+2. Create a folder: `skills/{skill-name}/`
 3. Create a `SKILL.md` file in that folder (using the structure below)
 4. Auto-create skill-metadata.json
 5. Update your Tier 2 file automatically
@@ -27,7 +27,7 @@ This template shows the FORMAT your skill should have.
 
 ## Template Structure
 
-Use this format for SKILL.md in `{ProjectName}\skills\{skill-name}\SKILL.md`:
+Use this format for SKILL.md in `{ProjectName}/skills/{skill-name}/SKILL.md`:
 
 ```markdown
 # Skill: [Skill Name]
@@ -110,4 +110,4 @@ When you're ready to create a skill:
 
 **Remember:** Skills are reusable, focused knowledge that loads on-demand.
 
-For complete guidance, see: `JITCR_Skills_Protocol.md`
+For complete guidance, see: `JITCR_Universal_Skills_Protocol.md`

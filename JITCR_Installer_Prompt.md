@@ -187,7 +187,7 @@ Minimal typing. Numbers for choices, free text only where needed.
 Q0: Where should JITCR store its files?
 
     Default path:
-      Windows : C:\Users\{Username}\Documents\JITCR_Protocol\
+      Windows : C:/Users/{Username}/Documents/JITCR_Protocol/
       macOS   : /Users/{Username}/Documents/JITCR_Protocol/
       Linux   : /home/{Username}/Documents/JITCR_Protocol/
 
@@ -197,7 +197,13 @@ Q0: Where should JITCR store its files?
 
     IF user types 1 → use OS default as {HubRoot}
     IF user types 2 → ask "Enter your custom path:"
-    Store as: {HubRoot}
+
+    REGARDLESS of source (default or custom), before storing:
+      Normalize: replace every "\" with "/" in the path.
+      (A user may paste a Windows path copied from Explorer, which uses "\" —
+      this step guarantees {HubRoot} is always forward-slash, no exceptions.)
+
+    Store as: {HubRoot} (forward-slash form)
     Show: ✓ Confirmed: {HubRoot}
 
 ────────────────────────────────────────────────────────────────────────────
@@ -234,7 +240,11 @@ Q2: Project root folder?
 
     IF user types 1 → set {ProjectRoot} = {HubRoot}/{ProjectName}/
     IF user types 2 → ask "Enter custom path:"
-    Store as: {ProjectRoot}
+
+    REGARDLESS of source (default or custom), before storing:
+      Normalize: replace every "\" with "/" in the path.
+
+    Store as: {ProjectRoot} (forward-slash form)
     Show: ✓ Confirmed: {ProjectRoot}
 
 ────────────────────────────────────────────────────────────────────────────
