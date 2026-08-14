@@ -19,6 +19,7 @@ This document is for users who are already running JITCR and want to go deeper. 
 7. [Session Continuity: Workflow Guide](#7-session-continuity-workflow-guide)
 8. [Git and GitHub Integration](#8-git-and-github-integration)
 9. [Multi-Project Setup](#9-multi-project-setup)
+   - [Scaling a Single Project Into a Multi-Layer Structure](#scaling-a-single-project-into-a-multi-layer-structure)
 10. [Platform-Specific Setup: Non-Claude Desktop](#10-platform-specific-setup-non-claude-desktop)
 11. [Troubleshooting](#11-troubleshooting)
 
@@ -1015,6 +1016,102 @@ Use project names that are unambiguous and filesystem-safe:
 - Consistent with how you name the corresponding Claude Desktop project
 
 Examples: `ClientABC-Web`, `InternalTools`, `ResearchQ3`, `PersonalSite`
+
+---
+
+### Scaling a Single Project Into a Multi-Layer Structure
+
+Multi-project setup (above) covers running several *separate* JITCR
+projects side by side. This section covers a different situation: one
+project that starts narrow and grows layers over time.
+
+**The scenario**
+
+Say you run a consulting practice and set up a JITCR project for it.
+At first it's one contract, one client. Later the practice grows --
+you're now working across multiple platforms or contract types
+(retainer clients, project-based contracts, referral work), each with
+several clients of their own. It's still one practice, one continuous
+body of work -- it just now has more than one thing living inside it.
+
+The wrong instinct is to spin up a new JITCR project per platform or
+per client -- that means N Tier 2 files and N logs folders to keep in
+sync for what is really one practice. Instead, let the project root
+grow a folder layer and keep everything else -- Tier 1, Tier 2, Tier 3,
+`JITCR_Universal_Commands.md` -- exactly as it was.
+
+**The pattern**
+
+```
+{ProjectRoot}\
+ ├─ Retainer\
+ │   ├─ ClientOne\
+ │   └─ ClientTwo\
+ └─ ProjectBased\
+     └─ ClientThree\
+```
+
+A new contract type or client later is just a new subfolder --
+`{ProjectRoot}\Referral\ClientFour\` -- nothing else to create, edit,
+or re-run. Don't add a client table to Tier 2 to track this -- it
+drifts the moment a folder is added and the table isn't updated. The
+folder tree itself is the source of truth, resolved live:
+
+```
+You:  Where did we leave off with the client proposal?
+
+AI:   That could be a few clients -- I see ClientOne and ClientTwo
+      under Retainer, and ClientThree under ProjectBased. Which one?
+
+You:  ClientTwo.
+
+AI:   [reads the latest handoff mentioning ClientTwo] Right, you were
+      waiting on their revised scope before finalizing pricing...
+```
+
+If you'd said "ClientTwo's proposal" up front, the AI resolves it
+silently -- no prompt, straight to the answer.
+
+**Where "current state" lives**
+
+Logs stay unified -- one `logs\` folder for the whole project, not one
+per client. So "what's the state of ClientTwo" is answered by the most
+recent handoff or journal that *mentions* ClientTwo, not by a separate
+per-client file. This is a deliberate simplification, not a gap: a
+per-client status file would just duplicate what the handoff already
+captures, with its own risk of falling out of sync. If a session
+touches several clients, say so explicitly when you `> save` -- the
+journal can cover more than one client in a single entry.
+
+**Setting it up**
+
+There's no command for this pattern -- it's plain folders, not a
+protocol feature. The one deliberate step is documenting the layout in
+your own Tier 2 file, the same way you'd document a project guardrail
+(see Section 6), so the AI applies it consistently every session
+instead of you re-explaining it.
+
+Open your `JITCR_{ProjectName}.md` file and add a new section --
+anywhere after `## Project Purpose` works well:
+
+```
+## Multi-Client Structure
+This project covers multiple clients across multiple contract types.
+No central client index is maintained -- the folder tree under
+{ProjectRoot} is the source of truth, resolved via a live directory
+scan at session start or whenever a client reference is ambiguous.
+On ambiguity, present the scanned options as a pick-one prompt.
+```
+
+Add that once, and every `> start` picks it up along with the rest of
+Tier 2 -- no re-explaining required.
+
+**When this isn't the right fit**
+
+If your layers genuinely need independent git histories, separate
+GitHub repos, or independent access control, use separate JITCR
+projects (Multi-Project Setup above) instead -- this pattern assumes
+one shared git history and one shared session log is what you want.
 
 ---
 

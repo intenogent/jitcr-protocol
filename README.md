@@ -152,7 +152,10 @@ Each row in The Solution table above is expanded below -- same nine areas, in th
 
 **Automatic path discovery** means JITCR always reads your project configuration first to get real paths. No hard-coded assumptions. No failures when paths differ across machines or team members.
 
+**Multi-layer scaling within one project** means a single project can grow beyond one flat structure -- multiple clients, multiple categories -- entirely within its own project root, with no new project, no central index, and no changes to Tier 1 or the shared command engine.
+
 > See [HOWTO.md -- Session Continuity Workflow](HOWTO.md#7-session-continuity-workflow-guide) for the full workflow and model-switching guide.
+> See [HOWTO.md -- Scaling a Single Project Into a Multi-Layer Structure](HOWTO.md#scaling-a-single-project-into-a-multi-layer-structure) for the multi-client/multi-category pattern.
 
 ---
 
